@@ -84,8 +84,9 @@ for i, (mouse_file, chosen_odors, csps) in enumerate(zip(mouse_files, condition.
 
 r, c = (len(condition.paths), 6)
 f, axs = plt.subplots(r,c)
+f.set_size_inches(8,6)
 ylim = [-5, 105]
-yticks = np.arange(0,100,20)
+yticks = np.arange(0,101,20)
 for i, mouse_decode_data in enumerate(all_decode_data):
     for j, (score, config) in enumerate(mouse_decode_data):
         time = np.arange(0, config.TRIAL_FRAMES) * config.TRIAL_PERIOD - config.DAQ_O_ON
@@ -96,4 +97,10 @@ for i, mouse_decode_data in enumerate(all_decode_data):
         axs[i,j].set_yticks(yticks)
         axs[i,j].set_xticks(xticks)
         axs[i,j].set_xticklabels(['','',''])
-plt.show()
+
+figpath = os.path.join(constants.LOCAL_FIGURE_PATH, condition_name)
+figname = decode_style
+if not os.path.exists(figpath):
+    os.makedirs(figpath)
+figpathname = os.path.join(figpath, figname)
+plt.savefig(figpathname + '.png', dpi=300)
