@@ -30,6 +30,7 @@ class PIR_NAIVE:
     pass
 
 class OFC:
+    #
     condition = 'OFC'
     paths = ['E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
              'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
