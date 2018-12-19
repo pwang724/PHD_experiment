@@ -107,7 +107,25 @@ class BLA_JAWS:
     pass
 
 class BLA:
-    pass
+    #TODO: N and T need fixing
+    condition = 'BLA'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M211_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M212_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M213_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M214_bla/training_LEARNING',
+        ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy']
+           ]
 
 class BLA_STATE:
     pass

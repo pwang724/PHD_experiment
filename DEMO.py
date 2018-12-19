@@ -64,10 +64,10 @@ def decode(config, data, chosen_odors, csp_odors, arg ='valence'):
     return scores
 
 
-condition = conditions.OFC
+condition = conditions.BLA
 condition_name = condition.condition
 decode_style = 'valence'
-path = r'C:\Users\Peter\PycharmProjects\phd_project\DATA\timepoint\OFC'
+path = r'C:\Users\Peter\PycharmProjects\phd_project\DATA\timepoint\BLA'
 mouse_files = [os.path.join(path, o) for o in os.listdir(path)
                     if os.path.isdir(os.path.join(path,o))]
 
@@ -82,7 +82,7 @@ for i, (mouse_file, chosen_odors, csps) in enumerate(zip(mouse_files, condition.
     all_decode_data.append(mouse_decode_data)
 
 
-r, c = (len(condition.paths), 6)
+r, c = (len(condition.paths), 7)
 f, axs = plt.subplots(r,c)
 f.set_size_inches(8,6)
 ylim = [-5, 105]

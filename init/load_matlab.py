@@ -78,13 +78,13 @@ def load_timepoint_from_matlab(path, condition, save = True):
         if save == True:
             save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER,
                                      condition, config.NAME_MOUSE)
-            save_name = config.NAME_DATE
+            save_name = config.NAME_DATE + '__' + config.NAME_PLANE
             _easy_save(save_path, save_name, data=(config, mat))
 
-    if save == True:
-        save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER, condition)
-        save_name = configs[0].NAME_MOUSE
-        _easy_save(save_path, save_name, data=(configs, mats))
+    # if save == True:
+    #     save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER, condition)
+    #     save_name = configs[0].NAME_MOUSE
+    #     _easy_save(save_path, save_name, data=(configs, mats))
     return mats, configs
 
 def load_pickle(pickle_path):
