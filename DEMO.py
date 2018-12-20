@@ -4,9 +4,9 @@ import CONSTANTS.conditions as conditions
 import decoding as dc
 import utils
 
-condition = conditions.BLA
+condition = conditions.OFC
 decode_style = 'valence'
-path = r'C:\Users\Peter\PycharmProjects\phd_project\DATA\timepoint\BLA'
+path = r'C:\Users\Peter\PycharmProjects\phd_project\DATA\timepoint\OFC'
 mouse_files = [os.path.join(path, o) for o in os.listdir(path)
                     if os.path.isdir(os.path.join(path,o))]
 

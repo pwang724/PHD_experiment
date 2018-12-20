@@ -46,31 +46,41 @@ def decode(config, data, chosen_odors, csp_odors, arg ='valence'):
 
     good_trials = np.any(list_of_masks, axis=0)
     decode_labels = _assign_labels(list_of_masks)
-    scores = decode_odors_time_bin(data_trial_cell_time, decode_labels, good_trials=good_trials, cv=10)
+    scores = decode_odors_time_bin(data_trial_cell_time[good_trials], decode_labels[good_trials], cv=5)
     return scores
 
 
-def decode_odors_time_bin(data, labels, good_trials=None, model=None, **cv_args):
+def decode_odors_time_bin(data, labels, model=None, number_of_cells=None, shuffle=False, **cv_args):
     '''
     Decoding as a function of time.
 
     :param data: calcium activity, in format of trials X cells X time
     :param labels: the label of the odor trials, with integers defining the label.
                 Must be equal to number of trials, or data[0].shape
-    :param good_trials: boolean array denoting trials that are kept
-                Must be equal to number of trials, or data[0].shape
+    :param number_of_cells: int, randomly select a subset of size number_of_cells to keep
+    :param shuffle: boolean, whether to shuffle the labels randomly
     :param model: sklearn model. default is SVM with linear kernel
     :param cv_args:
     :return:
     '''
+
     if model is None:
         model = SVC(kernel='linear')
-    if good_trials is None:
-        good_trials = [True]*data.shape[0]
+
+    if number_of_cells is not None:
+        nCells = data.shape[1]
+        if number_of_cells > nCells:
+            raise ValueError('number of cells for decoding is larger than existing cells in dataset')
+        cell_ixs = np.random.choice(nCells, size=number_of_cells, replace=False)
+        data = data[:,cell_ixs,:]
+
+    if shuffle == True:
+        labels = np.random.permutation(labels)
+
     scores = []
     for t in range(data.shape[-1]):
         scores.append(cross_val_score(model,
-                                      data[:, :, t][good_trials],
-                                      labels[good_trials],
+                                      data[:, :, t],
+                                      labels,
                                       **cv_args))
     return np.r_[scores]

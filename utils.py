@@ -33,16 +33,6 @@ def load_pickle(pickle_path):
     return e[0], e[1]
 
 
-def load_data(folder='../data', filename='data.mat', n_frames_per_trial=75, onset=25, offset=34, water_onset=44, period=0.229):
-    time_ax = np.linspace(0, n_frames_per_trial*period, n_frames_per_trial+1)[:-1]-onset*period    
-    dataset = loadmat(os.path.join(folder, filename), squeeze_me=True, struct_as_record=False, )['s']
-    data = dataset.data.reshape(int(dataset.data.shape[0]/n_frames_per_trial), n_frames_per_trial, -1)
-    data = np.transpose(data, (2, 0, 1))
-    labels = dataset.index-1
-    names = dataset.names
-    return time_ax, data, labels, names
-
-
 def load_variable(notebook, name, folder='../autorestore'):
     with open(os.path.join(folder, notebook, name)) as f:
         toret = pickle.load(f)
