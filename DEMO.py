@@ -2,7 +2,8 @@ import numpy as np
 import os
 import CONSTANTS.conditions as conditions
 import decoding as dc
-import utils
+import file_io
+import glob
 
 condition = conditions.OFC
 decode_style = 'valence'
@@ -15,10 +16,13 @@ condition_odors = condition.odors
 condition_csps = condition.csp
 all_decode_data = []
 for i, (mouse_file, odors, csps) in enumerate(zip(mouse_files, condition_odors, condition_csps)):
-    pickle_files = [os.path.join(mouse_file, o) for o in os.listdir(mouse_file)]
+    data_pathnames = glob.glob(os.path.join(mouse_file, '*.txt'))
+    config_pathnames = glob.glob(os.path.join(mouse_file, '*.pkl'))
+
     mouse_decode_data = []
-    for j, pickle_file in enumerate(pickle_files):
-        config, data = utils.load_pickle(pickle_file)
+    for j, data_pathname, config_pathname in enumerate(zip(data_pathnames, config_pathnames)):
+        config = file_io.load_pickle(config_pathname)
+        data = file_io.load_text(data_pathname)
         scores = dc.decode(config, data, odors, csps, arg=decode_style)
         mouse_decode_data.append((scores, config))
     all_decode_data.append(mouse_decode_data)

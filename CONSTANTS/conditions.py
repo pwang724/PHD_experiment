@@ -32,11 +32,13 @@ class PIR_NAIVE:
 class OFC:
     #
     condition = 'OFC'
-    paths = ['E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING']
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING'
+    ]
     odors = [
         ['pin', 'msy', 'euy', 'lim'],
         ['pin', 'msy', 'euy', 'lim'],
@@ -44,11 +46,12 @@ class OFC:
         ['pin', 'msy', 'euy', 'lim'],
         ['pin', 'msy', 'euy', 'lim']
     ]
-    csp = [['pin', 'msy'],
-           ['pin', 'msy'],
-           ['pin', 'msy'],
-           ['pin', 'msy'],
-           ['pin', 'msy'],
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
            ]
 
 class OFC_STATE:

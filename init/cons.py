@@ -8,7 +8,7 @@ import scipy.io as sio
 import matplotlib.pyplot as plt
 from scipy.signal import resample
 
-class baseConfig(object):
+class baseCons(object):
     def __init__(self):
         pass
 
@@ -28,9 +28,9 @@ class baseConfig(object):
         s += '[***]/CONFIG[***]'
         return s
 
-class ConstantConfig(baseConfig):
+class ConstantCons(baseCons):
     def __init__(self):
-        super(ConstantConfig, self).__init__()
+        super(ConstantCons, self).__init__()
 
         self.FOLDER_ANALYSIS = 'E:\IMPORTANT DATA\DATA_X'
         self.DIR_STORAGE_EFTY = 'E:\IMPORTANT DATA\STORAGE_EFTY'
@@ -44,13 +44,13 @@ class ConstantConfig(baseConfig):
         self.DAQ_W = 4
         self.DAQ_SAMP = 1000
 
-class Config(ConstantConfig):
+class Cons(ConstantCons):
     '''
     DAQ_W_ON, W_OFF takes on DEFAULT_O values if DAQ_W_ON > 6 seconds.
     DAQ_DATA dimensions: time, variable, file
     '''
     def __init__(self, path = None):
-        super(Config, self).__init__()
+        super(Cons, self).__init__()
 
         if path is None:
             self.DIR = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/7-27-2016/420'
@@ -205,7 +205,7 @@ class Config(ConstantConfig):
         self.DAQ_DATA = data
 
 if __name__ == '__main__':
-    a = Config()
+    a = Cons()
     print(a)
     # dict = a.__dict__
     # for key, val in dict.items():

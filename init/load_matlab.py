@@ -1,4 +1,4 @@
-from init.cons import Config
+from init.cons import Cons
 import matlab.engine
 import matlab
 import time
@@ -7,11 +7,11 @@ import os
 import glob
 from CONSTANTS.constants import constants
 import CONSTANTS.conditions as conditions
-import pickle
+from CONSTANTS.config import Config
 
 
 def copy_config_from_matlab(path):
-    c = Config()
+    c = Cons()
     eng = matlab.engine.start_matlab()
 
     obj = eng.load(path)['m']
@@ -23,13 +23,6 @@ def copy_config_from_matlab(path):
             setattr(c, name, val)
         #cannot do this for the key of DAQ_DATA
     return c
-
-def _easy_save(save_path, save_name, data):
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    save_pathname = os.path.join(save_path, save_name + '.pkl')
-    with open(save_pathname, "wb") as f:
-        pickle.dump(data, f)
 
 def load_calcium_traces_from_matlab(data_path, eng):
     temp= eng.load(data_path)
@@ -46,47 +39,40 @@ def load_single_from_matlab(data_path, save = True):
     start_time = time.time()
 
     eng = matlab.engine.start_matlab()
-    config = Config(data_path)
-    mat, _ = load_calcium_traces_from_matlab(config.STORAGE_DATA, eng)
+    cons = Cons(data_path)
+    mat, _ = load_calcium_traces_from_matlab(cons.STORAGE_DATA, eng)
     print('Time taken to load matfiles: {0:3.3f}'.format(time.time() - start_time))
     print(mat.shape)
     if save == True:
-        mouse = config.NAME_MOUSE
-        date = config.NAME_DATE
-        plane = config.NAME_PLANE
+        mouse = cons.NAME_MOUSE
+        date = cons.NAME_DATE
+        plane = cons.NAME_PLANE
         save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_SINGLE_FOLDER, mouse)
         save_name = date + '_' + plane
-        _easy_save(save_path, save_name, data = (config, mat))
-    return mat, config
+        Config.save_mat_f(save_path, save_name, data=mat)
+        Config.save_cons_f(save_path, save_name, data=cons)
+    return mat, cons
 
 def load_timepoint_from_matlab(path, condition, save = True):
     eng = matlab.engine.start_matlab()
     data_path = os.path.join(path, 'data')
     data_wildcard = os.path.join(data_path, '*.mat')
     matfile_paths = glob.glob(data_wildcard)
-    mats, configs = [],[]
+    list_of_mats, list_of_cons = [],[]
     for p in matfile_paths:
         start_time = time.time()
         mat, obj_name = load_calcium_traces_from_matlab(p, eng)
         dir = eng.eval(obj_name + ".constants.DIR")
-        config = Config(dir)
-
-        mats.append(mat)
-        configs.append(config)
+        cons = Cons(dir)
         print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(p, time.time() - start_time))
 
         if save == True:
             save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER,
-                                     condition, config.NAME_MOUSE)
-            save_name = config.NAME_DATE + '__' + config.NAME_PLANE
-            _easy_save(save_path, save_name, data=(config, mat))
-
-    # if save == True:
-    #     save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER, condition)
-    #     save_name = configs[0].NAME_MOUSE
-    #     _easy_save(save_path, save_name, data=(configs, mats))
-    return mats, configs
-
+                                     condition, cons.NAME_MOUSE)
+            save_name = cons.NAME_DATE + '__' + cons.NAME_PLANE
+            Config.save_mat_f(save_path, save_name, data=mat)
+            Config.save_cons_f(save_path, save_name, data=cons)
+    return list_of_mats, list_of_cons
 
 def load_condition(condition):
     name = condition.condition
@@ -102,5 +88,5 @@ if __name__ == '__main__':
     # path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING'
     # load_timepoint_from_matlab(path, condition, save=True)
 
-    condition = conditions.OFC
+    condition = conditions.BLA
     load_condition(condition)

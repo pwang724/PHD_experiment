@@ -5,8 +5,6 @@ import os
 import pickle
 
 import numpy as np
-from pylab import subplot
-from scipy.io import loadmat
 
 
 def reshape_data(data, trial_axis, cell_axis, time_axis, nFrames):
@@ -26,11 +24,6 @@ def make_odor_ix_dictionary(list_of_odors):
     for i, odor in enumerate(list_of_odors):
         dict[odor] = i
     return dict
-
-def load_pickle(pickle_path):
-    with open(pickle_path, "rb") as f:
-        e = pickle.load(f)
-    return e[0], e[1]
 
 
 def load_variable(notebook, name, folder='../autorestore'):
