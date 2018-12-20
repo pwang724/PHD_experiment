@@ -87,10 +87,6 @@ def load_timepoint_from_matlab(path, condition, save = True):
     #     _easy_save(save_path, save_name, data=(configs, mats))
     return mats, configs
 
-def load_pickle(pickle_path):
-    with open(pickle_path, "rb") as f:
-        e = pickle.load(f)
-    return e[0], e[1]
 
 def load_condition(condition):
     name = condition.condition

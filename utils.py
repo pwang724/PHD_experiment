@@ -9,6 +9,30 @@ from pylab import subplot
 from scipy.io import loadmat
 
 
+def reshape_data(data, trial_axis, cell_axis, time_axis, nFrames):
+    '''
+    reshape data with axis specified by trial, cell, and time axis arguments
+    :param data: calcium data. Dim 0 = cells. Dim 1 = trials X conditions
+    :return:
+    '''
+    # TODO: unit tests
+    data_cell_trial_time = data.reshape(data.shape[0], data.shape[1] // nFrames, nFrames)
+    permuted_ixs = np.argsort((cell_axis, trial_axis, time_axis))
+    permuted = np.transpose(data_cell_trial_time, permuted_ixs)
+    return permuted
+
+def make_odor_ix_dictionary(list_of_odors):
+    dict = {}
+    for i, odor in enumerate(list_of_odors):
+        dict[odor] = i
+    return dict
+
+def load_pickle(pickle_path):
+    with open(pickle_path, "rb") as f:
+        e = pickle.load(f)
+    return e[0], e[1]
+
+
 def load_data(folder='../data', filename='data.mat', n_frames_per_trial=75, onset=25, offset=34, water_onset=44, period=0.229):
     time_ax = np.linspace(0, n_frames_per_trial*period, n_frames_per_trial+1)[:-1]-onset*period    
     dataset = loadmat(os.path.join(folder, filename), squeeze_me=True, struct_as_record=False, )['s']
@@ -80,4 +104,3 @@ def convert_events_to_matrix(events, time_ax, n_cells=None, usemag=False):
     for e, t in zip(events, time_ids):
         matrix[t][int(e[1])] += e[2] if usemag else 1
     return matrix
-
