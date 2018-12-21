@@ -36,3 +36,4 @@ def vary_config(experiment, i):
     for key, index in zip(keys, indices):
         setattr(config, key, hp_ranges[key][index])
     return config
+

@@ -54,9 +54,6 @@ def save_json(save_path, save_name, config):
 
 def load_json(pathname):
     """Load config."""
-    with open(os.path.join(pathname, '.json'), 'r') as f:
+    with open(pathname +'.json', 'r') as f:
         config_dict = json.load(f)
-    config = Cons()
-    for key, val in config_dict.items():
-        setattr(config, key, val)
-    return config
+    return config_dict

@@ -10,6 +10,8 @@ class Config:
     load_cons_f = file_io.load_pickle
     cons_ext = '.pkl'
 
+    DECODE_CONFIG_JSON = 'decodeConfig'
+
     LOCAL_DATA_PATH = 'C:/Users/Peter/PycharmProjects/phd_project/DATA'
     LOCAL_DATA_SINGLE_FOLDER = 'single'
     LOCAL_DATA_TIMEPOINT_FOLDER = 'timepoint'

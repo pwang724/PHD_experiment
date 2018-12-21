@@ -4,8 +4,13 @@ import tools.plots as pt
 import matplotlib.pyplot as plt
 import numpy as np
 import os
+import glob
+import tools.file_io
+from collections import defaultdict
+from scipy import stats as sstats
 
-condition = conditions.OFC
+#plotting
+
 condition_name = condition.name
 decode_style = 'valence'
 save_path = os.path.join(Config.LOCAL_ANALYSIS_PATH, condition.name, decode_style)
