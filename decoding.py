@@ -20,8 +20,8 @@ def decode(cons, data, chosen_odors, csp_odors, decode_config):
             decode_labels[mask] = i+1
         return decode_labels
 
-    labels = cons.ODOR_TRIALIDX
-    data_trial_cell_time = utils.reshape_data(data, trial_axis=0, cell_axis=1, time_axis=2, nFrames= cons.TRIAL_FRAMES)
+    data_trial_cell_time = utils.reshape_data(data, trial_axis=0, cell_axis=1, time_axis=2,
+                                              nFrames= cons.TRIAL_FRAMES)
     odor_ix_dict = utils.make_odor_ix_dictionary(cons.ODOR_UNIQUE)
     us = 'water'
     csm_odors = list(set(chosen_odors) - set(csp_odors) - set(us))
@@ -34,9 +34,10 @@ def decode(cons, data, chosen_odors, csp_odors, decode_config):
         water_ix = None
 
     decode_style = decode_config.decode_style
-    decode_neurons = decode_config.decode_neurons
-    decode_shuffle = decode_config.decode_shuffle
+    decode_neurons = decode_config.neurons
+    decode_shuffle = decode_config.shuffle
 
+    labels = cons.ODOR_TRIALIDX
     if decode_style == 'valence':
         list_of_masks = _masks_from_ixs(labels, [[csp1_ix, csp2_ix],[csm1_ix, csm2_ix]])
     elif decode_style == 'identity':

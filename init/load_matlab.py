@@ -5,7 +5,6 @@ import time
 import numpy as np
 import os
 import glob
-from CONSTANTS.constants import constants
 import CONSTANTS.conditions as conditions
 from CONSTANTS.config import Config
 
@@ -16,10 +15,10 @@ def copy_config_from_matlab(path):
 
     obj = eng.load(path)['m']
     eng.workspace["obj"] = obj
-    fieldnames = eng.eval("fieldnames(obj.constants)")
+    fieldnames = eng.eval("fieldnames(obj.Config)")
     for name in fieldnames:
         if name != 'DAQ_DATA':
-            val = eng.eval("obj.constants." + name)
+            val = eng.eval("obj.Config." + name)
             setattr(c, name, val)
         #cannot do this for the key of DAQ_DATA
     return c
@@ -47,7 +46,7 @@ def load_single_from_matlab(data_path, save = True):
         mouse = cons.NAME_MOUSE
         date = cons.NAME_DATE
         plane = cons.NAME_PLANE
-        save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_SINGLE_FOLDER, mouse)
+        save_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_SINGLE_FOLDER, mouse)
         save_name = date + '_' + plane
         Config.save_mat_f(save_path, save_name, data=mat)
         Config.save_cons_f(save_path, save_name, data=cons)
@@ -62,12 +61,12 @@ def load_timepoint_from_matlab(path, condition, save = True):
     for p in matfile_paths:
         start_time = time.time()
         mat, obj_name = load_calcium_traces_from_matlab(p, eng)
-        dir = eng.eval(obj_name + ".constants.DIR")
+        dir = eng.eval(obj_name + ".Config.DIR")
         cons = Cons(dir)
         print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(p, time.time() - start_time))
 
         if save == True:
-            save_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER,
+            save_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER,
                                      condition, cons.NAME_MOUSE)
             save_name = cons.NAME_DATE + '__' + cons.NAME_PLANE
             Config.save_mat_f(save_path, save_name, data=mat)
@@ -75,7 +74,7 @@ def load_timepoint_from_matlab(path, condition, save = True):
     return list_of_mats, list_of_cons
 
 def load_condition(condition):
-    name = condition.condition
+    name = condition.name
     paths = condition.paths
     for path in paths:
         load_timepoint_from_matlab(path, name, save=True)

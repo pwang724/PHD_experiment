@@ -5,8 +5,6 @@ from xml.dom import minidom
 from skimage import io
 import time
 import scipy.io as sio
-import matplotlib.pyplot as plt
-from scipy.signal import resample
 
 class baseCons(object):
     def __init__(self):

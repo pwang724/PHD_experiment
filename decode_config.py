@@ -1,5 +1,5 @@
 import CONSTANTS.conditions as conditions
-from CONSTANTS.constants import constants
+from CONSTANTS.config import Config
 import os
 
 class BaseConfig(object):
@@ -12,10 +12,7 @@ class BaseConfig(object):
 class DecodeConfig(BaseConfig):
     def __init__(self):
         super(DecodeConfig, self).__init__()
-        self.condition = conditions.OFC
         self.decode_style = 'valence'
         self.neurons = 20
-
-        self.save_path = os.path.join(constants.LOCAL_ANALYSIS_PATH, self.condition.name, self.decode_style)
-        self.data_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER,
-                                 self.condition.name)
+        self.repeat = 1
+        self.shuffle = False

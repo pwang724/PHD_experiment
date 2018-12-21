@@ -1,4 +1,4 @@
-from CONSTANTS.constants import constants
+from CONSTANTS.config import Config
 from CONSTANTS import conditions
 import tools.plots as pt
 import matplotlib.pyplot as plt
@@ -8,7 +8,7 @@ import os
 condition = conditions.OFC
 condition_name = condition.name
 decode_style = 'valence'
-save_path = os.path.join(constants.LOCAL_ANALYSIS_PATH, condition.name, decode_style)
+save_path = os.path.join(Config.LOCAL_ANALYSIS_PATH, condition.name, decode_style)
 
 nMouse = len(condition.paths)
 r, c = (nMouse, 7)
