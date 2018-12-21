@@ -15,7 +15,7 @@ def copy_config_from_matlab(path):
 
     obj = eng.load(path)['m']
     eng.workspace["obj"] = obj
-    fieldnames = eng.eval("fieldnames(obj.Config)")
+    fieldnames = eng.eval("fieldnames(obj.constants)")
     for name in fieldnames:
         if name != 'DAQ_DATA':
             val = eng.eval("obj.Config." + name)
@@ -61,7 +61,7 @@ def load_timepoint_from_matlab(path, condition, save = True):
     for p in matfile_paths:
         start_time = time.time()
         mat, obj_name = load_calcium_traces_from_matlab(p, eng)
-        dir = eng.eval(obj_name + ".Config.DIR")
+        dir = eng.eval(obj_name + ".constants.DIR")
         cons = Cons(dir)
         print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(p, time.time() - start_time))
 

@@ -14,5 +14,5 @@ class DecodeConfig(BaseConfig):
         super(DecodeConfig, self).__init__()
         self.decode_style = 'valence'
         self.neurons = 20
-        self.repeat = 1
+        self.repeat = 2
         self.shuffle = False

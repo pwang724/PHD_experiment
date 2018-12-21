@@ -27,6 +27,16 @@ def load_text(pathname):
     data = np.loadtxt(pathname)
     return data
 
+def save_numpy(save_path, save_name, data):
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+    save_pathname = os.path.join(save_path, save_name + '.npy')
+    np.save(save_pathname, data)
+
+def load_numpy(pathname):
+    data = np.load(pathname)
+    return data
+
 def save_json(save_path, save_name, config):
     '''
     TODO: JSON cannot save ndarrays

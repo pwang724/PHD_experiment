@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 import numpy as np
 from tools import utils
 
@@ -36,6 +33,7 @@ def decode(cons, data, chosen_odors, csp_odors, decode_config):
     decode_style = decode_config.decode_style
     decode_neurons = decode_config.neurons
     decode_shuffle = decode_config.shuffle
+    decode_repeat = decode_config.repeat
 
     labels = cons.ODOR_TRIALIDX
     if decode_style == 'valence':
@@ -51,11 +49,16 @@ def decode(cons, data, chosen_odors, csp_odors, decode_config):
 
     good_trials = np.any(list_of_masks, axis=0)
     decode_labels = _assign_labels(list_of_masks)
-    scores = decode_odors_time_bin(data_trial_cell_time[good_trials], decode_labels[good_trials],
-                                   number_of_cells=decode_neurons,
-                                   shuffle=decode_shuffle,
-                                   cv=5)
-    return scores
+
+    list_of_scores = []
+    for _ in range(decode_repeat):
+        scores = decode_odors_time_bin(data_trial_cell_time[good_trials], decode_labels[good_trials],
+                                       number_of_cells=decode_neurons,
+                                       shuffle=decode_shuffle,
+                                       cv=5)
+        list_of_scores.append(scores)
+    out = np.stack(list_of_scores, axis=2)
+    return out
 
 
 def decode_odors_time_bin(data, labels, model=None, number_of_cells=None, shuffle=False, **cv_args):
