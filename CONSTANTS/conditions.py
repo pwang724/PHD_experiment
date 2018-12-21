@@ -3,7 +3,7 @@ from collections import namedtuple
 #CSP are always the first two odors
 
 class PIR:
-    condition = 'PIR'
+    name = 'PIR'
     paths = ['E:/IMPORTANT DATA/DATA_2P/M183/training_LEARNING',
              'E:/IMPORTANT DATA/DATA_2P/M184/training_LEARNING',
              'E:/IMPORTANT DATA/DATA_2P/M199_pir/training_LEARNING',
@@ -31,13 +31,13 @@ class PIR_NAIVE:
 
 class OFC:
     #
-    condition = 'OFC'
+    name = 'OFC'
     paths = [
         'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
         'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING'
+        # 'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
+        # 'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
+        # 'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING'
     ]
     odors = [
         ['pin', 'msy', 'euy', 'lim'],
@@ -64,7 +64,7 @@ class OFC_REVERSAL:
     pass
 
 class OFC_COMPOSITE:
-    condition = 'OFC_COMPOSITE'
+    name = 'OFC_COMPOSITE'
     paths = ['E:/IMPORTANT DATA/DATA_2P/M2_OFC/training', #days 1-4
              'E:/IMPORTANT DATA/DATA_2P/M3_OFC/training', #days 1-4, odor currently nananaive
              'E:/IMPORTANT DATA/DATA_2P/M4_OFC/training', #days 1-6, odor currently nananaive
@@ -86,7 +86,7 @@ class OFC_JAWS:
     pass
 
 class MPFC_COMPOSITE:
-    condition = 'MPFC_COMPOSITE'
+    name = 'MPFC_COMPOSITE'
     paths = ['E:/IMPORTANT DATA/DATA_2P/M2_MPFC/training',  #days 1-3
              'E:/IMPORTANT DATA/DATA_2P/M3_MPFC/training',  #days 1-3
              'E:/IMPORTANT DATA/DATA_2P/M4_MPFC/training',  #days 1-4, naive first day
@@ -112,7 +112,7 @@ class BLA_JAWS:
 
 class BLA:
     #TODO: N and T need fixing
-    condition = 'BLA'
+    name = 'BLA'
     paths = [
         'E:/IMPORTANT DATA/DATA_2P/M211_bla/training_LEARNING',
         'E:/IMPORTANT DATA/DATA_2P/M212_bla/training_LEARNING',

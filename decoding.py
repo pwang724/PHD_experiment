@@ -2,12 +2,12 @@
 # coding: utf-8
 
 import numpy as np
-import utils
+from tools import utils
 
 from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
 
-def decode(config, data, chosen_odors, csp_odors, arg ='valence'):
+def decode(cons, data, chosen_odors, csp_odors, decode_config):
     def _masks_from_ixs(labels, list_of_ixs):
         list_of_masks = []
         for ixs in list_of_ixs:
@@ -20,9 +20,9 @@ def decode(config, data, chosen_odors, csp_odors, arg ='valence'):
             decode_labels[mask] = i+1
         return decode_labels
 
-    labels = config.ODOR_TRIALIDX
-    data_trial_cell_time = utils.reshape_data(data, trial_axis=0, cell_axis=1, time_axis=2, nFrames= config.TRIAL_FRAMES)
-    odor_ix_dict = utils.make_odor_ix_dictionary(config.ODOR_UNIQUE)
+    labels = cons.ODOR_TRIALIDX
+    data_trial_cell_time = utils.reshape_data(data, trial_axis=0, cell_axis=1, time_axis=2, nFrames= cons.TRIAL_FRAMES)
+    odor_ix_dict = utils.make_odor_ix_dictionary(cons.ODOR_UNIQUE)
     us = 'water'
     csm_odors = list(set(chosen_odors) - set(csp_odors) - set(us))
 
@@ -33,20 +33,27 @@ def decode(config, data, chosen_odors, csp_odors, arg ='valence'):
     else:
         water_ix = None
 
-    if arg == 'valence':
+    decode_style = decode_config.decode_style
+    decode_neurons = decode_config.decode_neurons
+    decode_shuffle = decode_config.decode_shuffle
+
+    if decode_style == 'valence':
         list_of_masks = _masks_from_ixs(labels, [[csp1_ix, csp2_ix],[csm1_ix, csm2_ix]])
-    elif arg == 'identity':
+    elif decode_style == 'identity':
         list_of_masks = _masks_from_ixs(labels, [[csp1_ix], [csp2_ix],[csm1_ix], [csm2_ix]])
-    elif arg == 'csp_identity':
+    elif decode_style == 'csp_identity':
         list_of_masks = _masks_from_ixs(labels, [[csp1_ix], [csp2_ix]])
-    elif arg == 'csm_identity':
+    elif decode_style == 'csm_identity':
         list_of_masks = _masks_from_ixs(labels, [[csm1_ix], [csm2_ix]])
     else:
-        raise ValueError('Unknown decoding type {:s}'.format(arg))
+        raise ValueError('Unknown decoding type {:s}'.format(decode_style))
 
     good_trials = np.any(list_of_masks, axis=0)
     decode_labels = _assign_labels(list_of_masks)
-    scores = decode_odors_time_bin(data_trial_cell_time[good_trials], decode_labels[good_trials], cv=5)
+    scores = decode_odors_time_bin(data_trial_cell_time[good_trials], decode_labels[good_trials],
+                                   number_of_cells=decode_neurons,
+                                   shuffle=decode_shuffle,
+                                   cv=5)
     return scores
 
 

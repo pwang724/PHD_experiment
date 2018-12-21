@@ -4,3 +4,4 @@ class constants:
     LOCAL_DATA_TIMEPOINT_FOLDER = 'timepoint'
 
     LOCAL_FIGURE_PATH = 'C:/Users/Peter/PycharmProjects/phd_project/FIGURES'
+    LOCAL_ANALYSIS_PATH = 'C:/Users/Peter/PycharmProjects/phd_project/ANALYSIS'
