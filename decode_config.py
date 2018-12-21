@@ -15,7 +15,6 @@ class DecodeConfig(BaseConfig):
         self.condition = conditions.OFC
         self.decode_style = 'valence'
         self.neurons = 20
-        self.shuffle = False
 
         self.save_path = os.path.join(constants.LOCAL_ANALYSIS_PATH, self.condition.name, self.decode_style)
         self.data_path = os.path.join(constants.LOCAL_DATA_PATH, constants.LOCAL_DATA_TIMEPOINT_FOLDER,
