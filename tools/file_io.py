@@ -54,6 +54,6 @@ def save_json(save_path, save_name, config):
 
 def load_json(pathname):
     """Load config."""
-    with open(pathname +'.json', 'r') as f:
+    with open(pathname, 'r') as f:
         config_dict = json.load(f)
     return config_dict

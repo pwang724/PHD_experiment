@@ -169,7 +169,7 @@ class Cons(ConstantCons):
             max_odor_pid = (max_odor_pid - min) / (max - min)
             O_on = np.argwhere(max_odor_pid > thres_odor_high)[0][0] / self.DAQ_SAMP
             O_off = np.argwhere(max_odor_pid > thres_odor_low)[-1][0] / self.DAQ_SAMP
-            if O_on > 6:
+            if O_on > 6 or O_on < 5:
                 O_on = self.DEFAULT_O_ON
                 O_off = self.DEFAULT_O_OFF
             return O_on, O_off

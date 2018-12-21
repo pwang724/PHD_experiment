@@ -28,7 +28,6 @@ def decode_experiment(condition, decodeConfig, save_path):
                              condition.name)
     mouse_files = [os.path.join(data_path, o) for o in os.listdir(data_path)
                    if os.path.isdir(os.path.join(data_path, o))]
-    tools.file_io.save_json(save_path, Config.DECODE_CONFIG_JSON, decodeConfig)
 
     for i, (mouse_file, odors, csps) in enumerate(zip(mouse_files, condition.odors, condition.csp)):
         start_time = time.time()
@@ -38,12 +37,19 @@ def decode_experiment(condition, decodeConfig, save_path):
             cons = Config.load_cons_f(config_pathname)
             data = Config.load_mat_f(data_pathname)
 
+            cons_dict = cons.__dict__
+            for key, value in cons_dict.items():
+                if isinstance(value, list) or isinstance(value, np.ndarray):
+                    pass
+                else:
+                    setattr(decodeConfig, key, value)
             scores = decoding.decode_odor_labels(cons, data, odors, csps, decodeConfig)
 
-            save_folder = os.path.split(mouse_file)[1]
-            save_name = os.path.splitext(os.path.split(data_pathname)[1])[0]
-            tools.file_io.save_numpy(save_path=os.path.join(save_path, save_folder),
-                              save_name=save_name, data=scores)
+            mouse = os.path.split(mouse_file)[1]
+            date_plane = os.path.splitext(os.path.split(data_pathname)[1])[0]
+            name = mouse + '__' + date_plane
+            tools.file_io.save_json(save_path=save_path, save_name=name, config=decodeConfig)
+            tools.file_io.save_numpy(save_path=save_path, save_name=name, data=scores)
         print("Analyzed: {0:s} in {1:.2f} seconds".format(mouse_file, time.time()-start_time))
 
 argTest = True

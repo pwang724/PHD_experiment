@@ -5,6 +5,15 @@ from sklearn.svm import SVC
 from sklearn.model_selection import cross_val_score
 
 def decode_odor_labels(cons, data, chosen_odors, csp_odors, decode_config):
+    '''
+
+    :param cons:
+    :param data:
+    :param chosen_odors:
+    :param csp_odors:
+    :param decode_config:
+    :return: decoding: returns CV scores in dimensions of Time X Cross-Folds X Repeats
+    '''
     def _masks_from_ixs(labels, list_of_ixs):
         list_of_masks = []
         for ixs in list_of_ixs:
