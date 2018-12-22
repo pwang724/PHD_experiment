@@ -32,12 +32,14 @@ class PIR_NAIVE:
 class OFC:
     #
     name = 'OFC'
+    #TODO: some mice have frame numbers that are 65 for naive odor presentation.
+    # check onset offset etc for these
     paths = [
         'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
         'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
-        # 'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
-        # 'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
-        # 'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING'
+        'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING'
     ]
     odors = [
         ['pin', 'msy', 'euy', 'lim'],

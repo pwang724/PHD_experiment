@@ -1,16 +1,19 @@
 from tools import plot_utils
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import numpy as np
 import copy
 import os
 
 
 # filter
+#TODO: refactor somewhere else
 def _filter_results(res, select_dict):
     out = copy.copy(res)
     list_of_ixs = []
-    for key, val in select_dict.items():
-        list_of_ixs.append(res[key] == val)
+    for key, vals in select_dict.items():
+        membership = np.isin(res[key], vals)
+        list_of_ixs.append(membership)
     select_ixs = np.all(list_of_ixs, axis=0)
     for key, value in res.items():
         out[key] = value[select_ixs]
@@ -25,24 +28,35 @@ def _easy_save(path, name, dpi=300, pdf=True):
         plt.savefig(os.path.join(figname + '.pdf'), transparent=True)
     plt.close()
 
-def plot_results(res, xkey, ykey, loop_key, select_dict, path):
-    res = _filter_results(res, select_dict)
+def plot_results(res, xkey, ykey, loop_key, select_dict=None, path=None, kwargs=None):
+    if select_dict is not None:
+        res = _filter_results(res, select_dict)
 
     # process data for plotting
     xdata = res[xkey]
     ydata = res[ykey]
     loopdata = res[loop_key]
 
+    cmap = plt.get_cmap('cool')
+    colors = [cmap(i) for i in np.linspace(0, 1, np.unique(loopdata).size)]
+
     fig = plt.figure(figsize=(3, 3))
-    ax = fig.add_axes([0.2, 0.2, 0.7, 0.7])
+    ax = plt.axes(**kwargs)
+    ax.set_color_cycle(colors)
     for x in np.unique(loopdata):
         ind = loopdata == x
         x_plot = xdata[ind]
         y_plot = ydata[ind]
-        if ykey == 'mean' or ykey == 'sem':
-            ax.plot(x_plot.transpose(), y_plot.transpose(), label=str(x))
-        else:
-            ax.plot(x_plot, y_plot, 'o-', label=str(x))
+        if xdata.dtype == 'O':
+            x_plot = x_plot[0]
+        if ydata.dtype == 'O':
+            y_plot = y_plot[0]
+        if ykey == 'mean':
+            x_plot = x_plot.transpose()
+            y_plot = y_plot.transpose()
+            sem_plot = res['sem'][ind][0].transpose()
+            ax.fill_between(x_plot, y_plot - sem_plot, y_plot + sem_plot, zorder=0, lw=0, alpha=0.3)
+        ax.plot(x_plot, y_plot, label=str(x))
 
     #format
     if loop_key:
@@ -55,20 +69,20 @@ def plot_results(res, xkey, ykey, loop_key, select_dict, path):
         xticklabels = ['On', 'Off', 'US']
         ax.set_xticks(xticks)
         ax.set_xticklabels(xticklabels)
-
-    yticks = np.linspace(0,1,5)
-    ax.set_yticks(yticks)
-    ax.set_title(select_dict)
     plot_utils.nicer_plot(ax)
 
-    name = ''
-    for k, v in select_dict.items():
-        name += k + '_' + str(v) + '_'
+    if select_dict is None:
+        name = 'figure'
+    else:
+        name = ''
+        for k, v in select_dict.items():
+            name += k + '_' + str(v) + '_'
 
-    name += '_' + ykey + '_vs_' + xkey
+    folder_name = ykey + '_vs_' + xkey
     if loop_key:
-        name += '_vary_' + loop_key
-    _easy_save(path, name, dpi=300, pdf=False)
+        folder_name += '_vary_' + loop_key
+    save_path = os.path.join(path, folder_name)
+    _easy_save(save_path, name, dpi=300, pdf=False)
 
 # figpath = os.path.join(constants.LOCAL_FIGURE_PATH, condition_name)
 # figname = decode_style

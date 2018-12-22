@@ -17,10 +17,10 @@ def vary_neuron_valence(argTest = True):
     decodeConfig.repeat = 10
 
     if argTest:
-        decodeConfig.repeat = 2
+        decodeConfig.repeat = 5
 
     hp_ranges = OrderedDict()
-    hp_ranges['neurons'] = [10, 20]
+    hp_ranges['neurons'] = [5, 10, 20, 30, 40, 50]
     return decodeConfig, hp_ranges
 
 def decode_experiment(condition, decodeConfig, save_path):

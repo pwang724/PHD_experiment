@@ -8,6 +8,7 @@ import tools.file_io
 from collections import defaultdict
 from scipy import stats as sstats
 import plot_decode
+import copy
 
 def load_results(data_path):
     res = defaultdict(list)
@@ -34,14 +35,15 @@ def _add_days(res):
 
     list_of_dates = res['NAME_DATE']
     list_of_mice = res['NAME_MOUSE']
-    xdata_new = []
+    days = np.zeros_like(list_of_dates, dtype=int)
     _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
     for mouse_ix in np.unique(mouse_ixs):
-        mouse_dates = list_of_dates[mouse_ixs == mouse_ix]
+        ixs = mouse_ixs == mouse_ix
+        mouse_dates = list_of_dates[ixs]
         sorted_dates = rankdata(mouse_dates, 'dense') - 1
-        xdata_new.append(sorted_dates)
+        days[ixs] = sorted_dates
     res['mouse'] = mouse_ixs
-    res['day'] = np.array(xdata_new).flatten()
+    res['day'] = days
 
 # add time
 def _add_time(res):
@@ -64,13 +66,52 @@ def _add_time(res):
 def _add_stats(res):
     # data is in format of experiment X time X CVfold X repeat
     # TODO: ask Fabio if joining CV scores and repetitions is legitimate
-    data = np.array(res['data'])
-    data_reshaped = np.reshape(data.transpose([0, 1, 3, 2]),
-                               [data.shape[0], data.shape[1], data.shape[2] * data.shape[3]])
-    data_mean = np.mean(data_reshaped, axis=2)
-    data_sem = sstats.sem(data_reshaped, axis=2)
-    res['mean'] = data_mean
-    res['sem'] = data_sem
+    datas = np.array(res['data'])
+    O_on = res['DAQ_O_ON_F'].astype(np.int)
+    W_on = res['DAQ_W_ON_F'].astype(np.int)
+    for i, data in enumerate(datas):
+        data_reshaped = np.reshape(data.transpose([0, 2, 1]),
+                                   [data.shape[0], data.shape[1] * data.shape[2]])
+        mean = np.mean(data_reshaped, axis=1)
+        max = np.max(mean[O_on[i]: W_on[i]])
+        res['mean'].append(mean)
+        res['sem'].append(sstats.sem(data_reshaped, axis=1))
+        res['max'].append(max)
+
+    res['mean'] = np.array(res['mean'])
+    res['sem'] = np.array(res['sem'])
+    res['max'] = np.array(res['max'])
+
+
+def _get_last_day_per_mouse(res):
+    out = []
+    list_of_dates = res['NAME_DATE']
+    list_of_mice = res['NAME_MOUSE']
+    _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
+    for mouse_ix in np.unique(mouse_ixs):
+        mouse_dates = list_of_dates[mouse_ixs == mouse_ix]
+        counts = np.unique(mouse_dates).size - 1
+        out.append(counts)
+    return out
+
+#TODO: refactor somewhere else
+def _filter_days_per_mouse(res, days_per_mouse):
+    out = copy.copy(res)
+    list_of_ixs = []
+    list_of_dates = res['day']
+    list_of_mice = res['mouse']
+    _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
+    for i, mouse_ix in enumerate(np.unique(mouse_ixs)):
+        ix = mouse_ixs == mouse_ix
+        mouse_dates = list_of_dates[ix]
+        membership = np.isin(mouse_dates, days_per_mouse[i])
+        ix[ix]= membership
+        list_of_ixs.append(ix)
+
+    select_ixs = np.any(list_of_ixs, axis=0)
+    for key, value in res.items():
+        out[key] = value[select_ixs]
+    return out
 
 condition = conditions.OFC
 data_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'Valence', condition.name)
@@ -81,12 +122,23 @@ _add_days(res)
 _add_time(res)
 _add_stats(res)
 
+last_day_per_mouse = _get_last_day_per_mouse(res)
+last_day_res = _filter_days_per_mouse(res, days_per_mouse=last_day_per_mouse)
+
 # plotting
-days = np.unique(res['day'])
+xkey = 'neurons'
+ykey = 'max'
+loopkey = 'mouse'
+plot_dict = {'yticks':[.4, .6, .8, 1.0], 'ylim':[.35, 1.05]}
+plot_decode.plot_results(last_day_res, xkey, ykey, loopkey, select_dict=None, path= save_path, kwargs=plot_dict)
+
+
 xkey = 'time'
 ykey = 'mean'
-loopkey = 'mouse'
+loopkey = 'day'
+plot_dict = {'yticks':[.4, .6, .8, 1.0], 'ylim':[.35, 1.05]}
 
-for day in days:
-    select_dict = {'neurons':10, 'day': day}
-    plot_decode.plot_results(res, xkey, ykey, loopkey, select_dict, save_path)
+mice = np.unique(res['mouse'])
+for i, mouse in enumerate(mice):
+    select_dict = {'neurons':20, 'mouse': mouse, 'day':[0, last_day_per_mouse[i]]}
+    plot_decode.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)
