@@ -1,23 +1,12 @@
+from filter import _filter_results
 from tools import plot_utils
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import numpy as np
-import copy
 import os
 
 
 # filter
 #TODO: refactor somewhere else
-def _filter_results(res, select_dict):
-    out = copy.copy(res)
-    list_of_ixs = []
-    for key, vals in select_dict.items():
-        membership = np.isin(res[key], vals)
-        list_of_ixs.append(membership)
-    select_ixs = np.all(list_of_ixs, axis=0)
-    for key, value in res.items():
-        out[key] = value[select_ixs]
-    return out
 
 def _easy_save(path, name, dpi=300, pdf=True):
     os.makedirs(path, exist_ok=True)

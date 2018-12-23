@@ -1,14 +1,11 @@
 from CONSTANTS.config import Config
-from CONSTANTS import conditions
-import matplotlib.pyplot as plt
 import numpy as np
 import os
 import glob
 import tools.file_io
 from collections import defaultdict
 from scipy import stats as sstats
-import plot_decode
-import copy
+
 
 def load_results(data_path):
     res = defaultdict(list)
@@ -28,6 +25,11 @@ def load_results(data_path):
     for key, val in res.items():
         res[key] = np.array(val)
     return res
+
+def analyze_results(res):
+    _add_days(res)
+    _add_time(res)
+    _add_stats(res)
 
 # add days
 def _add_days(res):
@@ -82,63 +84,4 @@ def _add_stats(res):
     res['sem'] = np.array(res['sem'])
     res['max'] = np.array(res['max'])
 
-
-def _get_last_day_per_mouse(res):
-    out = []
-    list_of_dates = res['NAME_DATE']
-    list_of_mice = res['NAME_MOUSE']
-    _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
-    for mouse_ix in np.unique(mouse_ixs):
-        mouse_dates = list_of_dates[mouse_ixs == mouse_ix]
-        counts = np.unique(mouse_dates).size - 1
-        out.append(counts)
-    return out
-
 #TODO: refactor somewhere else
-def _filter_days_per_mouse(res, days_per_mouse):
-    out = copy.copy(res)
-    list_of_ixs = []
-    list_of_dates = res['day']
-    list_of_mice = res['mouse']
-    _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
-    for i, mouse_ix in enumerate(np.unique(mouse_ixs)):
-        ix = mouse_ixs == mouse_ix
-        mouse_dates = list_of_dates[ix]
-        membership = np.isin(mouse_dates, days_per_mouse[i])
-        ix[ix]= membership
-        list_of_ixs.append(ix)
-
-    select_ixs = np.any(list_of_ixs, axis=0)
-    for key, value in res.items():
-        out[key] = value[select_ixs]
-    return out
-
-condition = conditions.OFC
-data_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'Valence', condition.name)
-save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'Valence', condition.name)
-
-res = load_results(data_path)
-_add_days(res)
-_add_time(res)
-_add_stats(res)
-
-last_day_per_mouse = _get_last_day_per_mouse(res)
-last_day_res = _filter_days_per_mouse(res, days_per_mouse=last_day_per_mouse)
-
-# plotting
-xkey = 'neurons'
-ykey = 'max'
-loopkey = 'mouse'
-plot_dict = {'yticks':[.4, .6, .8, 1.0], 'ylim':[.35, 1.05]}
-plot_decode.plot_results(last_day_res, xkey, ykey, loopkey, select_dict=None, path= save_path, kwargs=plot_dict)
-
-
-xkey = 'time'
-ykey = 'mean'
-loopkey = 'day'
-plot_dict = {'yticks':[.4, .6, .8, 1.0], 'ylim':[.35, 1.05]}
-
-mice = np.unique(res['mouse'])
-for i, mouse in enumerate(mice):
-    select_dict = {'neurons':20, 'mouse': mouse, 'day':[0, last_day_per_mouse[i]]}
-    plot_decode.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)

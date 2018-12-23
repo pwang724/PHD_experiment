@@ -52,10 +52,11 @@ def decode_experiment(condition, decodeConfig, save_path):
             tools.file_io.save_numpy(save_path=save_path, save_name=name, data=scores)
         print("Analyzed: {0:s} in {1:.2f} seconds".format(mouse_file, time.time()-start_time))
 
-argTest = True
-condition = experimental_conditions.OFC
-save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'Valence', condition.name)
-perform(experiment=decode_experiment,
-        condition =condition,
-        experiment_configs=vary_neuron_valence(argTest = argTest),
-        path= save_path)
+if __name__ == '__main__':
+    argTest = True
+    condition = experimental_conditions.OFC
+    save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'Valence', condition.name)
+    perform(experiment=decode_experiment,
+            condition =condition,
+            experiment_configs=vary_neuron_valence(argTest= argTest),
+            path= save_path)

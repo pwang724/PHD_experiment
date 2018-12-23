@@ -1,0 +1,48 @@
+import experiment
+import analysis
+import filter
+import plot
+from tools import experiment_tools
+import os
+
+import numpy as np
+from CONSTANTS.config import Config
+import CONSTANTS.conditions as experimental_conditions
+
+
+#run exp
+argTest = True
+condition = experimental_conditions.OFC
+data_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'Valence', condition.name)
+experiment_tools.perform(experiment=experiment.decode_experiment,
+        condition=condition,
+        experiment_configs=experiment.vary_neuron_valence(argTest=argTest),
+        path=data_path)
+
+#analyze exp
+save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'Valence', condition.name)
+res = analysis.load_results(data_path)
+analysis.analyze_results(res)
+
+last_day_per_mouse = filter._get_last_day_per_mouse(res)
+last_day_res = filter._filter_days_per_mouse(res, days_per_mouse=last_day_per_mouse)
+
+# plot exp
+
+#neurons vs decoding performance
+xkey = 'neurons'
+ykey = 'max'
+loopkey = 'mouse'
+plot_dict = {'yticks':[.4, .6, .8, 1.0], 'ylim':[.35, 1.05]}
+plot.plot_results(last_day_res, xkey, ykey, loopkey, select_dict=None, path= save_path, kwargs=plot_dict)
+
+#decoding performance wrt time for each mouse, comparing 1st and last day
+xkey = 'time'
+ykey = 'mean'
+loopkey = 'day'
+plot_dict = {'yticks':[.4, .6, .8, 1.0], 'ylim':[.35, 1.05]}
+
+mice = np.unique(res['mouse'])
+for i, mouse in enumerate(mice):
+    select_dict = {'neurons':20, 'mouse': mouse, 'day':[0, last_day_per_mouse[i]]}
+    plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)
