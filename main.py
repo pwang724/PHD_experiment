@@ -1,3 +1,4 @@
+import init.load_matlab
 import experiment
 import analysis
 import filter
@@ -9,32 +10,37 @@ import numpy as np
 from CONSTANTS.config import Config
 import CONSTANTS.conditions as experimental_conditions
 
-
-#run exp
+#inputs
 argTest = True
 condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'Valence', condition.name)
-experiment_tools.perform(experiment=experiment.decode_experiment,
-        condition=condition,
-        experiment_configs=experiment.vary_neuron_valence(argTest=argTest),
-        path=data_path)
+save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'Valence', condition.name)
+
+#load files from matlab
+init.load_matlab.load_condition(condition)
+
+#run exp
+experiment_tools.perform(experiment=experiment.decode_odor_as_label,
+                         condition=condition,
+                         experiment_configs=experiment.vary_neuron_valence(argTest=argTest),
+                         path=data_path)
 
 #analyze exp
-save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'Valence', condition.name)
 res = analysis.load_results(data_path)
 analysis.analyze_results(res)
 
-last_day_per_mouse = filter._get_last_day_per_mouse(res)
-last_day_res = filter._filter_days_per_mouse(res, days_per_mouse=last_day_per_mouse)
+#prepare files for plotting
+last_day_per_mouse = filter.get_last_day_per_mouse(res)
+res_lastday = filter.filter_days_per_mouse(res, days_per_mouse=last_day_per_mouse)
 
-# plot exp
+## plotting
 
 #neurons vs decoding performance
 xkey = 'neurons'
 ykey = 'max'
 loopkey = 'mouse'
 plot_dict = {'yticks':[.4, .6, .8, 1.0], 'ylim':[.35, 1.05]}
-plot.plot_results(last_day_res, xkey, ykey, loopkey, select_dict=None, path= save_path, kwargs=plot_dict)
+plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict=None, path= save_path, ax_args=plot_dict)
 
 #decoding performance wrt time for each mouse, comparing 1st and last day
 xkey = 'time'

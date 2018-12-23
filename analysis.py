@@ -84,4 +84,3 @@ def _add_stats(res):
     res['sem'] = np.array(res['sem'])
     res['max'] = np.array(res['max'])
 
-#TODO: refactor somewhere else

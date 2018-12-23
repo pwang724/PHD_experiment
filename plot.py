@@ -1,14 +1,19 @@
-from filter import _filter_results
+from filter import filter
 from tools import plot_utils
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 
 
-# filter
-#TODO: refactor somewhere else
-
 def _easy_save(path, name, dpi=300, pdf=True):
+    '''
+    convenience function for saving figs while taking care of making folders
+    :param path: save path
+    :param name: save name
+    :param dpi: save dpi for .png format
+    :param pdf: boolean, save in another pdf or not
+    :return:
+    '''
     os.makedirs(path, exist_ok=True)
     figname = os.path.join(path, name)
     plt.savefig(os.path.join(figname + '.png'), dpi=dpi)
@@ -17,20 +22,31 @@ def _easy_save(path, name, dpi=300, pdf=True):
         plt.savefig(os.path.join(figname + '.pdf'), transparent=True)
     plt.close()
 
-def plot_results(res, xkey, ykey, loop_key, select_dict=None, path=None, kwargs=None):
+def plot_results(res, x_key, y_key, loop_key, select_dict=None, path=None, ax_args=None):
+    '''
+
+    :param res: flattened dict of results
+    :param x_key:
+    :param y_key:
+    :param loop_key:
+    :param select_dict:
+    :param path: save path
+    :param ax_args: additional args to pass to ax, such as ylim, etc. in dictionary format
+    :return:
+    '''
     if select_dict is not None:
-        res = _filter_results(res, select_dict)
+        res = filter(res, select_dict)
 
     # process data for plotting
-    xdata = res[xkey]
-    ydata = res[ykey]
+    xdata = res[x_key]
+    ydata = res[y_key]
     loopdata = res[loop_key]
 
     cmap = plt.get_cmap('cool')
     colors = [cmap(i) for i in np.linspace(0, 1, np.unique(loopdata).size)]
 
-    fig = plt.figure(figsize=(3, 3))
-    ax = plt.axes(**kwargs)
+    fig = plt.figure(figsize=(2.5, 2))
+    ax = plt.axes(**ax_args)
     ax.set_color_cycle(colors)
     for x in np.unique(loopdata):
         ind = loopdata == x
@@ -40,7 +56,7 @@ def plot_results(res, xkey, ykey, loop_key, select_dict=None, path=None, kwargs=
             x_plot = x_plot[0]
         if ydata.dtype == 'O':
             y_plot = y_plot[0]
-        if ykey == 'mean':
+        if y_key == 'mean':
             x_plot = x_plot.transpose()
             y_plot = y_plot.transpose()
             sem_plot = res['sem'][ind][0].transpose()
@@ -53,7 +69,7 @@ def plot_results(res, xkey, ykey, loop_key, select_dict=None, path=None, kwargs=
         l = ax.legend()
         l.set_title(loop_key)
 
-    if xkey == 'time':
+    if x_key == 'time':
         xticks = res['xticks'][0]
         xticklabels = ['On', 'Off', 'US']
         ax.set_xticks(xticks)
@@ -67,15 +83,8 @@ def plot_results(res, xkey, ykey, loop_key, select_dict=None, path=None, kwargs=
         for k, v in select_dict.items():
             name += k + '_' + str(v) + '_'
 
-    folder_name = ykey + '_vs_' + xkey
+    folder_name = y_key + '_vs_' + x_key
     if loop_key:
         folder_name += '_vary_' + loop_key
     save_path = os.path.join(path, folder_name)
     _easy_save(save_path, name, dpi=300, pdf=False)
-
-# figpath = os.path.join(constants.LOCAL_FIGURE_PATH, condition_name)
-# figname = decode_style
-# if not os.path.exists(figpath):
-#     os.makedirs(figpath)
-# figpathname = os.path.join(figpath, figname)
-# plt.savefig(figpathname + '.png', dpi=300)

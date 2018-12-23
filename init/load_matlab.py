@@ -67,17 +67,21 @@ def load_timepoint_from_matlab(path, condition, save = True):
 
         if save == True:
             save_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER,
-                                     condition, cons.NAME_MOUSE)
-            save_name = cons.NAME_DATE + '__' + cons.NAME_PLANE
+                                     condition)
+            save_name = cons.NAME_MOUSE + '__' + cons.NAME_DATE + '__' + cons.NAME_PLANE
             Config.save_mat_f(save_path, save_name, data=mat)
             Config.save_cons_f(save_path, save_name, data=cons)
     return list_of_mats, list_of_cons
 
 def load_condition(condition):
+    #TODO: see if it works
     name = condition.name
     paths = condition.paths
     for path in paths:
-        load_timepoint_from_matlab(path, name, save=True)
+        if os.path.exists(path):
+            print('path {}, folder {} already exists'.format(path, name))
+        else:
+            load_timepoint_from_matlab(path, name, save=True)
 
 if __name__ == '__main__':
     # example_path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/7-19-2016/420'
