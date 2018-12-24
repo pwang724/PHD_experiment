@@ -10,29 +10,55 @@ import CONSTANTS.conditions as experimental_conditions
 from collections import OrderedDict
 from tools.experiment_tools import perform
 
-def vary_neuron_valence(argTest = True):
+def vary_neuron(argTest = True):
     decodeConfig = decode_config.DecodeConfig()
     decodeConfig.shuffle = False
     decodeConfig.decode_style = 'valence'
-    decodeConfig.repeat = 100
-
-    if argTest:
-        decodeConfig.repeat = 10
-
+    decodeConfig.repeat = 25
     hp_ranges = OrderedDict()
     hp_ranges['neurons'] = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    if argTest:
+        decodeConfig.repeat = 5
+        hp_ranges['neurons'] = [10, 20, 30, 40, 50]
     return decodeConfig, hp_ranges
 
-def decode_odor_as_label(condition, decodeConfig, save_path):
+def vary_shuffle(argTest = True):
+    decodeConfig = decode_config.DecodeConfig()
+    decodeConfig.decode_style = 'valence'
+    decodeConfig.repeat = 10
+    decodeConfig.neurons = 50
+
+    hp_ranges = OrderedDict()
+    hp_ranges['shuffle'] = [False, True]
+    if argTest:
+        decodeConfig.repeat = 5
+    return decodeConfig, hp_ranges
+
+def vary_decode_style(argTest = True):
+    decodeConfig = decode_config.DecodeConfig()
+    decodeConfig.repeat = 10
+    decodeConfig.neurons = 50
+
+    hp_ranges = OrderedDict()
+    hp_ranges['shuffle'] = [False, True]
+    hp_ranges['decode_style'] = ['csp_identity','csm_identity', 'valence']
+    if argTest:
+        decodeConfig.repeat = 5
+    return decodeConfig, hp_ranges
+
+
+def decode_odor_as_label(condition, decodeConfig, data_path, save_path):
     '''
-    :param condition:
-    :param decodeConfig:
+    Run decoding experiments with labels based on the odor that was presented. Data is contained
+
+    :param condition: experimental condition. For example, condition OFC.
+    Must contain fields: name, paths, odors, csp
+    :param decodeConfig: class config, contains as fields relevant parameters to run decoding experiment
+    :param data_path:
     :param save_path:
     :return:
     '''
-    #TODO: see if it works
-    data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER,
-                             condition.name)
+    #TODO: see if it works when odors are different for each animal
     data_pathnames = glob.glob(os.path.join(data_path, '*' + Config.mat_ext))
     config_pathnames = glob.glob(os.path.join(data_path, '*' + Config.cons_ext))
     mouse_names_per_file = [Config.load_cons_f(d).NAME_MOUSE for d in config_pathnames]
@@ -69,7 +95,10 @@ if __name__ == '__main__':
     argTest = True
     condition = experimental_conditions.OFC
     save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'Valence', condition.name)
+    data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER,
+                             condition.name)
     perform(experiment=decode_odor_as_label,
             condition =condition,
-            experiment_configs=vary_neuron_valence(argTest= argTest),
-            path= save_path)
+            experiment_configs=vary_neuron(argTest= argTest),
+            data_path = data_path,
+            save_path= save_path)

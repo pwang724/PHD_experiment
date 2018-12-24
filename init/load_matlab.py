@@ -59,20 +59,17 @@ def load_timepoint_from_matlab(path, condition):
     matfile_paths = glob.glob(data_wildcard)
     list_of_mats, list_of_cons = [],[]
     for p in matfile_paths:
+        start_time = time.time()
+        mat, obj_name = load_calcium_traces_from_matlab(p, eng)
+        dir = eng.eval(obj_name + ".constants.DIR")
+        cons = Cons(dir)
+        print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(p, time.time() - start_time))
+
         save_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER,
                                  condition)
-        if os.path.exists(save_path):
-            print('path {} already exists'.format(save_path))
-        else:
-            start_time = time.time()
-            mat, obj_name = load_calcium_traces_from_matlab(p, eng)
-            dir = eng.eval(obj_name + ".constants.DIR")
-            cons = Cons(dir)
-            print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(p, time.time() - start_time))
-
-            save_name = cons.NAME_MOUSE + '__' + cons.NAME_DATE + '__' + cons.NAME_PLANE
-            Config.save_mat_f(save_path, save_name, data=mat)
-            Config.save_cons_f(save_path, save_name, data=cons)
+        save_name = cons.NAME_MOUSE + '__' + cons.NAME_DATE + '__' + cons.NAME_PLANE
+        Config.save_mat_f(save_path, save_name, data=mat)
+        Config.save_cons_f(save_path, save_name, data=cons)
 
 def load_condition(condition):
     name = condition.name

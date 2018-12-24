@@ -1,14 +1,14 @@
 import os
 import numpy as np
 
-def perform(experiment, condition, experiment_configs, path):
+def perform(experiment, condition, experiment_configs, data_path, save_path):
     """Train all models locally."""
     for i in range(0, 1000):
         config = vary_config(experiment_configs, i)
         if config:
             print('[***] Hyper-parameter: %2d' % i)
-            save_path = os.path.join(path, str(i).zfill(6))
-            experiment(condition, config, save_path)
+            current_save_path = os.path.join(save_path, str(i).zfill(6))
+            experiment(condition, config, data_path, current_save_path)
 
 
 def vary_config(experiment, i):
