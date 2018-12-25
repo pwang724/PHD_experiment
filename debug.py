@@ -17,7 +17,7 @@ def _look_at_timing(cons):
     str= 'Odor ON: {0:d}, Odor OFF: {1:d}, US: {2:d}, DIR: {3:s}, ODORS: {4:s}'.format(on, off, us, dir, '|'.join(odors))
     print(str)
 
-condition = experimental_conditions.OFC_COMPOSITE
+condition = experimental_conditions.PIR
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 #
 #load cons

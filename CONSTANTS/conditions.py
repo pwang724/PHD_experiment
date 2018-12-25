@@ -88,7 +88,26 @@ class OFC_REVERSAL:
     pass
 
 class OFC_LONGTERM:
-    pass
+    #TODO: exclude additional odors
+    name = 'OFC_LONGTERM'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M230_ofc/training_LONGTERM',
+        'E:/IMPORTANT DATA/DATA_2P/M232_ofc/training_LONGTERM',
+        'E:/IMPORTANT DATA/DATA_2P/M239_ofc/training_LONGTERM',
+        'E:/IMPORTANT DATA/DATA_2P/M241_ofc/training_LONGTERM'
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy']
+           ]
+    timing_override = [True, True, True, True]
 
 class OFC_JAWS:
     name = 'OFC_JAWS'
@@ -173,10 +192,28 @@ class MPFC_COMPOSITE:
     naive_pt_day = [None, None, 1, 1]
 
 class BLA_JAWS:
-    pass
+    #TODO
+    name = 'BLA_JAWS'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M220_jawsbla_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M223_jawsbla_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M224_jawsbla_ofc/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M225_jawsbla_ofc/training_LEARNING'
+        ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy']
+           ]
+    timing_override = [True, True, True, True]
 
 class BLA:
-    #TODO: N and T need fixing
     name = 'BLA'
     paths = [
         'E:/IMPORTANT DATA/DATA_2P/M211_bla/training_LEARNING',
@@ -206,7 +243,7 @@ class BLA_CONTEXT:
 class BLA_REVERSAL:
     pass
 
-class BLA_LT:
+class BLA_LONGTERM:
     pass
 
 
