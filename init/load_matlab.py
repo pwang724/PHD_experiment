@@ -84,5 +84,8 @@ if __name__ == '__main__':
     # path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING'
     # load_timepoint_from_matlab(path, condition, save=True)
 
-    condition = conditions.MPFC_COMPOSITE
+    # for condition in conditions.all_conditions():
+    #     load_condition(condition)
+
+    condition = conditions.OFC_COMPOSITE
     load_condition(condition)

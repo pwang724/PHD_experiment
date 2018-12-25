@@ -13,11 +13,11 @@ def _look_at_timing(cons):
     off = cons.DAQ_O_OFF_F
     us = cons.DAQ_W_ON_F
     dir = cons.DIR
-    str= 'Odor ON: {0:d}, Odor OFF: {1:d}, US: {2:d}, DIR: {3:s}'.format(on, off, us, dir)
+    odors = cons.ODOR_UNIQUE
+    str= 'Odor ON: {0:d}, Odor OFF: {1:d}, US: {2:d}, DIR: {3:s}, ODORS: {4:s}'.format(on, off, us, dir, '|'.join(odors))
     print(str)
-    print(cons.ODOR_UNIQUE)
 
-condition = experimental_conditions.MPFC_COMPOSITE
+condition = experimental_conditions.OFC_COMPOSITE
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 #
 #load cons

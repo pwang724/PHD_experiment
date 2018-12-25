@@ -2,6 +2,15 @@ from collections import namedtuple
 
 #CSP are always the first two odors
 
+def all_conditions():
+    out = [
+        PIR, PIR_NAIVE,
+        OFC, OFC_COMPOSITE,
+        BLA,
+        MPFC_COMPOSITE
+    ]
+    return out
+
 class PIR:
     name = 'PIR'
     paths = ['E:/IMPORTANT DATA/DATA_2P/M183/training_LEARNING',
@@ -13,10 +22,10 @@ class PIR:
     odors = [
         ['pin', 'msy', '4mt', 'lim'],
         ['pin', 'msy', '4mt', 'lim'],
-        ['euy', 'lim', 'iso', '4mt'],
-        ['euy', 'lim', 'iso', '4mt'],
+        ['euy', 'lim', 'iso', '4mt'], #pin
+        ['euy', 'lim', 'iso', '4mt'], #pin
         ['euy', 'lim', 'fen', 'ger'],
-        ['euy', 'lim', 'iso', '4mt'],
+        ['euy', 'lim', 'iso', '4mt'], #pin
     ]
     csp = [['pin', 'msy'],
            ['pin', 'msy'],
@@ -78,6 +87,28 @@ class OFC_CONTEXT:
 class OFC_REVERSAL:
     pass
 
+class OFC_LONGTERM:
+    pass
+
+class OFC_JAWS:
+    name = 'OFC_JAWS'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M222_jawsofc_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M226_jawsofc_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M227_jawsofc_bla/training_LEARNING',
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+           ]
+    timing_override = [True, True, True]
+
 class OFC_COMPOSITE:
     name = 'OFC_COMPOSITE'
     paths = [
@@ -86,7 +117,14 @@ class OFC_COMPOSITE:
         'E:/IMPORTANT DATA/DATA_2P/M4_OFC/training', #days 1-6
         'E:/IMPORTANT DATA/DATA_2P/M5_OFC/training', #days 1-4
              ]
-    odors = [
+    dt_odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    pt_odors = [
         ['naive', 'oct'],
         ['naive', 'oct'],
         ['naive', 'oct'],
@@ -102,8 +140,6 @@ class OFC_COMPOSITE:
     naive_dt_day = [0, 0, 0, 0]
     naive_pt_day = [1, 1, 1, 1]
 
-class OFC_JAWS:
-    pass
 
 class MPFC_COMPOSITE:
     name = 'MPFC_COMPOSITE'
@@ -113,11 +149,18 @@ class MPFC_COMPOSITE:
         'E:/IMPORTANT DATA/DATA_2P/M4_MPFC/training',   #days 1-4
         'E:/IMPORTANT DATA/DATA_2P/M6_MPFC/training'    #days 1-4
     ]
-    odors = [
+    dt_odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    pt_odors = [
         ['oct'],
         ['oct'],
-        ['oct'],
-        ['oct'],
+        ['naive','oct'],
+        ['naive','oct'],
     ]
     csp = [
         ['oct'],
@@ -128,8 +171,6 @@ class MPFC_COMPOSITE:
     timing_override = [True, True, True, True]
     naive_dt_day = [0, 0, 0, 0]
     naive_pt_day = [None, None, 1, 1]
-
-
 
 class BLA_JAWS:
     pass
@@ -154,6 +195,7 @@ class BLA:
            ['pin', 'msy'],
            ['pin', 'msy']
            ]
+    timing_override = [True, True, True, True]
 
 class BLA_STATE:
     pass
@@ -163,10 +205,6 @@ class BLA_CONTEXT:
 
 class BLA_REVERSAL:
     pass
-
-
-
-
 
 class BLA_LT:
     pass

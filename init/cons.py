@@ -194,11 +194,11 @@ class Cons(ConstantCons):
             W_t = 10.02
 
         O = data[:,self.DAQ_O,:]
-
+        self.DAQ_O_ON, self.DAQ_O_OFF = _get_odor_timing(O, timing_override)
+        if W_t < self.DAQ_O_OFF:
+            W_t = 10.02
 
         self.DAQ_W_ON = W_t
-        self.DAQ_O_ON, self.DAQ_O_OFF = _get_odor_timing(O, timing_override)
-
         self.DAQ_O_ON_F = np.round(self.DAQ_O_ON/self.TRIAL_PERIOD).astype(int)
         self.DAQ_O_OFF_F = np.round(self.DAQ_O_OFF/self.TRIAL_PERIOD).astype(int)
         self.DAQ_W_ON_F = np.round(self.DAQ_W_ON/self.TRIAL_PERIOD).astype(int)
