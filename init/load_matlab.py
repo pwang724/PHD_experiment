@@ -73,8 +73,8 @@ def load_timepoint_from_matlab(path, name, timing_override = False):
 def load_condition(condition):
     name = condition.name
     paths = condition.paths
-    for path in paths:
-        load_timepoint_from_matlab(path, name, condition.timing_override)
+    for i, path in enumerate(paths):
+        load_timepoint_from_matlab(path, name, condition.timing_override[i])
 
 if __name__ == '__main__':
     # example_path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/7-19-2016/420'
@@ -84,5 +84,5 @@ if __name__ == '__main__':
     # path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING'
     # load_timepoint_from_matlab(path, condition, save=True)
 
-    condition = conditions.OFC
+    condition = conditions.MPFC_COMPOSITE
     load_condition(condition)

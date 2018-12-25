@@ -20,20 +20,32 @@ class PIR:
     ]
     csp = [['pin', 'msy'],
            ['pin', 'msy'],
-           ['pin', 'msy'],
-           ['pin', 'msy'],
-           ['pin', 'msy'],
+           ['euy', 'lim'],
+           ['euy', 'lim'],
+           ['euy', 'lim'],
+           ['euy', 'lim']
            ]
+    timing_override = [True, True, True, True, True, True]
 
 class PIR_NAIVE:
-    condition = 'PIR_NAIVE'
-    pass
+    name = 'PIR_NAIVE'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M199_pir/training_NAIVE',
+        'E:/IMPORTANT DATA/DATA_2P/M200_pir/training_NAIVE',
+        'E:/IMPORTANT DATA/DATA_2P/M201_pir/training_NAIVE',
+        'E:/IMPORTANT DATA/DATA_2P/M202_pir/training_NAIVE'
+             ]
+    odors = [
+        ['2pe', 'ben', 'msy', 'oct'],
+        ['2pe', 'ben', 'msy', 'oct'],
+        ['2pe', 'ben', 'msy', 'oct'],
+        ['2pe', 'ben', 'msy', 'oct']
+    ]
+    timing_override = [True, True, True, True]
+
 
 class OFC:
-    #
     name = 'OFC'
-    #TODO: some mice have frame numbers that are 65 for naive odor presentation.
-    # check onset offset etc for these
     paths = [
         'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
         'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
@@ -55,7 +67,6 @@ class OFC:
         ['pin', 'msy'],
         ['pin', 'msy'],
            ]
-
     timing_override = [False, False, False, True, True]
 
 class OFC_STATE:
@@ -69,10 +80,12 @@ class OFC_REVERSAL:
 
 class OFC_COMPOSITE:
     name = 'OFC_COMPOSITE'
-    paths = ['E:/IMPORTANT DATA/DATA_2P/M2_OFC/training', #days 1-4
-             'E:/IMPORTANT DATA/DATA_2P/M3_OFC/training', #days 1-4, odor currently nananaive
-             'E:/IMPORTANT DATA/DATA_2P/M4_OFC/training', #days 1-6, odor currently nananaive
-             'E:/IMPORTANT DATA/DATA_2P/M5_OFC/training'] #days 1-4, odor currently nanaive]
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M2_OFC/training', #days 1-4
+        'E:/IMPORTANT DATA/DATA_2P/M3_OFC/training', #days 1-4
+        'E:/IMPORTANT DATA/DATA_2P/M4_OFC/training', #days 1-6
+        'E:/IMPORTANT DATA/DATA_2P/M5_OFC/training', #days 1-4
+             ]
     odors = [
         ['naive', 'oct'],
         ['naive', 'oct'],
@@ -85,16 +98,21 @@ class OFC_COMPOSITE:
         ['oct'],
         ['oct']
     ]
+    timing_override = [True, True, True, True]
+    naive_dt_day = [0, 0, 0, 0]
+    naive_pt_day = [1, 1, 1, 1]
 
 class OFC_JAWS:
     pass
 
 class MPFC_COMPOSITE:
     name = 'MPFC_COMPOSITE'
-    paths = ['E:/IMPORTANT DATA/DATA_2P/M2_MPFC/training',  #days 1-3
-             'E:/IMPORTANT DATA/DATA_2P/M3_MPFC/training',  #days 1-3
-             'E:/IMPORTANT DATA/DATA_2P/M4_MPFC/training',  #days 1-4, naive first day
-             'E:/IMPORTANT DATA/DATA_2P/M6_MPFC/training']  #days 1-4, nanaive first day.]
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M2_MPFC/training',   #days 1-3
+        'E:/IMPORTANT DATA/DATA_2P/M3_MPFC/training',   #days 1-3
+        'E:/IMPORTANT DATA/DATA_2P/M4_MPFC/training',   #days 1-4
+        'E:/IMPORTANT DATA/DATA_2P/M6_MPFC/training'    #days 1-4
+    ]
     odors = [
         ['oct'],
         ['oct'],
@@ -107,9 +125,11 @@ class MPFC_COMPOSITE:
         ['oct'],
         ['oct']
     ]
+    timing_override = [True, True, True, True]
+    naive_dt_day = [0, 0, 0, 0]
+    naive_pt_day = [None, None, 1, 1]
 
 
-    pass
 
 class BLA_JAWS:
     pass

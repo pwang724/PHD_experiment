@@ -1,5 +1,5 @@
 from tools import file_io
-
+import os
 
 class Config:
     save_mat_f = file_io.save_numpy
@@ -12,10 +12,11 @@ class Config:
 
     DECODE_CONFIG_JSON = 'decodeConfig'
 
-    LOCAL_DATA_PATH = 'C:/Users/Peter/PycharmProjects/phd_project/DATA'
+    cwd = r'C:\Users\P\Desktop\PYTHON\PHD_experiment'
+    LOCAL_DATA_PATH = os.path.join(cwd,'DATA')
     LOCAL_DATA_SINGLE_FOLDER = 'single'
     LOCAL_DATA_TIMEPOINT_FOLDER = 'timepoint'
 
-    LOCAL_FIGURE_PATH = 'C:/Users/Peter/PycharmProjects/phd_project/FIGURES'
-    LOCAL_EXPERIMENT_PATH = 'C:/Users/Peter/PycharmProjects/phd_project/EXPERIMENTS'
-    LOCAL_ANALYSIS_PATH = 'C:/Users/Peter/PycharmProjects/phd_project/ANALYSIS'
+    LOCAL_FIGURE_PATH = os.path.join(cwd,'FIGURES')
+    LOCAL_EXPERIMENT_PATH = os.path.join(cwd,'EXPERIMENTS')
+    LOCAL_ANALYSIS_PATH = os.path.join('ANALYSIS')
