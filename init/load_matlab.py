@@ -52,21 +52,20 @@ def load_single_from_matlab(data_path, save = True):
         Config.save_cons_f(save_path, save_name, data=cons)
     return mat, cons
 
-def load_timepoint_from_matlab(path, condition):
+def load_timepoint_from_matlab(path, name, timing_override = False):
     eng = matlab.engine.start_matlab()
     data_path = os.path.join(path, 'data')
     data_wildcard = os.path.join(data_path, '*.mat')
     matfile_paths = glob.glob(data_wildcard)
-    list_of_mats, list_of_cons = [],[]
     for p in matfile_paths:
         start_time = time.time()
         mat, obj_name = load_calcium_traces_from_matlab(p, eng)
         dir = eng.eval(obj_name + ".constants.DIR")
-        cons = Cons(dir)
+        cons = Cons(dir, timing_override)
         print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(p, time.time() - start_time))
 
         save_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER,
-                                 condition)
+                                 name)
         save_name = cons.NAME_MOUSE + '__' + cons.NAME_DATE + '__' + cons.NAME_PLANE
         Config.save_mat_f(save_path, save_name, data=mat)
         Config.save_cons_f(save_path, save_name, data=cons)
@@ -75,7 +74,7 @@ def load_condition(condition):
     name = condition.name
     paths = condition.paths
     for path in paths:
-        load_timepoint_from_matlab(path, name)
+        load_timepoint_from_matlab(path, name, condition.timing_override)
 
 if __name__ == '__main__':
     # example_path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/7-19-2016/420'

@@ -47,7 +47,7 @@ class Cons(ConstantCons):
     DAQ_W_ON, W_OFF takes on DEFAULT_O values if DAQ_W_ON > 6 seconds.
     DAQ_DATA dimensions: time, variable, file
     '''
-    def __init__(self, path = None):
+    def __init__(self, path = None, timing_override = False):
         super(Cons, self).__init__()
 
         if path is None:
@@ -81,8 +81,8 @@ class Cons(ConstantCons):
         self.ODOR_UNIQUE = None
         self.ODOR_TRIALIDX = None
 
-        self.DEFAULT_O_ON = 5.6
-        self.DEFAULT_O_OFF = 7.6
+        self.DEFAULT_O_ON = 5.7
+        self.DEFAULT_O_OFF = 7.7
 
         self.DAQ_W_ON = None
         self.DAQ_O_ON = None
@@ -96,7 +96,7 @@ class Cons(ConstantCons):
         self._getDirs()
         self._getOdors()
         self._getTiming()
-        self._getDaq()
+        self._getDaq(timing_override)
         et = time.time()
         print('Config loaded in: {0:3.3f} seconds'.format(et - st))
 
@@ -160,23 +160,24 @@ class Cons(ConstantCons):
         self.TRIAL_PERIOD = period
         self.TRIAL_FRAMES = im.shape[0]
 
-    def _getDaq(self):
-        def _get_odor_timing(O):
-            max_pid_per_odor = np.max(O, axis=0)
-            odor_ix = np.argmax(max_pid_per_odor)
-            max_odor_pid = O[:, odor_ix]
-            min, max = np.min(max_odor_pid), np.max(max_odor_pid)
-            max_odor_pid = (max_odor_pid - min) / (max - min)
-            O_on = np.argwhere(max_odor_pid > thres_odor_high)[0][0] / self.DAQ_SAMP
-            O_off = np.argwhere(max_odor_pid > thres_odor_low)[-1][0] / self.DAQ_SAMP
-            if O_on > 6 or O_on < 5:
+    def _getDaq(self, timing_override):
+        def _get_odor_timing(O, timing_override=False):
+            if timing_override:
                 O_on = self.DEFAULT_O_ON
                 O_off = self.DEFAULT_O_OFF
+            else:
+                thres_odor_high = .5
+                max_pid_per_odor = np.max(O, axis=0)
+                odor_ix = np.argmax(max_pid_per_odor)
+                max_odor_pid = O[:, odor_ix]
+                min, max = np.min(max_odor_pid), np.max(max_odor_pid)
+                max_odor_pid = (max_odor_pid - min) / (max - min)
+                O_on = np.argwhere(max_odor_pid > thres_odor_high)[0][0] / self.DAQ_SAMP
+                O_off = O_on + 2
+                if O_on < 6.3 and O_on > 5:
+                    O_on = self.DEFAULT_O_ON
+                    O_off = self.DEFAULT_O_OFF
             return O_on, O_off
-
-
-        thres_odor_low = .2
-        thres_odor_high = .5
 
         daqs = glob.glob(os.path.join(self.DIR_ORIG, '*.mat'))
         test = [sio.loadmat(f)['data'] for f in daqs]
@@ -184,6 +185,7 @@ class Cons(ConstantCons):
         dsamp_factor = 20
         data = data[::dsamp_factor,:,:]
         self.DAQ_SAMP /= dsamp_factor
+
         try:
             W = data[:,self.DAQ_W,:]
             W_t = np.argwhere(W > 1)[0][0]
@@ -195,16 +197,13 @@ class Cons(ConstantCons):
 
 
         self.DAQ_W_ON = W_t
-        self.DAQ_O_ON, self.DAQ_O_OFF = _get_odor_timing(O)
+        self.DAQ_O_ON, self.DAQ_O_OFF = _get_odor_timing(O, timing_override)
 
-        self.DAQ_O_ON_F = np.round(self.DAQ_O_ON/self.TRIAL_PERIOD)
-        self.DAQ_O_OFF_F = np.round(self.DAQ_O_OFF/self.TRIAL_PERIOD)
-        self.DAQ_W_ON_F = np.round(self.DAQ_W_ON/self.TRIAL_PERIOD)
+        self.DAQ_O_ON_F = np.round(self.DAQ_O_ON/self.TRIAL_PERIOD).astype(int)
+        self.DAQ_O_OFF_F = np.round(self.DAQ_O_OFF/self.TRIAL_PERIOD).astype(int)
+        self.DAQ_W_ON_F = np.round(self.DAQ_W_ON/self.TRIAL_PERIOD).astype(int)
         self.DAQ_DATA = data
 
 if __name__ == '__main__':
     a = Cons()
     print(a)
-    # dict = a.__dict__
-    # for key, val in dict.items():
-    #     print('{}: {}'.format(key, val))

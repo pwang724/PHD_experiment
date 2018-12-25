@@ -17,14 +17,18 @@ def vary_neuron(argTest = True):
     decodeConfig.repeat = 25
     hp_ranges = OrderedDict()
     hp_ranges['neurons'] = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50]
+    hp_ranges['shuffle'] = [False, True]
+    hp_ranges['decode_style'] = ['csp_identity', 'csm_identity', 'valence']
     if argTest:
-        decodeConfig.repeat = 5
+        decodeConfig.repeat = 10
         hp_ranges['neurons'] = [10, 20, 30, 40, 50]
+
     return decodeConfig, hp_ranges
 
 def vary_shuffle(argTest = True):
     decodeConfig = decode_config.DecodeConfig()
     decodeConfig.decode_style = 'valence'
+
     decodeConfig.repeat = 10
     decodeConfig.neurons = 50
 

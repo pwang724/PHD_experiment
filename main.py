@@ -12,7 +12,7 @@ import CONSTANTS.conditions as experimental_conditions
 
 #
 core_experiments = ['vary_neuron', 'vary_shuffle', 'vary_decoding_style']
-experiments = ['vary_decode_style']
+experiments = ['vary_neuron']
 EXPERIMENT = True
 ANALYZE = True
 argTest = True
@@ -121,19 +121,29 @@ if 'vary_neuron' in experiments:
         last_day_per_mouse = filter.get_last_day_per_mouse(res)
         res_lastday = filter.filter_days_per_mouse(res, days_per_mouse=last_day_per_mouse)
 
-        # neurons vs decoding performance
+        # neurons vs decoding performance. plot separately for each shuffle + decode style
         xkey = 'neurons'
         ykey = 'max'
         loopkey = 'mouse'
         plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
-        plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict=None, path=save_path, ax_args=plot_dict)
+
+        decode_styles = np.unique(res['decode_style'])
+        shuffles = np.unique(res['shuffle'])
+        for i, shuffle in enumerate(shuffles):
+            for j, dc in enumerate(decode_styles):
+                select_dict = {'shuffle':shuffle, 'decode_style': dc}
+                plot.plot_results(res_lastday, xkey, ykey, loopkey,
+                                  select_dict=select_dict, path=save_path, ax_args=plot_dict)
 
         # decoding performance wrt time for each mouse, comparing 1st and last day
+        # plot separately for each mouse and each decode style
         xkey = 'time'
         ykey = 'mean'
         loopkey = 'day'
         plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
-            select_dict = {'neurons': 20, 'mouse': mouse, 'day': [0, last_day_per_mouse[i]]}
-            plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)
+            for j, dc in enumerate(decode_styles):
+                select_dict = {'decode_style': dc, 'shuffle': False,
+                               'neurons': 20, 'mouse': mouse, 'day': [0, last_day_per_mouse[i]]}
+                plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)

@@ -56,6 +56,8 @@ class OFC:
         ['pin', 'msy'],
            ]
 
+    timing_override = [False, False, False, True, True]
+
 class OFC_STATE:
     pass
 
