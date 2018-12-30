@@ -5,8 +5,9 @@ from collections import namedtuple
 def all_conditions():
     out = [
         PIR, PIR_NAIVE,
-        OFC, OFC_COMPOSITE,
-        BLA,
+        OFC, OFC_COMPOSITE, OFC_LONGTERM, OFC_STATE, OFC_CONTEXT, OFC_REVERSAL,
+        BLA, BLA_LONGTERM, BLA_STATE, BLA_CONTEXT, BLA_REVERSAL,
+        OFC_JAWS, BLA_JAWS,
         MPFC_COMPOSITE
     ]
     return out
@@ -79,16 +80,78 @@ class OFC:
     timing_override = [False, False, False, True, True]
 
 class OFC_STATE:
-    pass
+    name = 'OFC_STATE'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_STATE',
+        'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_STATE',
+        'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_STATE',
+        'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_STATE',
+        'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_STATE'
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy']
+           ]
+    timing_override = [True, True, True, True, True]
 
 class OFC_CONTEXT:
-    pass
+    name = 'OFC_CONTEXT'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_CONTEXT',
+        'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_CONTEXT',
+        'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_CONTEXT',
+        'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_CONTEXT'
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['euy', 'lim'],
+        ['euy', 'lim'],
+        ['euy', 'lim'],
+        ['euy', 'lim']
+           ]
+    timing_override = [True, True, True, True]
 
 class OFC_REVERSAL:
-    pass
+    name = 'OFC_REVERSAL'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_REVERSAL',
+        'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_REVERSAL',
+        'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_REVERSAL',
+        'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_REVERSAL',
+        'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_REVERSAL'
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy']
+           ]
+    timing_override = [True, True, True, True, True]
 
 class OFC_LONGTERM:
-    #TODO: exclude additional odors
     name = 'OFC_LONGTERM'
     paths = [
         'E:/IMPORTANT DATA/DATA_2P/M230_ofc/training_LONGTERM',
@@ -158,6 +221,7 @@ class OFC_COMPOSITE:
     timing_override = [True, True, True, True]
     naive_dt_day = [0, 0, 0, 0]
     naive_pt_day = [1, 1, 1, 1]
+    last_pt_day = [3, 3, 5, 3]
 
 
 class MPFC_COMPOSITE:
@@ -190,6 +254,7 @@ class MPFC_COMPOSITE:
     timing_override = [True, True, True, True]
     naive_dt_day = [0, 0, 0, 0]
     naive_pt_day = [None, None, 1, 1]
+    last_pt_day = [2, 2, 3, 3]
 
 class BLA_JAWS:
     #TODO
@@ -235,16 +300,78 @@ class BLA:
     timing_override = [True, True, True, True]
 
 class BLA_STATE:
-    pass
+    name = 'BLA_STATE'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M211_bla/training_STATE',
+        'E:/IMPORTANT DATA/DATA_2P/M212_bla/training_STATE'
+        ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['euy', 'lim'],
+        ['euy', 'lim']
+           ]
+    timing_override = [True, True]
 
 class BLA_CONTEXT:
-    pass
+    name = 'BLA_CONTEXT'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M211_bla/training_CONTEXT',
+        'E:/IMPORTANT DATA/DATA_2P/M212_bla/training_CONTEXT'
+        ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin','msy'],
+        ['pin','msy']
+           ]
+    timing_override = [True, True]
 
 class BLA_REVERSAL:
-    pass
-
+    name = 'BLA_REVERSAL'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M211_bla/training_REVERSAL',
+        'E:/IMPORTANT DATA/DATA_2P/M212_bla/training_REVERSAL'
+        ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin','msy'],
+        ['pin','msy']
+           ]
+    timing_override = [True, True]
 class BLA_LONGTERM:
-    pass
+    name = 'BLA_LONGTERM'
+    paths = [
+        'E:/IMPORTANT DATA/DATA_2P/M211_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M212_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M213_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M214_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M260_ofc_bla/training_LEARNING',
+        'E:/IMPORTANT DATA/DATA_2P/M261_bla/training_LEARNING'
+        ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy'],
+           ['pin', 'msy']
+           ]
+    timing_override = [True, True, True, True, True, True]
 
 
 

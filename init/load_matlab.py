@@ -87,5 +87,5 @@ if __name__ == '__main__':
     # for condition in conditions.all_conditions():
     #     load_condition(condition)
 
-    condition = conditions.PIR
+    condition = conditions.BLA_CONTEXT
     load_condition(condition)
