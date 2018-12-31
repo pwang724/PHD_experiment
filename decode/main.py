@@ -1,5 +1,4 @@
-import init.load_matlab
-import experiment
+from decode import experiment
 import analysis
 import filter
 import plot
@@ -12,8 +11,8 @@ import CONSTANTS.conditions as experimental_conditions
 
 #
 core_experiments = ['vary_neuron', 'vary_shuffle', 'vary_decoding_style']
-experiments = ['vary_neuron']
-EXPERIMENT = True
+experiments = ['vary_shuffle']
+EXPERIMENT = False
 ANALYZE = True
 argTest = True
 
@@ -43,13 +42,13 @@ if 'vary_decode_style' in experiments:
         xkey = 'time'
         ykey = 'mean'
         loopkey = ['shuffle','day']
-        plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.1, 1.05]}
+        ax_args = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.1, 1.05]}
         decode_styles = np.unique(res['decode_style'])
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
             for j, dc in enumerate(decode_styles):
                 select_dict = {'mouse':mouse, 'decode_style': dc}
-                plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)
+                plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, ax_args)
 
         #decoding, comparing last day of each mouse, shuffle and no shuffle
         last_day_per_mouse = filter.get_last_day_per_mouse(res)
@@ -57,11 +56,11 @@ if 'vary_decode_style' in experiments:
         xkey = 'time'
         ykey = 'mean'
         loopkey = ['shuffle','decode_style']
-        plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.1, 1.05]}
+        ax_args = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.1, 1.05]}
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
             select_dict = {'mouse':mouse}
-            plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict, save_path, plot_dict)
+            plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict, save_path, ax_args)
 
 
 
@@ -83,11 +82,11 @@ if 'vary_shuffle' in experiments:
         xkey = 'time'
         ykey = 'mean'
         loopkey = ['shuffle','day']
-        plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
+        ax_args = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
             select_dict = {'mouse': mouse}
-            plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)
+            plot.plot_results(res, xkey, ykey, loopkey, select_dict=select_dict, path =save_path, ax_args=ax_args)
 
         #shuffle vs non-shuffle. plot last day for all mice
         last_day_per_mouse = filter.get_last_day_per_mouse(res)
@@ -95,12 +94,12 @@ if 'vary_shuffle' in experiments:
         xkey = 'time'
         ykey = 'mean'
         loopkey = 'shuffle'
-        plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
-        plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict=None, path=save_path, ax_args=plot_dict)
+        ax_args = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
+        plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict=None, path=save_path, ax_args=ax_args)
 
         loopkey = ['shuffle', 'mouse']
-        plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
-        plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict=None, path=save_path, ax_args=plot_dict)
+        ax_args = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
+        plot.plot_results(res_lastday, xkey, ykey, loopkey, select_dict=None, path=save_path, ax_args=ax_args)
 
 
 if 'vary_neuron' in experiments:
@@ -125,7 +124,7 @@ if 'vary_neuron' in experiments:
         xkey = 'neurons'
         ykey = 'max'
         loopkey = 'mouse'
-        plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
+        ax_args = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
 
         decode_styles = np.unique(res['decode_style'])
         shuffles = np.unique(res['shuffle'])
@@ -133,17 +132,17 @@ if 'vary_neuron' in experiments:
             for j, dc in enumerate(decode_styles):
                 select_dict = {'shuffle':shuffle, 'decode_style': dc}
                 plot.plot_results(res_lastday, xkey, ykey, loopkey,
-                                  select_dict=select_dict, path=save_path, ax_args=plot_dict)
+                                  select_dict=select_dict, path=save_path, ax_args=ax_args)
 
         # decoding performance wrt time for each mouse, comparing 1st and last day
         # plot separately for each mouse and each decode style
         xkey = 'time'
         ykey = 'mean'
         loopkey = 'day'
-        plot_dict = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
+        ax_args = {'yticks': [.4, .6, .8, 1.0], 'ylim': [.35, 1.05]}
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
             for j, dc in enumerate(decode_styles):
                 select_dict = {'decode_style': dc, 'shuffle': False,
                                'neurons': 20, 'mouse': mouse, 'day': [0, last_day_per_mouse[i]]}
-                plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, plot_dict)
+                plot.plot_results(res, xkey, ykey, loopkey, select_dict, save_path, ax_args)

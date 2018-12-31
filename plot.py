@@ -24,7 +24,7 @@ def _easy_save(path, name, dpi=300, pdf=True):
         plt.savefig(os.path.join(figname + '.pdf'), transparent=True)
     plt.close()
 
-def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, ax_args=None):
+def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, colors= None, ax_args={}, plot_args={}):
     '''
 
     :param res: flattened dict of results
@@ -45,14 +45,20 @@ def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, ax_a
     if isinstance(loop_keys, str):
         loop_keys = [loop_keys]
 
-    unique_entries_per_loopkey =  [np.unique(res[x]) for x in loop_keys]
+    unique_entries_per_loopkey = []
+    for x in loop_keys:
+        a = res[x]
+        indexes = np.unique(a, return_index=True)[1]
+        unique_entries_per_loopkey.append([a[index] for index in sorted(indexes)])
+
     unique_entry_combinations = list(itertools.product(*unique_entries_per_loopkey))
     nlines = len(unique_entry_combinations)
 
-    cmap = plt.get_cmap('cool')
-    colors = [cmap(i) for i in np.linspace(0, 1, nlines)]
+    if colors is None:
+        cmap = plt.get_cmap('cool')
+        colors = [cmap(i) for i in np.linspace(0, 1, nlines)]
 
-    fig = plt.figure(figsize=(2.5, 2))
+    fig = plt.figure(figsize=(2, 1.5))
     ax = plt.axes(**ax_args)
     for x in range(nlines):
         list_of_ixs = []
@@ -67,14 +73,14 @@ def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, ax_a
 
         if xdata.dtype == 'O' and ydata.dtype == 'O':
             for i in range(x_plot.shape[0]):
-                ax.plot(x_plot[i], y_plot[i], color= colors[x], label=label)
+                ax.plot(x_plot[i], y_plot[i], color= colors[x], label=label, **plot_args)
                 if y_key == 'mean':
                     sem_plot = res['sem'][ind]
                     ax.fill_between(x_plot[i], y_plot[i] - sem_plot[i], y_plot[i] + sem_plot[i],
                                     color = colors[x], zorder=0, lw=0, alpha=0.3)
         else:
             ax.plot(x_plot, y_plot,
-                    color=colors[x], label=label)
+                    color=colors[x], label=label, **plot_args)
 
 
 

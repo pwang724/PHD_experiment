@@ -1,9 +1,8 @@
 import numpy as np
 import os
-import decoding
+from decode import decoding, decode_config
 import glob
 from CONSTANTS.config import Config
-import decode_config
 import time
 import tools.file_io as fio
 import CONSTANTS.conditions as experimental_conditions

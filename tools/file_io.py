@@ -49,6 +49,9 @@ def save_json(save_path, save_name, config):
         os.makedirs(save_path)
     save_pathname = os.path.join(save_path, save_name + '.json')
     config_dict = config.__dict__
+    for k, v in config_dict.items():
+        if np.issubdtype(type(v), np.integer):
+            config_dict[k] = int(v)
     with open(save_pathname, 'w') as f:
         json.dump(config_dict, f)
 

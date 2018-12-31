@@ -6,6 +6,20 @@ import tools.file_io
 from collections import defaultdict
 from scipy import stats as sstats
 
+def load_all_cons(data_path):
+    res = defaultdict(list)
+
+    config_pathnames = glob.glob(os.path.join(data_path, '*' + Config.cons_ext))
+    for i, config_pn in enumerate(config_pathnames):
+        cons = Config.load_cons_f(config_pn)
+        for key, val in cons.__dict__.items():
+            if isinstance(val, list):
+                res[key].append(np.array(val))
+            else:
+                res[key].append(val)
+    for key, val in res.items():
+        res[key] = np.array(val)
+    return res
 
 def load_results(data_path):
     res = defaultdict(list)
@@ -29,9 +43,8 @@ def load_results(data_path):
 def analyze_results(res):
     _add_days(res)
     _add_time(res)
-    _add_stats(res)
+    _add_decode_stats(res)
 
-# add days
 def _add_days(res):
     from scipy.stats import rankdata
 
@@ -47,10 +60,9 @@ def _add_days(res):
     res['mouse'] = mouse_ixs
     res['day'] = days
 
-# add time
 def _add_time(res):
-    data = np.array(res['data'])
-    for i in range(data.shape[0]):
+    nExperiments = res['TRIAL_FRAMES'].size
+    for i in range(nExperiments):
         nF = res['TRIAL_FRAMES'][i]
         period = res['TRIAL_PERIOD'][i]
         O_on = res['DAQ_O_ON'][i]
@@ -65,8 +77,8 @@ def _add_time(res):
     res['xticks'] = np.array(res['xticks'])
 
 #add relevant stats
-def _add_stats(res):
-    # data is in format of experiment X time X CVfold X repeat
+def _add_decode_stats(res):
+    # decoding data is in format of experiment X time X CVfold X repeat
     # TODO: ask Fabio if joining CV scores and repetitions is legitimate
     datas = np.array(res['data'])
     O_on = res['DAQ_O_ON_F'].astype(np.int)

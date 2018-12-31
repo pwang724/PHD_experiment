@@ -78,6 +78,7 @@ class OFC:
         ['pin', 'msy'],
            ]
     timing_override = [False, False, False, True, True]
+    training_start_day = [1, 1, 1, 1, 1]
 
 class OFC_STATE:
     name = 'OFC_STATE'

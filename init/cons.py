@@ -49,12 +49,6 @@ class Cons(ConstantCons):
     '''
     def __init__(self, path = None, timing_override = False):
         super(Cons, self).__init__()
-
-        if path is None:
-            self.DIR = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/7-27-2016/420'
-        else:
-            self.DIR = path
-
         #can be editted later to incorporate more options.
         self.FORMAT = 'cycle'
         self.FORMAT_READ = 'tifstack'
@@ -92,13 +86,17 @@ class Cons(ConstantCons):
         self.DAQ_W_ON_F = None
         self.DAQ_DATA = None
 
-        st = time.time()
-        self._getDirs()
-        self._getOdors()
-        self._getTiming()
-        self._getDaq(timing_override)
-        et = time.time()
-        print('Config loaded in: {0:3.3f} seconds'.format(et - st))
+        if path is None:
+            self.DIR = None
+        else:
+            self.DIR = path
+            st = time.time()
+            self._getDirs()
+            self._getOdors()
+            self._getTiming()
+            self._getDaq(timing_override)
+            et = time.time()
+            print('Config loaded in: {0:3.3f} seconds'.format(et - st))
 
     def _getDirs(self):
         self.DIR_ORIG = self.DIR + '_' + self.FORMAT
@@ -199,9 +197,9 @@ class Cons(ConstantCons):
             W_t = 10.02
 
         self.DAQ_W_ON = W_t
-        self.DAQ_O_ON_F = np.round(self.DAQ_O_ON/self.TRIAL_PERIOD).astype(int)
-        self.DAQ_O_OFF_F = np.round(self.DAQ_O_OFF/self.TRIAL_PERIOD).astype(int)
-        self.DAQ_W_ON_F = np.round(self.DAQ_W_ON/self.TRIAL_PERIOD).astype(int)
+        self.DAQ_O_ON_F = int(np.round(self.DAQ_O_ON/self.TRIAL_PERIOD))
+        self.DAQ_O_OFF_F = int(np.round(self.DAQ_O_OFF/self.TRIAL_PERIOD))
+        self.DAQ_W_ON_F = int(np.round(self.DAQ_W_ON/self.TRIAL_PERIOD))
         self.DAQ_DATA = data
 
 if __name__ == '__main__':
