@@ -11,6 +11,7 @@ import filter
 import plot
 from scipy.signal import savgol_filter
 
+#TODO parcellate things into functions
 
 class behaviorConfig(object):
     def __init__(self):
@@ -20,17 +21,27 @@ class behaviorConfig(object):
         self.smoothing_window_boolean = 9
         self.polynomial_degree = 1
 
+        self.halfmax_up_threshold = 50
+
 def _getCurrentIndex(res, i):
     out = Cons()
     for k, v in res.items():
         setattr(out, k, v[i])
     return out
 
-#TODO: implement find half-max last up, find half-max last down
-def find_last_up(vec):
-    pass
+def half_max_up(vec):
+    config = behaviorConfig()
+    vec_binary = vec > config.halfmax_up_threshold
+    last_ix_below_threshold = np.where(vec_binary == 0)[0][-1]
+    vec_binary[:last_ix_below_threshold] = 0
+    if np.any(vec_binary):
+        half_max = np.where(vec_binary==1)[0][0]
+    else:
+        half_max = None
+    return half_max
 
-def find_last_down(vec):
+#TODO: implement find half-max last down
+def half_max_down(vec):
     pass
 
 def analyze_lick(odors, csp_odors, cons):
@@ -111,7 +122,7 @@ for i in range(0, nCons):
 res['licks'] = np.array(list_of_licks)
 res['licks_per_odor'] = np.array(list_of_licks_per_odor)
 
-#stitch
+#stitch data into format: each odor condition for all days per mouse
 plot_res = defaultdict(list)
 mice = np.unique(res['mouse'])
 first_day = condition.training_start_day
@@ -121,22 +132,47 @@ for i, mouse in enumerate(mice):
     filter_dict = {'mouse': mouse, 'day': np.arange(first_day[i], last_day[i])}
     filtered_res = filter.filter(res, filter_dict)
     odor_lick_list, odor_day_lick_list = stitch_by_day(filtered_res)
+
+    csp_ix, csm_ix = 1, 1
+    odors = condition.odors[i]
+    csp = condition.csp[i]
+    csm = list(set(odors)-set(csp))
     for j, lick_list in enumerate(odor_lick_list):
         plot_res['mouse'].append(mouse)
         plot_res['lick'].append(lick_list)
-        plot_res['odor'].append(condition.odors[i][j])
+        plot_res['odor'].append(odors[j])
         plot_res['trial'].append(np.arange(len(lick_list)))
+        if np.isin(odors[j], csp):
+            plot_res['odor_standard'].append('CS+' + str(csp_ix))
+            plot_res['odor_valence'].append('CS+')
+            csp_ix+=1
+        elif np.isin(odors[j], csm):
+            plot_res['odor_standard'].append('CS-' + str(csp_ix))
+            plot_res['odor_valence'].append('CS-')
+            csm_ix+=1
+        else:
+            raise ValueError('odor {} is not in either CS+ or CS- odor'.format(odors[j]))
 for key, val in plot_res.items():
     plot_res[key] = np.array(val)
 
-#analyze per mouse
+#analysis: each odor condition for all days per mouse
 odor_lick_list = plot_res['lick']
 plot_res['lick_smoothed'] = [savgol_filter(y, config.smoothing_window, config.polynomial_degree)
                          for y in odor_lick_list]
-plot_res['boolean_smoothed'] = [savgol_filter(y > 0, config.smoothing_window_boolean, config.polynomial_degree)
+plot_res['boolean_smoothed'] = [100 * savgol_filter(y > 0, config.smoothing_window_boolean, config.polynomial_degree)
                                    for y in odor_lick_list]
+plot_res['half_max'] = [half_max_up(x) for x in plot_res['boolean_smoothed']]
 for key, val in plot_res.items():
     plot_res[key] = np.array(val)
+
+#summarize data
+summary_res = defaultdict(list)
+for i, mouse in enumerate(mice):
+    filter_dict = {'mouse': mouse, 'odor': condition.csp[i]}
+    cur_res = filter.filter(plot_res, filter_dict)
+    summary_res['half_max'].append(np.mean(cur_res['half_max']))
+    summary_res['mouse'].append(mouse)
+
 
 #plot
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
@@ -152,13 +188,27 @@ for i, mouse in enumerate(mice):
     plot.plot_results(plot_res, x_key='trial', y_key = 'lick', loop_keys = 'odor',
                       select_dict= select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args, path = save_path)
 
-#plot
-ax_args = {'yticks':[0, .5, 1], 'ylim':[-.05, 1.05], 'xticks':[0, 10, 20, 30, 40, 50], 'xlim':[0, 60]}
+ax_args = {'yticks':[0, 50, 100], 'ylim':[-5, 105], 'xticks':[0, 10, 20, 30, 40, 50], 'xlim':[0, 60]}
 mice = np.unique(plot_res['mouse'])
 for i, mouse in enumerate(mice):
     select_dict = {'mouse':mouse}
     plot.plot_results(plot_res, x_key='trial', y_key = 'boolean_smoothed', loop_keys = 'odor',
                       select_dict= select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args, path = save_path)
+
+#bar plot
+csp_plot_res = filter.filter_odors_per_mouse(plot_res, condition.csp)
+colors = ['black','black']
+select_dict = {'odor_valence':'CS+'}
+ax_args = {'yticks':[0, 10, 20, 30, 40], 'ylim':[-1, 41]}
+plot_args = {'marker':'o', 's':10, 'facecolors': 'none', 'alpha':.6}
+plot.plot_results(plot_res, x_key='mouse', y_key = 'half_max', loop_keys='odor_standard', colors = colors,
+                  select_dict= select_dict, path=save_path, plot_function= plt.scatter, plot_args=plot_args,
+                  ax_args=ax_args, save = False)
+
+plot_args = {'alpha':.6, 'fill': False}
+plot.plot_results(summary_res, x_key='mouse', y_key = 'half_max', loop_keys=None,
+                  path=save_path, plot_function= plt.bar, plot_args=plot_args,
+                  ax_args=ax_args, save = True, reuse= True)
 
 
 

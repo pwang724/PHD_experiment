@@ -49,6 +49,22 @@ def filter_days_per_mouse(res, days_per_mouse):
         out[key] = value[select_ixs]
     return out
 
+def filter_odors_per_mouse(res, odors):
+    out = copy.copy(res)
+    list_of_ixs = []
+    list_of_odors = res['odor']
+    list_of_mice = res['mouse']
+    mouse_names, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
+    for i, mouse_name in enumerate(mouse_names):
+        mouse_mask = list_of_mice == mouse_name
+        odor_mask = np.isin(list_of_odors, odors[i])
+        list_of_ixs.append(np.all((mouse_mask, odor_mask), axis=0))
+    select_ixs = np.any(list_of_ixs, axis=0)
+    for key, value in res.items():
+        out[key] = value[select_ixs]
+    return out
+
+
 def filter(res, filter_dict):
     '''
     Filter results to only include entries containing the key, value pairs in select_dict
