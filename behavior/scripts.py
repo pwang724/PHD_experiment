@@ -6,7 +6,7 @@ import filter
 from reduce import reduce_by_mean
 from tools.utils import append_defaultdicts
 
-
+#TODO: figure out a way to get rid of this
 def get_summary(res, condition):
     # summarize data
     new_res = defaultdict(list)

@@ -14,11 +14,13 @@ import numpy as np
 import analysis
 
 core_experiments = ['individual', 'individual_half_max', 'basic_3']
-experiments = ['individual', 'individual_half_max', 'basic_3']
+# experiments = ['individual', 'individual_half_max', 'basic_3']
+# conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA,
+#               experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
+#               experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
 
-conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA,
-              experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
-              experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
+experiments = ['individual']
+conditions = [experimental_conditions.PIR]
 
 list_of_res = []
 for i, condition in enumerate(conditions):
@@ -39,18 +41,20 @@ if 'individual' in experiments:
         plot_args = {'marker': 'o', 'markersize': 1, 'alpha': .6, 'linewidth': 1}
         ax_args = {'yticks': [0, 10, 20, 30, 40], 'ylim': [-1, 41], 'xticks': [0, 20, 40, 60, 80, 100],
                    'xlim': [0, 100]}
+        bool_ax_args = {'yticks': [0, 25, 50, 75, 100], 'ylim': [-5, 105], 'xticks': [0, 20, 40, 60, 80, 100],
+                   'xlim': [0, 100]}
 
         mice = np.unique(plot_res['mouse'])
         for i, mouse in enumerate(mice):
             select_dict = {'mouse': mouse}
-            plot.plot_results(plot_res, x_key='trial', y_key='lick_smoothed', loop_keys='odor',
+            plot.plot_results(plot_res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_standard',
                               select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
                               path=save_path)
-            plot.plot_results(plot_res, x_key='trial', y_key='lick', loop_keys='odor',
+            plot.plot_results(plot_res, x_key='trial', y_key='lick', loop_keys='odor_standard',
                               select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
                               path=save_path)
-            plot.plot_results(plot_res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
+            plot.plot_results(plot_res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=plot_args,
                               path=save_path)
 
 if 'individual_half_max' in experiments:
