@@ -18,7 +18,12 @@ def load_all_cons(data_path):
             else:
                 res[key].append(val)
     for key, val in res.items():
-        res[key] = np.array(val)
+        if key == 'DAQ_DATA':
+            arr = np.empty(len(val), dtype='object')
+            for i, v in enumerate(val):
+                arr[i] = v
+        else:
+            res[key] = np.array(val)
     return res
 
 def load_results(data_path):
@@ -41,11 +46,11 @@ def load_results(data_path):
     return res
 
 def analyze_results(res):
-    _add_days(res)
-    _add_time(res)
-    _add_decode_stats(res)
+    add_indices(res)
+    add_time(res)
+    add_decode_stats(res)
 
-def _add_days(res):
+def add_indices(res):
     from scipy.stats import rankdata
 
     list_of_dates = res['NAME_DATE']
@@ -60,7 +65,7 @@ def _add_days(res):
     res['mouse'] = mouse_ixs
     res['day'] = days
 
-def _add_time(res):
+def add_time(res):
     nExperiments = res['TRIAL_FRAMES'].size
     for i in range(nExperiments):
         nF = res['TRIAL_FRAMES'][i]
@@ -77,7 +82,7 @@ def _add_time(res):
     res['xticks'] = np.array(res['xticks'])
 
 #add relevant stats
-def _add_decode_stats(res):
+def add_decode_stats(res):
     # decoding data is in format of experiment X time X CVfold X repeat
     # TODO: ask Fabio if joining CV scores and repetitions is legitimate
     datas = np.array(res['data'])

@@ -5,6 +5,7 @@ import matplotlib as mpl
 import numpy as np
 import os
 import itertools
+from sklearn import preprocessing
 
 mpl.rcParams['font.size'] = 5
 
@@ -121,7 +122,18 @@ def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, colo
     else:
         if colors is None:
             colors = 'black'
-        plot_function(xdata, ydata, color=colors, **plot_args)
+        if type(xdata[0]) == str:
+            x_index = np.unique(xdata, return_index=True)[1]
+            x_inverse = np.unique(xdata, return_inverse=True)[1]
+
+            x_ticks = np.unique(x_inverse)
+            x_labels = [xdata[index] for index in sorted(x_index)]
+            x_data = sorted(x_inverse)
+            plot_function(x_data, ydata, color=colors, **plot_args)
+            ax.set_xticks(x_ticks)
+            ax.set_xticklabels(x_labels)
+        else:
+            plot_function(xdata, ydata, color=colors, **plot_args)
 
 
     #format

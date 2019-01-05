@@ -3,7 +3,7 @@
 
 import os
 import pickle
-
+import itertools
 import numpy as np
 
 def make_odor_ix_dictionary(list_of_odors):
@@ -86,3 +86,13 @@ def convert_events_to_matrix(events, time_ax, n_cells=None, usemag=False):
     for e, t in zip(events, time_ids):
         matrix[t][int(e[1])] += e[2] if usemag else 1
     return matrix
+
+
+def append_defaultdicts(dictA, dictB):
+    #TODO: should this be in np array format
+    for k in dictB.keys():
+        dictA[k].append(dictB[k])
+
+def chain_defaultdicts(dictA, dictB):
+    for k in dictB.keys():
+        dictA[k] = list(itertools.chain(dictA[k], dictB[k]))

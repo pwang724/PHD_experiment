@@ -36,6 +36,7 @@ class PIR:
            ['euy', 'lim']
            ]
     timing_override = [True, True, True, True, True, True]
+    training_start_day = [0, 0, 0, 0, 0, 0]
 
 class PIR_NAIVE:
     name = 'PIR_NAIVE'
@@ -299,6 +300,7 @@ class BLA:
            ['pin', 'msy']
            ]
     timing_override = [True, True, True, True]
+    training_start_day = [1, 1, 1, 1]
 
 class BLA_STATE:
     name = 'BLA_STATE'
