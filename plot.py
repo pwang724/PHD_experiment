@@ -18,8 +18,14 @@ def nice_names(key):
         'odor': 'Odor',
         'mouse': 'Mouse',
         'half_max': 'Learning Rate',
-        'odor_standard': 'Odor'
+        'odor_standard': 'Odor',
+        'condition_name': 'Experimental Condition',
+        'OFC_JAWS': r'OFC$_{\rm INH}$',
+        'BLA_JAWS': r'BLA$_{\rm INH}$',
+        'OFC_LONGTERM': r'OFC$_{\rm LT}$',
+        'BLA_LONGTERM': r'BLA$_{\rm LT}$'
     }
+
     if key in nice_name_dict.keys():
         out = nice_name_dict[key]
     else:
@@ -61,6 +67,16 @@ def _loop_key_filter(res, loop_keys):
             list_of_ixs.append(val == res[loop_keys[i]])
         list_of_ind.append(np.all(list_of_ixs, axis=0))
     return unique_entry_combinations, list_of_ind
+
+def _string_to_index(xdata):
+    x_index = np.unique(xdata, return_index=True)[1]
+    labels = [xdata[index] for index in sorted(x_index)]
+    indices = np.zeros_like(xdata, dtype= int)
+    for i, label in enumerate(labels):
+        indices[label == xdata] = i
+    nice_labels = [nice_names(key) for key in labels]
+    return indices, nice_labels
+
 
 
 def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, colors= None, plot_function= plt.plot, ax_args={}, plot_args={},
@@ -122,18 +138,22 @@ def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, colo
     else:
         if colors is None:
             colors = 'black'
-        if type(xdata[0]) == str:
-            x_index = np.unique(xdata, return_index=True)[1]
-            x_inverse = np.unique(xdata, return_inverse=True)[1]
+        if type(xdata[0]) == str or type(xdata[0]) == np.str_:
+            xdata, tick_labels = _string_to_index(xdata)
+            ax.set_xticks(np.unique(xdata))
+            ax.set_xticklabels(tick_labels)
 
-            x_ticks = np.unique(x_inverse)
-            x_labels = [xdata[index] for index in sorted(x_index)]
-            x_data = sorted(x_inverse)
-            plot_function(x_data, ydata, color=colors, **plot_args)
-            ax.set_xticks(x_ticks)
-            ax.set_xticklabels(x_labels)
+            if plot_function == plt.errorbar:
+                error_data = res[y_key + '_std']
+                plot_function(xdata, ydata, error_data, color=colors, **plot_args)
+            else:
+                plot_function(xdata, ydata, color=colors, **plot_args)
         else:
-            plot_function(xdata, ydata, color=colors, **plot_args)
+            if plot_function == plt.errorbar:
+                error_data = res[y_key + '_std']
+                plot_function(xdata, ydata, error_data, color=colors, **plot_args)
+            else:
+                plot_function(xdata, ydata, color=colors, **plot_args)
 
 
     #format

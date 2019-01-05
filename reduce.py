@@ -2,6 +2,9 @@ from collections import defaultdict
 
 import numpy as np
 
+import filter
+from tools.utils import append_defaultdicts
+
 
 def _sort(res, rank_keys):
     rank = []
@@ -39,9 +42,11 @@ def reduce_by_concat(res, key, rank_keys = None, verbose = False):
 def reduce_by_mean(res, key, verbose = False):
     data = res[key]
     try:
-        out = np.mean(data)
+        mean = np.mean(data)
+        std = np.std(data)
     except:
-        out = np.mean(data[data!=None])
+        mean = np.mean(data[data!=None])
+        std = np.std(data[data!=None])
         print('mean of entries for {} could not be computed. took the mean of non-None entries: {}'.format(
             key, data
         ))
@@ -49,7 +54,8 @@ def reduce_by_mean(res, key, verbose = False):
     out_res = defaultdict(list)
     for k, v in res.items():
         if k == key:
-            out_res[k] = out
+            out_res[k] = mean
+            out_res[k + '_std'] = std
         else:
             try:
                 if len(set(v)) == 1:
@@ -59,3 +65,17 @@ def reduce_by_mean(res, key, verbose = False):
                 if verbose:
                     print(str)
     return out_res
+
+
+def filter_reduce(res, filter_key, reduce_key):
+    out = defaultdict(list)
+    unique_ixs = sorted(np.unique(res[filter_key], return_index=True)[-1])
+    unique_vals = res[filter_key][unique_ixs]
+    for v in unique_vals:
+        filter_dict = {filter_key: v}
+        cur_res = filter.filter(res, filter_dict)
+        temp_res = reduce_by_mean(cur_res, reduce_key)
+        append_defaultdicts(out, temp_res)
+    for key, val in out.items():
+        out[key] = np.array(val)
+    return out

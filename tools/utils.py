@@ -96,3 +96,5 @@ def append_defaultdicts(dictA, dictB):
 def chain_defaultdicts(dictA, dictB):
     for k in dictB.keys():
         dictA[k] = list(itertools.chain(dictA[k], dictB[k]))
+    for key, val in dictA.items():
+        dictA[key] = np.array(val)

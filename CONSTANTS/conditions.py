@@ -173,6 +173,7 @@ class OFC_LONGTERM:
            ['pin', 'msy']
            ]
     timing_override = [True, True, True, True]
+    training_start_day = [0, 0, 0, 0]
 
 class OFC_JAWS:
     name = 'OFC_JAWS'
@@ -192,6 +193,7 @@ class OFC_JAWS:
         ['pin', 'msy'],
            ]
     timing_override = [True, True, True]
+    training_start_day = [0, 0, 0]
 
 class OFC_COMPOSITE:
     name = 'OFC_COMPOSITE'
@@ -279,6 +281,7 @@ class BLA_JAWS:
            ['pin', 'msy']
            ]
     timing_override = [True, True, True, True]
+    training_start_day = [0, 0, 0, 0]
 
 class BLA:
     name = 'BLA'
@@ -375,6 +378,7 @@ class BLA_LONGTERM:
            ['pin', 'msy']
            ]
     timing_override = [True, True, True, True, True, True]
+    training_start_day = [1, 1, 1, 1, 1, 1]
 
 
 
