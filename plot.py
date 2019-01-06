@@ -50,7 +50,6 @@ def _easy_save(path, name, dpi=300, pdf=True):
     plt.close()
 
 def _loop_key_filter(res, loop_keys):
-    #TODO: bug in code
     unique_entries_per_loopkey = []
     for x in loop_keys:
         a = res[x]
@@ -67,7 +66,6 @@ def _loop_key_filter(res, loop_keys):
         for i, val in enumerate(cur_combination):
             list_of_ixs.append(val == res[loop_keys[i]])
         list_of_ind.append(np.all(list_of_ixs, axis=0))
-    print(res[loop_keys[0]])
     return unique_entry_combinations, list_of_ind
 
 def _string_to_index(xdata):

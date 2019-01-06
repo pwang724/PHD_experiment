@@ -29,7 +29,7 @@ def convert(res, condition):
         mouse = res['mouse'][i]
         relevant_odors = condition.odors[mouse]
         csps = condition.csp[mouse]
-        csms = list(set(relevant_odors) - set(csps))
+        csms = [x for x in relevant_odors if not np.isin(x, csps)]
 
         for j, odor in enumerate(odorTrials):
             if odor in relevant_odors:
