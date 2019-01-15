@@ -19,7 +19,7 @@ core_experiments = ['individual', 'individual_half_max', 'basic_3']
 #               experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
 #               experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
 
-experiments = ['individual']
+experiments = ['individual_half_max']
 conditions = [experimental_conditions.PIR]
 
 list_of_res = []
@@ -64,7 +64,8 @@ if 'individual_half_max' in experiments:
         # bar plot
         colors = ['black', 'black']
         select_dict = {'odor_valence': 'CS+'}
-        ax_args = {'yticks': [0, 20, 40, 60, 80], 'ylim': [0, 80]}
+        nMouse = np.unique(plot_res['mouse']).size
+        ax_args = {'yticks': [0, 20, 40, 60, 80], 'ylim': [0, 80], 'xticks': np.arange(nMouse)}
         plot_args = {'marker': 'o', 's': 10, 'facecolors': 'none', 'alpha': .6}
         plot.plot_results(plot_res, x_key='mouse', y_key='half_max', loop_keys='odor_standard', colors=colors,
                           select_dict=select_dict, path=save_path, plot_function=plt.scatter, plot_args=plot_args,
@@ -72,6 +73,7 @@ if 'individual_half_max' in experiments:
 
         try:
             summary_res = get_summary(plot_res, condition)
+            ax_args = {'yticks': [0, 20, 40, 60, 80], 'ylim': [0, 80], }
             plot_args = {'alpha': .6, 'fill': False}
             plot.plot_results(summary_res, x_key='mouse', y_key='half_max', loop_keys=None,
                               select_dict=select_dict, path=save_path, plot_function=plt.bar, plot_args=plot_args,

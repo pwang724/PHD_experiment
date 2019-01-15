@@ -12,7 +12,7 @@ class Config:
 
     DECODE_CONFIG_JSON = 'decodeConfig'
 
-    cwd = r'/Users/pwang/Desktop/GITHUB_PROJECTS/PHD_experiment'
+    cwd = r'C:\Users\P\Desktop\PYTHON\PHD_experiment'
     LOCAL_DATA_PATH = os.path.join(cwd,'DATA')
     LOCAL_DATA_SINGLE_FOLDER = 'single'
     LOCAL_DATA_TIMEPOINT_FOLDER = 'timepoint'
