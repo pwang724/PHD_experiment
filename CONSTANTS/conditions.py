@@ -37,6 +37,7 @@ class PIR:
            ]
     timing_override = [True, True, True, True, True, True]
     training_start_day = [0, 0, 0, 0, 0, 0]
+    min_neurons = 46
 
 class PIR_NAIVE:
     name = 'PIR_NAIVE'
@@ -53,6 +54,7 @@ class PIR_NAIVE:
         ['2pe', 'ben', 'msy', 'oct']
     ]
     timing_override = [True, True, True, True]
+    min_neurons = 46
 
 
 class OFC:

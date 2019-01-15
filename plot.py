@@ -26,6 +26,10 @@ def nice_names(key):
         'OFC_LONGTERM': r'OFC$_{\rm LT}$',
         'BLA_LONGTERM': r'BLA$_{\rm LT}$',
         'odor_valence': 'Odor Valence'
+        'csp_identity': 'CS+ ID',
+        'csm_identity': 'CS- ID',
+        'identity': 'ID',
+        'valence': 'Valence'
     }
 
     if key in nice_name_dict.keys():
@@ -81,7 +85,9 @@ def _string_to_index(xdata):
 
 
 
-def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, colors= None, plot_function= plt.plot, ax_args={}, plot_args={},
+def plot_results(res, x_key, y_key, loop_keys =None,
+                 select_dict=None, path=None, colors= None, colormap='cool',
+                 plot_function= plt.plot, ax_args={}, plot_args={},
                  save = True, reuse = False):
     '''
 
@@ -109,26 +115,32 @@ def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, colo
         rect = [.2, .2, .7, .7]
         ax = plt.axes(rect, **ax_args)
 
-    if loop_keys:
+    if loop_keys != None:
         if isinstance(loop_keys, str):
             loop_keys = [loop_keys]
         unique_entry_combinations, list_of_ind = _loop_key_filter(res, loop_keys)
         nlines = len(unique_entry_combinations)
-        if colors is None:
+
+        if colormap is None:
             cmap = plt.get_cmap('cool')
+        else:
+            cmap = plt.get_cmap(colormap)
+
+        if colors is None:
             colors = [cmap(i) for i in np.linspace(0, 1, nlines)]
 
         for x in range(nlines):
             ind = list_of_ind[x]
             cur_combination = unique_entry_combinations[x]
-            x_plot = xdata[ind]
-            y_plot = ydata[ind]
+            x_plot = np.squeeze(xdata[ind])
+            y_plot = np.squeeze(ydata[ind])
             if save:
                 label = str(','.join(str(e) for e in cur_combination))
             else:
                 label = None
 
             if xdata.dtype == 'O' and ydata.dtype == 'O':
+                print('plotted O')
                 for i in range(x_plot.shape[0]):
                     plot_function(x_plot[i], y_plot[i], color= colors[x], label=label, **plot_args)
                     # if y_key == 'mean':
