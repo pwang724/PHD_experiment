@@ -25,7 +25,7 @@ def nice_names(key):
         'BLA_JAWS': r'BLA$_{\rm INH}$',
         'OFC_LONGTERM': r'OFC$_{\rm LT}$',
         'BLA_LONGTERM': r'BLA$_{\rm LT}$',
-        'odor_valence': 'Odor Valence'
+        'odor_valence': 'Odor Valence',
         'csp_identity': 'CS+ ID',
         'csm_identity': 'CS- ID',
         'identity': 'ID',

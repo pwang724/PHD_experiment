@@ -71,8 +71,8 @@ def decode_odor_as_label(condition, decodeConfig, data_path, save_path):
     :return:
     '''
     #TODO: see if it works when odors are different for each animal
-    data_pathnames = glob.glob(os.path.join(data_path, '*' + Config.mat_ext))
-    config_pathnames = glob.glob(os.path.join(data_path, '*' + Config.cons_ext))
+    data_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.mat_ext)))
+    config_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.cons_ext)))
     mouse_names_per_file = [Config.load_cons_f(d).NAME_MOUSE for d in config_pathnames]
     mouse_names, list_of_mouse_ix = np.unique(mouse_names_per_file, return_inverse=True)
 
@@ -117,8 +117,8 @@ def decode_day_as_label(condition, decodeConfig, data_path, save_path):
     :param save_path:
     :return:
     '''
-    data_pathnames = glob.glob(os.path.join(data_path, '*' + Config.mat_ext))
-    config_pathnames = glob.glob(os.path.join(data_path, '*' + Config.cons_ext))
+    data_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.mat_ext)))
+    config_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.cons_ext)))
 
     list_of_all_data = np.array([Config.load_mat_f(d) for d in data_pathnames])
     list_of_all_cons = np.array([Config.load_cons_f(d) for d in config_pathnames])
@@ -135,7 +135,7 @@ def decode_day_as_label(condition, decodeConfig, data_path, save_path):
         list_of_cons = list_of_all_cons[ix]
         list_of_data = list_of_all_data[ix]
         for cons in list_of_cons:
-            assert(cons.NAME_MOUSE == mouse_name, 'Wrong mouse file!')
+            assert cons.NAME_MOUSE == mouse_name, 'Wrong mouse file!'
 
         cons = list_of_cons[0]
         cons_dict = cons.__dict__
@@ -144,13 +144,13 @@ def decode_day_as_label(condition, decodeConfig, data_path, save_path):
                 pass
             else:
                 setattr(decodeConfig, key, value)
-        odor = condition.odors[list_of_mouse_ix[i]]
+        odor = condition.odors[i]
         if decodeConfig.decode_style == 'identity':
             csp = None
         else:
-            csp = condition.csp[list_of_mouse_ix[i]]
+            csp = condition.csp[i]
 
-        scores = decoding.decode_odor_labels(list_of_cons, list_of_data, odor, csp, decodeConfig)
+        scores = decoding.decode_day_labels(list_of_cons, list_of_data, odor, csp, decodeConfig)
         name = cons.NAME_MOUSE
         fio.save_json(save_path=save_path, save_name=name, config=decodeConfig)
         fio.save_numpy(save_path=save_path, save_name=name, data=scores)

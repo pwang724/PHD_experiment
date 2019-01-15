@@ -9,7 +9,7 @@ from scipy import stats as sstats
 def load_all_cons(data_path):
     res = defaultdict(list)
 
-    config_pathnames = glob.glob(os.path.join(data_path, '*' + Config.cons_ext))
+    config_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.cons_ext)))
     for i, config_pn in enumerate(config_pathnames):
         cons = Config.load_cons_f(config_pn)
         for key, val in cons.__dict__.items():
@@ -28,10 +28,10 @@ def load_all_cons(data_path):
 
 def load_results(data_path):
     res = defaultdict(list)
-    experiment_dirs = [os.path.join(data_path, d) for d in os.listdir(data_path)]
+    experiment_dirs = sorted([os.path.join(data_path, d) for d in os.listdir(data_path)])
     for exp_dir in experiment_dirs:
-        data_dirs = glob.glob(os.path.join(exp_dir, '*' + Config.mat_ext))
-        config_dirs = glob.glob(os.path.join(exp_dir, '*.json'))
+        data_dirs = sorted(glob.glob(os.path.join(exp_dir, '*' + Config.mat_ext)))
+        config_dirs = sorted(glob.glob(os.path.join(exp_dir, '*.json')))
         for data_dir, config_dir in zip(data_dirs,config_dirs):
             config = tools.file_io.load_json(config_dir)
             data = tools.file_io.load_numpy(data_dir)

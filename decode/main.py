@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 #
 core_experiments = ['vary_neuron_odor', 'vary_decoding_style_odor', 'vary_decoding_style_days']
 experiments = ['vary_decoding_style_days']
-EXPERIMENT = True
+EXPERIMENT = False
 ANALYZE = True
 argTest = True
 
@@ -35,6 +35,38 @@ if 'vary_decoding_style_days' in experiments:
                                  experiment_configs=experiment.vary_decode_style_identity(argTest=argTest),
                                  data_path=data_path,
                                  save_path=experiment_path)
+
+    if ANALYZE:
+        res = analysis.load_results(experiment_path)
+        analysis.analyze_results(res)
+        decode_styles = np.unique(res['decode_style'])
+
+        #decoding, plot for each condition: mouse + decode style
+        ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05]}
+        loopkey = ['shuffle']
+        mice = np.unique(res['mouse'])
+        for i, mouse in enumerate(mice):
+            for j, dc in enumerate(decode_styles):
+                select_dict = {'mouse':mouse, 'decode_style': dc}
+                plot.plot_results(res, x_key='time', y_key='mean', loop_keys=loopkey,
+                                  select_dict=select_dict, path=save_path, ax_args=ax_args)
+
+        #summary for last day of each mouse
+        nMouse = np.unique(res['mouse']).size
+        ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [0, 1.05],
+                   'xticks': [0, 1]}
+        plot_args = {'alpha': .5, 'linewidth': 1, 'marker': 'o', 'markersize': 1}
+        plot.plot_results(res, x_key='shuffle', y_key='max', loop_keys='mouse',
+                          colors = ['Black'] * nMouse,
+                          path = save_path, plot_args= plot_args, ax_args=ax_args,
+                          save=False)
+
+        summary_res = reduce.filter_reduce(res, 'shuffle','max')
+        plot_args = {'alpha': .6, 'fill': False}
+        plot.plot_results(summary_res, x_key='shuffle', y_key='max',
+                          path = save_path, plot_function=plt.bar, plot_args=plot_args,
+                          save=True, reuse=True)
+
 
 if 'vary_decoding_style_odor' in experiments:
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -101,10 +133,10 @@ if 'vary_decoding_style_odor' in experiments:
                           path = save_path, plot_function=plt.scatter, plot_args= plot_args, ax_args=ax_args,
                           save=False)
 
-        res_lastday_nonshuffle = filter.filter(res_lastday, filter_dict={'shuffle':False})
-        summary_res = reduce.filter_reduce(res_lastday_nonshuffle, 'decode_style', 'max')
+        res_nonshuffle = filter.filter(res_lastday, filter_dict={'shuffle':False})
+        summary_res_nonshuffle = reduce.filter_reduce(res_nonshuffle, 'decode_style', 'max')
         plot_args = {'alpha': .6, 'fill': False}
-        plot.plot_results(summary_res, x_key='decode_style', y_key='max', select_dict=select_dict,
+        plot.plot_results(summary_res_nonshuffle, x_key='decode_style', y_key='max', select_dict=select_dict,
                           path = save_path, plot_function=plt.bar, plot_args=plot_args,
                           save=True, reuse=True)
 
