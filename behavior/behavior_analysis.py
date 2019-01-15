@@ -6,6 +6,7 @@ from scipy.signal import savgol_filter
 
 from reduce import reduce_by_concat
 from tools.utils import append_defaultdicts
+import copy
 
 def convert(res, condition):
     '''
@@ -73,7 +74,7 @@ def agglomerate_days(res, condition, first_day, last_day):
         out[key] = np.array(val)
     return out
 
-def analyze_behavior(res):
+def analyze_behavior(res, condition, arg = 'normal'):
     '''
 
     :param res:
@@ -95,9 +96,20 @@ def analyze_behavior(res):
                 half_max = None
         return half_max
 
-    # TODO: implement find half-max last down
     def _half_max_down(vec):
-        pass
+        config = behaviorConfig()
+        vec_binary = vec < config.halfmax_down_threshold
+
+        if np.all(vec_binary):
+            half_max = 0
+        else:
+            last_ix_below_threshold = np.where(vec_binary == 0)[0][-1]
+            vec_binary[:last_ix_below_threshold] = 0
+            if np.any(vec_binary):
+                half_max = np.where(vec_binary == 1)[0][0]
+            else:
+                half_max = None
+        return half_max
 
     config = behaviorConfig()
     res['lick_smoothed'] = [savgol_filter(y, config.smoothing_window, config.polynomial_degree)
@@ -106,8 +118,29 @@ def analyze_behavior(res):
         100 * savgol_filter(y > 0, config.smoothing_window_boolean, config.polynomial_degree)
         for y in res['lick']]
 
+    up = []
     for x in res['boolean_smoothed']:
-        res['half_max'].append(_half_max_up(x))
+        up.append(_half_max_up(x))
+
+    down = []
+    for x in res['boolean_smoothed']:
+        down.append(_half_max_down(x))
+
+    for i, odor in enumerate(res['odor']):
+        mouse = res['mouse'][i]
+        is_csp = np.isin(odor, condition.csp[mouse])
+        if arg == 'normal':
+            if is_csp:
+                res['half_max'].append(up[i])
+            else:
+                res['half_max'].append(down[i])
+        elif arg == 'reversed':
+            if is_csp:
+                res['half_max'].append(down[i])
+            else:
+                res['half_max'].append(up[i])
+        else:
+            raise ValueError('Did not recognize keyword {} for determining half_max'.format(arg))
 
     for key, val in res.items():
         res[key] = np.array(val)

@@ -13,14 +13,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import analysis
 
-core_experiments = ['individual', 'individual_half_max', 'basic_3']
+core_experiments = ['individual', 'individual_half_max', 'summary','basic_3']
 # experiments = ['individual', 'individual_half_max', 'basic_3']
-# conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA,
-#               experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
-#               experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
+conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA,
+              experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
+              experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
 
-experiments = ['individual']
-conditions = [experimental_conditions.PIR]
+conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA]
+
+experiments = core_experiments
 
 list_of_res = []
 for i, condition in enumerate(conditions):
@@ -31,7 +32,7 @@ for i, condition in enumerate(conditions):
     lick_res = convert(res, condition)
     plot_res = agglomerate_days(lick_res, condition, condition.training_start_day,
                                 filter.get_last_day_per_mouse(res))
-    analyze_behavior(plot_res)
+    analyze_behavior(plot_res, condition)
     list_of_res.append(plot_res)
 
 if 'individual' in experiments:
@@ -57,6 +58,7 @@ if 'individual' in experiments:
                               select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=plot_args,
                               path=save_path)
 
+
 if 'individual_half_max' in experiments:
     for plot_res, condition in zip(list_of_res, conditions):
         save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
@@ -79,6 +81,24 @@ if 'individual_half_max' in experiments:
         except:
             print('Cannot get half_max data for: {}'.format(condition.name))
             # raise ValueError('Cannot summarize: {}'.format(condition.name))
+
+if 'summary' in experiments:
+    plot_args = {'marker': '.', 'markersize': 1, 'alpha': .6, 'linewidth': 1}
+    ax_args = {'yticks': [0, 10, 20, 30, 40], 'ylim': [-1, 41], 'xticks': [0, 20, 40, 60, 80, 100],
+               'xlim': [0, 100]}
+    for plot_res, condition in zip(list_of_res, conditions):
+        save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
+
+        csp_res = filter.filter(plot_res, {'odor_valence':'CS+'})
+        csp_summary = filter_reduce(csp_res, filter_key='mouse', reduce_key='lick_smoothed')
+        csm_res = filter.filter(plot_res, {'odor_valence':'CS-'})
+        csm_summary = filter_reduce(csm_res, filter_key='mouse', reduce_key='lick_smoothed')
+        chain_defaultdicts(csp_summary, csm_summary)
+        summary_res = csp_summary
+
+        plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
+                            colors= ['lime','salmon'], ax_args=ax_args, plot_args=plot_args,
+                            path=save_path)
 
 
 if 'basic_3' in experiments:

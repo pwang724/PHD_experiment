@@ -6,6 +6,7 @@ import numpy as np
 import os
 import itertools
 from sklearn import preprocessing
+from collections import OrderedDict
 
 mpl.rcParams['font.size'] = 5
 
@@ -23,7 +24,8 @@ def nice_names(key):
         'OFC_JAWS': r'OFC$_{\rm INH}$',
         'BLA_JAWS': r'BLA$_{\rm INH}$',
         'OFC_LONGTERM': r'OFC$_{\rm LT}$',
-        'BLA_LONGTERM': r'BLA$_{\rm LT}$'
+        'BLA_LONGTERM': r'BLA$_{\rm LT}$',
+        'odor_valence': 'Odor Valence'
     }
 
     if key in nice_name_dict.keys():
@@ -169,7 +171,10 @@ def plot_results(res, x_key, y_key, loop_keys, select_dict=None, path=None, colo
     if save:
         if loop_keys:
             nice_loop_str = '+'.join([nice_names(x) for x in loop_keys])
-            l = ax.legend(fontsize=4)
+
+            handles, labels = ax.get_legend_handles_labels()
+            by_label = OrderedDict(zip(labels, handles))
+            l = ax.legend(by_label.values(), by_label.keys())
             l.set_title(nice_loop_str)
             plt.setp(l.get_title(), fontsize=4)
 
