@@ -43,7 +43,13 @@ def load_results(data_path):
                 res[key].append(val)
 
     for key, val in res.items():
-        res[key] = np.array(val)
+        try:
+            res[key] = np.array(val)
+        except:
+            arr = np.empty(len(val), dtype='object')
+            for i, v in enumerate(val):
+                arr[i] = v
+            res[key] = arr
     return res
 
 def analyze_results(res):

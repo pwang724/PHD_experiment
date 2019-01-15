@@ -1,7 +1,7 @@
-from init.cons import Cons
-import matlab.engine
-import matlab
-import init.load_matlab
+# from init.cons import Cons
+# import matlab.engine
+# import matlab
+# import init.load_matlab
 
 import CONSTANTS.conditions as experimental_conditions
 import os
@@ -17,7 +17,7 @@ def _look_at_timing(cons):
     str= 'Odor ON: {0:d}, Odor OFF: {1:d}, US: {2:d}, DIR: {3:s}, ODORS: {4:s}'.format(on, off, us, dir, '|'.join(odors))
     print(str)
 
-condition = experimental_conditions.BLA_CONTEXT
+condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 #
 #load cons
@@ -40,5 +40,6 @@ config_pathnames = glob.glob(os.path.join(data_path, '*' + Config.cons_ext))
 
 for i, config_pn in enumerate(config_pathnames):
     cons = Config.load_cons_f(config_pn)
-    _look_at_timing(cons)
+    # _look_at_timing(cons)
+    print(cons.DIR + '__' + str(cons.TRIAL_FRAMES))
 

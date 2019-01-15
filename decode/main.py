@@ -19,7 +19,7 @@ ANALYZE = True
 argTest = True
 
 #inputs
-condition = experimental_conditions.PIR
+condition = experimental_conditions.OFC
 
 #load files from matlab
 # init.load_matlab.load_condition(condition)
@@ -30,9 +30,16 @@ if 'vary_decoding_style_days' in experiments:
     save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'vary_decoding_style_days', condition.name)
 
     if EXPERIMENT:
+        if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':
+            style = ('identity')
+        elif condition.name == 'OFC':
+            style = ('identity','csp_identity','csm_identity')
+        else:
+            raise ValueError('condition name not recognized')
+
         experiment_tools.perform(experiment=experiment.decode_day_as_label,
                                  condition=condition,
-                                 experiment_configs=experiment.vary_decode_style_identity(argTest=argTest),
+                                 experiment_configs=experiment.vary_decode_style(argTest=argTest, style=style),
                                  data_path=data_path,
                                  save_path=experiment_path)
 
@@ -55,18 +62,20 @@ if 'vary_decoding_style_days' in experiments:
         nMouse = np.unique(res['mouse']).size
         ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [0, 1.05],
                    'xticks': [0, 1]}
-        plot_args = {'alpha': .5, 'linewidth': 1, 'marker': 'o', 'markersize': 1}
-        plot.plot_results(res, x_key='shuffle', y_key='max', loop_keys='mouse',
-                          colors = ['Black'] * nMouse,
-                          path = save_path, plot_args= plot_args, ax_args=ax_args,
-                          save=False)
+        for decode_style in decode_styles:
+            cur_res = filter.filter(res, {'decode_style': decode_style})
+            summary_res = reduce.filter_reduce(cur_res, 'shuffle','max')
+            plot_args = {'alpha': .6, 'fill': False}
+            plot.plot_results(summary_res, x_key='shuffle', y_key='max',
+                              path = save_path, plot_function=plt.bar, plot_args=plot_args, ax_args=ax_args,
+                              save=False)
 
-        summary_res = reduce.filter_reduce(res, 'shuffle','max')
-        plot_args = {'alpha': .6, 'fill': False}
-        plot.plot_results(summary_res, x_key='shuffle', y_key='max',
-                          path = save_path, plot_function=plt.bar, plot_args=plot_args,
-                          save=True, reuse=True)
-
+            plot_args = {'alpha': .5, 'linewidth': 1, 'marker': 'o', 'markersize': 1}
+            plot.plot_results(res, x_key='shuffle', y_key='max', loop_keys='mouse',
+                              select_dict={'decode_style': decode_style},
+                              colors = ['Black'] * nMouse,
+                              path = save_path, plot_args= plot_args, ax_args=ax_args,
+                              save=True, reuse=True)
 
 if 'vary_decoding_style_odor' in experiments:
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

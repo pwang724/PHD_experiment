@@ -72,8 +72,7 @@ def reduce_by_mean(res, key, verbose = False):
 
 def regularize_length(res, key):
     data = res[key]
-
-    if type(data[0]) == np.ndarray or type(data[0] == list):
+    if type(data[0]) == np.ndarray or type(data[0]) == list:
         min_length = np.min([x.shape for x in data])
         for k, v in res.items():
             if type(v[0]) == np.ndarray or type(v[0]) == list:

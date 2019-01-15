@@ -34,14 +34,14 @@ def vary_shuffle(argTest = True):
         decodeConfig.repeat = 5
     return decodeConfig, hp_ranges
 
-def vary_decode_style(argTest = True):
+def vary_decode_style(argTest = True, style = ('identity','csp_identity','csm_identity', 'valence')):
     decodeConfig = decode_config.DecodeConfig()
     decodeConfig.repeat = 10
     decodeConfig.neurons = 40
 
     hp_ranges = OrderedDict()
     hp_ranges['shuffle'] = [False, True]
-    hp_ranges['decode_style'] = ['identity','csp_identity','csm_identity', 'valence']
+    hp_ranges['decode_style'] = style
     if argTest:
         decodeConfig.repeat = 5
     return decodeConfig, hp_ranges
@@ -132,8 +132,13 @@ def decode_day_as_label(condition, decodeConfig, data_path, save_path):
     for i, mouse_name in enumerate(mouse_names):
         start_time = time.time()
         ix = mouse_name == mouse_names_per_file
-        list_of_cons = list_of_all_cons[ix]
-        list_of_data = list_of_all_data[ix]
+        if hasattr(condition, 'training_start_day'):
+            start_day = condition.training_start_day[i]
+        else:
+            start_day = 0
+
+        list_of_cons = list_of_all_cons[ix][start_day:]
+        list_of_data = list_of_all_data[ix][start_day:]
         for cons in list_of_cons:
             assert cons.NAME_MOUSE == mouse_name, 'Wrong mouse file!'
 

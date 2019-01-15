@@ -99,10 +99,10 @@ def decode_day_labels(list_of_cons, list_of_data, chosen_odors, csp_odors, decod
     for i, cons in enumerate(list_of_cons):
         list_of_masks = _get_odor_masks(cons, chosen_odors, csp_odors, decode_style)
         day_odor_masks.append(list_of_masks)
-    odor_day_masks = np.transpose(day_odor_masks)
+    odor_day_masks = np.swapaxes(np.array(day_odor_masks), 0, 1)
 
     list_of_reshaped_data = []
-    for data in list_of_data:
+    for data, cons in zip(list_of_data, list_of_cons):
         data_trial_cell_time = utils.reshape_data(data, trial_axis=0, cell_axis=1, time_axis=2,
                                               nFrames=cons.TRIAL_FRAMES)
         list_of_reshaped_data.append(data_trial_cell_time)

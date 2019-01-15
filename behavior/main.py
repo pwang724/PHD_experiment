@@ -19,7 +19,7 @@ conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experime
               experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
 
 experiments = core_experiments
-conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA]
+conditions = [experimental_conditions.PIR]
 
 list_of_res = []
 for i, condition in enumerate(conditions):
