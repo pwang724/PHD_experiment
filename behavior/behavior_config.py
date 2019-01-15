@@ -7,3 +7,4 @@ class behaviorConfig(object):
         self.polynomial_degree = 1
 
         self.halfmax_up_threshold = 50
+        self.halfmax_down_threshold = 50
