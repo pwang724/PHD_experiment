@@ -5,7 +5,6 @@ import filter
 from CONSTANTS import conditions as experimental_conditions
 from CONSTANTS.config import Config
 from behavior.behavior_analysis import convert, agglomerate_days, analyze_behavior
-from behavior.scripts import get_summary
 from reduce import filter_reduce
 from tools.utils import chain_defaultdicts
 import plot
@@ -19,8 +18,8 @@ conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experime
               experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
               experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
 
-experiments = ['individual_half_max']
-conditions = [experimental_conditions.PIR]
+experiments = core_experiments
+conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA]
 
 list_of_res = []
 for i, condition in enumerate(conditions):
@@ -73,7 +72,8 @@ if 'individual_half_max' in experiments:
                           ax_args=ax_args, save=False)
 
         try:
-            summary_res = get_summary(plot_res, condition)
+            csp_res = filter.filter(plot_res, {'odor_valence':'CS+'})
+            summary_res = filter_reduce(csp_res, filter_key='mouse', reduce_key='half_max')
             ax_args = {'yticks': [0, 20, 40, 60, 80], 'ylim': [0, 80], }
             plot_args = {'alpha': .6, 'fill': False}
             plot.plot_results(summary_res, x_key='mouse', y_key='half_max', loop_keys=None,
@@ -106,7 +106,8 @@ if 'basic_3' in experiments:
     summary_all = defaultdict(list)
     for plot_res, condition in zip(list_of_res, conditions):
         try:
-            summary_res = get_summary(plot_res, condition)
+            csp_res = filter.filter(plot_res, {'odor_valence':'CS+'})
+            summary_res = filter_reduce(csp_res, filter_key='mouse', reduce_key='half_max')
             summary_res['condition_name'] = [condition.name] * len(summary_res['half_max'])
             chain_defaultdicts(summary_all, summary_res)
         except:

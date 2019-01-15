@@ -22,6 +22,7 @@ def load_all_cons(data_path):
             arr = np.empty(len(val), dtype='object')
             for i, v in enumerate(val):
                 arr[i] = v
+            res[key] = arr
         else:
             res[key] = np.array(val)
     return res
@@ -84,7 +85,6 @@ def add_time(res):
 #add relevant stats
 def add_decode_stats(res):
     # decoding data is in format of experiment X time X CVfold X repeat
-    # TODO: ask Fabio if joining CV scores and repetitions is legitimate
     datas = np.array(res['data'])
     O_on = res['DAQ_O_ON_F'].astype(np.int)
     W_on = res['DAQ_W_ON_F'].astype(np.int)

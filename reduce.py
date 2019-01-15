@@ -48,9 +48,9 @@ def reduce_by_mean(res, key, verbose = False):
     except:
         mean = np.mean(data[data!=None], axis=0)
         std = np.std(data[data!=None], axis=0)
-        print('mean of entries for {} could not be computed. took the mean of non-None entries: {}'.format(
-            key, data
-        ))
+        print('mean of entries for {} could not be computed. took the mean of non-None entries: {}'
+              ' for mouse {}'.
+            format(key, data, res['mouse']))
 
     out_res = defaultdict(list)
     for k, v in res.items():
@@ -72,15 +72,17 @@ def reduce_by_mean(res, key, verbose = False):
 
 def regularize_length(res, key):
     data = res[key]
-    min_length = np.min([x.shape for x in data])
-    for k, v in res.items():
-        if type(v[0]) == np.ndarray or type(v[0]) == list:
-            for i, x in enumerate(v):
-                if len(x) > min_length:
-                    v[i] = x[:min_length]
-            res[k] = v
-    for key, val in res.items():
-        res[key] = np.array(val)
+
+    if type(data[0]) == np.ndarray or type(data[0] == list):
+        min_length = np.min([x.shape for x in data])
+        for k, v in res.items():
+            if type(v[0]) == np.ndarray or type(v[0]) == list:
+                for i, x in enumerate(v):
+                    if len(x) > min_length:
+                        v[i] = x[:min_length]
+                res[k] = v
+        for key, val in res.items():
+            res[key] = np.array(val)
 
 def filter_reduce(res, filter_key, reduce_key):
     out = defaultdict(list)

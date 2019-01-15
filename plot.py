@@ -132,12 +132,13 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         for x in range(nlines):
             ind = list_of_ind[x]
             cur_combination = unique_entry_combinations[x]
-            x_plot = np.squeeze(xdata[ind])
-            y_plot = np.squeeze(ydata[ind])
             if save:
                 label = str(','.join(str(e) for e in cur_combination))
             else:
                 label = None
+
+            x_plot = xdata[ind]
+            y_plot = ydata[ind]
 
             if xdata.dtype == 'O' and ydata.dtype == 'O':
                 print('plotted O')
@@ -148,6 +149,8 @@ def plot_results(res, x_key, y_key, loop_keys =None,
                     #     ax.fill_between(x_plot[i], y_plot[i] - sem_plot[i], y_plot[i] + sem_plot[i],
                     #                     color = colors[x], zorder=0, lw=0, alpha=0.3)
             else:
+                x_plot = np.squeeze(x_plot)
+                y_plot = np.squeeze(y_plot)
                 plot_function(x_plot, y_plot, color=colors[x], label=label, **plot_args)
     else:
         if colors is None:
