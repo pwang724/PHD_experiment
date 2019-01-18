@@ -46,19 +46,6 @@ def vary_decode_style(argTest = True, style = ('identity','csp_identity','csm_id
         decodeConfig.repeat = 5
     return decodeConfig, hp_ranges
 
-def vary_decode_style_identity(argTest = True):
-    decodeConfig = decode_config.DecodeConfig()
-    decodeConfig.repeat = 10
-    decodeConfig.neurons = 40
-
-    hp_ranges = OrderedDict()
-    hp_ranges['shuffle'] = [False, True]
-    hp_ranges['decode_style'] = ['identity']
-    if argTest:
-        decodeConfig.repeat = 5
-    return decodeConfig, hp_ranges
-
-
 def decode_odor_as_label(condition, decodeConfig, data_path, save_path):
     '''
     Run decoding experiments with labels based on the odor that was presented. Data is contained

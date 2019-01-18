@@ -8,3 +8,6 @@ class behaviorConfig(object):
 
         self.halfmax_up_threshold = 50
         self.halfmax_down_threshold = 50
+
+        self.fully_learned_threshold_up = 90
+        self.fully_learned_threshold_down = 10

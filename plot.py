@@ -1,11 +1,9 @@
-from filter import filter
+import filter
 from tools import plot_utils
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import os
-import itertools
-from sklearn import preprocessing
 from collections import OrderedDict
 
 mpl.rcParams['font.size'] = 5
@@ -29,7 +27,9 @@ def nice_names(key):
         'csp_identity': 'CS+ ID',
         'csm_identity': 'CS- ID',
         'identity': 'ID',
-        'valence': 'Valence'
+        'valence': 'Valence',
+        'False': '0',
+        'True': '1'
     }
 
     if key in nice_name_dict.keys():
@@ -55,24 +55,6 @@ def _easy_save(path, name, dpi=300, pdf=True):
         plt.savefig(os.path.join(figname + '.pdf'), transparent=True)
     plt.close()
 
-def _loop_key_filter(res, loop_keys):
-    unique_entries_per_loopkey = []
-    for x in loop_keys:
-        a = res[x]
-        indexes = np.unique(a, return_index=True)[1]
-        unique_entries_per_loopkey.append([a[index] for index in sorted(indexes)])
-
-    unique_entry_combinations = list(itertools.product(*unique_entries_per_loopkey))
-    nlines = len(unique_entry_combinations)
-
-    list_of_ind = []
-    for x in range(nlines):
-        list_of_ixs = []
-        cur_combination = unique_entry_combinations[x]
-        for i, val in enumerate(cur_combination):
-            list_of_ixs.append(val == res[loop_keys[i]])
-        list_of_ind.append(np.all(list_of_ixs, axis=0))
-    return unique_entry_combinations, list_of_ind
 
 def _string_to_index(xdata):
     x_index = np.unique(xdata, return_index=True)[1]
@@ -83,12 +65,34 @@ def _string_to_index(xdata):
     nice_labels = [nice_names(key) for key in labels]
     return indices, nice_labels
 
+def _plot(plot_function, x, y, color, label, plot_args):
+    if x.dtype == 'O' and y.dtype == 'O':
+        # print('plotted O')
+        for i in range(x.shape[0]):
+            plot_function(x[i], y[i], color=color, label=label, **plot_args)
+    else:
+        plot_function(x, y, color=color, label=label, **plot_args)
 
+def _plot_error(plot_function, x, y, err, color, label, plot_args):
+    if x.dtype == 'O' and y.dtype == 'O':
+        # print('plotted O')
+        for i in range(x.shape[0]):
+            plot_function(x[i], y[i], err[i], color=color, label=label, **plot_args)
+    else:
+        plot_function(x, y, err, color=color, label=label, **plot_args)
+
+def _plot_fill(plot_function, x, y, err, color, label, plot_args):
+    if x.dtype == 'O' and y.dtype == 'O':
+        # print('plotted O')
+        for i in range(x.shape[0]):
+            plot_function(x[i], y[i]-err[i], y[i] + err[i], color=color, label=label, **plot_args)
+    else:
+        plot_function(x, y-err, y+err, color=color, label=label, **plot_args)
 
 def plot_results(res, x_key, y_key, loop_keys =None,
                  select_dict=None, path=None, colors= None, colormap='cool',
                  plot_function= plt.plot, ax_args={}, plot_args={},
-                 save = True, reuse = False):
+                 save = True, reuse = False, sort = False, error_key = '_sem'):
     '''
 
     :param res: flattened dict of results
@@ -102,78 +106,62 @@ def plot_results(res, x_key, y_key, loop_keys =None,
     '''
 
     if select_dict is not None:
-        res = filter(res, select_dict)
-
-    # process data for plotting
-    xdata = res[x_key]
-    ydata = res[y_key]
+        res = filter.filter(res, select_dict)
 
     if reuse:
         ax = plt.gca()
     else:
         fig = plt.figure(figsize=(2, 1.5))
-        rect = [.2, .2, .7, .7]
-        ax = plt.axes(rect, **ax_args)
+        rect = [.2, .25, .7, .65]
+        ax = fig.add_axes(rect, **ax_args)
+
+    if sort:
+        ind_sort = np.argsort(res[x_key])
+        for key, val in res.items():
+            res[key] = val[ind_sort]
 
     if loop_keys != None:
         if isinstance(loop_keys, str):
             loop_keys = [loop_keys]
-        unique_entry_combinations, list_of_ind = _loop_key_filter(res, loop_keys)
-        nlines = len(unique_entry_combinations)
+        loop_combinations, loop_indices = filter.retrieve_unique_entries(res, loop_keys)
+        if save:
+            labels = [str(','.join(str(e) for e in cur_combination)) for cur_combination in loop_combinations]
+        else:
+            labels = [None] * len(loop_combinations)
 
         if colormap is None:
             cmap = plt.get_cmap('cool')
         else:
             cmap = plt.get_cmap(colormap)
-
         if colors is None:
-            colors = [cmap(i) for i in np.linspace(0, 1, nlines)]
-
-        for x in range(nlines):
-            ind = list_of_ind[x]
-            cur_combination = unique_entry_combinations[x]
-            if save:
-                label = str(','.join(str(e) for e in cur_combination))
-            else:
-                label = None
-
-            x_plot = xdata[ind]
-            y_plot = ydata[ind]
-
-            if xdata.dtype == 'O' and ydata.dtype == 'O':
-                print('plotted O')
-                for i in range(x_plot.shape[0]):
-                    plot_function(x_plot[i], y_plot[i], color= colors[x], label=label, **plot_args)
-                    # if y_key == 'mean':
-                    #     sem_plot = res['sem'][ind]
-                    #     ax.fill_between(x_plot[i], y_plot[i] - sem_plot[i], y_plot[i] + sem_plot[i],
-                    #                     color = colors[x], zorder=0, lw=0, alpha=0.3)
-            else:
-                x_plot = np.squeeze(x_plot)
-                y_plot = np.squeeze(y_plot)
-                plot_function(x_plot, y_plot, color=colors[x], label=label, **plot_args)
+            colors = [cmap(i) for i in np.linspace(0, 1, len(loop_combinations))]
+        loop_lines = len(loop_combinations)
     else:
+        loop_lines = 1
+        loop_indices = [np.arange(len(res[y_key]))]
         if colors is None:
-            colors = 'black'
-        if type(xdata[0]) == str or type(xdata[0]) == np.str_:
-            xdata, tick_labels = _string_to_index(xdata)
-            ax.set_xticks(np.unique(xdata))
-            ax.set_xticklabels(tick_labels)
+            colors = ['black']
+        labels = [None]
 
-            if plot_function == plt.errorbar:
-                error_data = res[y_key + '_std']
-                plot_function(xdata, ydata, error_data, color=colors, **plot_args)
-            else:
-                plot_function(xdata, ydata, color=colors, **plot_args)
+    for i in range(loop_lines):
+        color = colors[i]
+        label = labels[i]
+        plot_ix = loop_indices[i]
+        x_plot = res[x_key][plot_ix]
+        if type(x_plot) != np.ndarray:
+            x_plot = np.array([nice_names(x) for x in x_plot])
+        y_plot = res[y_key][plot_ix]
+        if plot_function == plt.errorbar:
+            error_plot = res[error_key][plot_ix]
+            _plot_error(plot_function, x_plot, y_plot, error_plot, color=color, label=label, plot_args=plot_args)
+        elif plot_function == plt.fill_between:
+            error_plot = res[error_key][plot_ix]
+            _plot_fill(plot_function, x_plot, y_plot, error_plot, color=color, label=label, plot_args=plot_args)
         else:
-            if plot_function == plt.errorbar:
-                error_data = res[y_key + '_std']
-                plot_function(xdata, ydata, error_data, color=colors, **plot_args)
-            else:
-                plot_function(xdata, ydata, color=colors, **plot_args)
-
+            _plot(plot_function, x_plot, y_plot, color=color, label=label, plot_args=plot_args)
 
     #format
+    plt.xticks(rotation=45)
     ax.set_ylabel(nice_names(y_key), fontsize = 5)
     ax.set_xlabel(nice_names(x_key), fontsize = 5)
     if x_key == 'time':
@@ -189,7 +177,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
             handles, labels = ax.get_legend_handles_labels()
             by_label = OrderedDict(zip(labels, handles))
-            l = ax.legend(by_label.values(), by_label.keys())
+            l = ax.legend(by_label.values(), by_label.keys(), ncol = 3, fontsize = 4)
             l.set_title(nice_loop_str)
             plt.setp(l.get_title(), fontsize=4)
 

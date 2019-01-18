@@ -52,10 +52,10 @@ def load_results(data_path):
             res[key] = arr
     return res
 
-def analyze_results(res):
+def analyze_results(res, condition, arg='different'):
     add_indices(res)
     add_time(res)
-    add_decode_stats(res)
+    add_decode_stats(res, condition, arg)
 
 def add_indices(res):
     from scipy.stats import rankdata
@@ -89,18 +89,36 @@ def add_time(res):
     res['xticks'] = np.array(res['xticks'])
 
 #add relevant stats
-def add_decode_stats(res):
+def add_decode_stats(res, condition, arg='different'):
+    '''
+
+    :param res:
+    :param condition:
+    :param arg:
+    :return:
+    '''
     # decoding data is in format of experiment X time X CVfold X repeat
     datas = np.array(res['data'])
     O_on = res['DAQ_O_ON_F'].astype(np.int)
+    O_off = res['DAQ_O_OFF_F'].astype(np.int)
     W_on = res['DAQ_W_ON_F'].astype(np.int)
     for i, data in enumerate(datas):
         data_reshaped = np.reshape(data.transpose([0, 2, 1]),
                                    [data.shape[0], data.shape[1] * data.shape[2]])
         mean = np.mean(data_reshaped, axis=1)
-        max = np.max(mean[O_on[i]: W_on[i]])
+        std = sstats.sem(data_reshaped, axis=1)
+
+        if arg == 'different':
+            if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':
+                max = np.max(mean[O_on[i]: W_on[i]])
+            else:
+                max = np.mean(mean[O_off[i]: W_on[i]])
+        elif arg == 'same':
+            max = np.mean(mean[O_off[i]: W_on[i]])
+        else:
+            raise ValueError('Argument for calculating summary decoding metric, max, is not known: {}'.format(arg))
         res['mean'].append(mean)
-        res['sem'].append(sstats.sem(data_reshaped, axis=1))
+        res['sem'].append(std)
         res['max'].append(max)
 
     res['mean'] = np.array(res['mean'])

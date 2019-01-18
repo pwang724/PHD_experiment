@@ -89,7 +89,6 @@ def convert_events_to_matrix(events, time_ax, n_cells=None, usemag=False):
 
 
 def append_defaultdicts(dictA, dictB):
-    #TODO: should this be in np array format
     for k in dictB.keys():
         dictA[k].append(dictB[k])
 

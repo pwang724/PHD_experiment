@@ -1,5 +1,8 @@
 import copy
+import itertools
+
 import numpy as np
+import plot
 
 
 def get_last_day_per_mouse(res):
@@ -83,3 +86,40 @@ def filter(res, filter_dict):
     for key, value in res.items():
         out[key] = value[select_ixs]
     return out
+
+
+def retrieve_unique_entries(res, loop_keys):
+    unique_entries_per_loopkey = []
+    for x in loop_keys:
+        a = res[x]
+        indexes = np.unique(a, return_index=True)[1]
+        unique_entries_per_loopkey.append([a[index] for index in sorted(indexes)])
+
+    unique_entry_combinations = list(itertools.product(*unique_entries_per_loopkey))
+    nlines = len(unique_entry_combinations)
+
+    list_of_ind = []
+    for x in range(nlines):
+        list_of_ixs = []
+        cur_combination = unique_entry_combinations[x]
+        for i, val in enumerate(cur_combination):
+            list_of_ixs.append(val == res[loop_keys[i]])
+        ind = np.all(list_of_ixs, axis=0)
+        ind_ = np.where(ind)[0]
+        list_of_ind.append(ind_)
+    return unique_entry_combinations, list_of_ind
+
+def assign_composite(res, loop_keys):
+    '''
+    loop keys change last first
+    :param res:
+    :param loop_keys:
+    :return:
+    '''
+    unique_entry_combinations, list_of_ind = retrieve_unique_entries(res, loop_keys)
+    out = np.zeros_like(res[loop_keys[0]]).astype(object)
+    for i, name in enumerate(unique_entry_combinations):
+        name = '_'.join([plot.nice_names(str(n)) for n in name])
+        out[list_of_ind[i]] = name
+    key = '_'.join(key for key in loop_keys)
+    res[key] = out

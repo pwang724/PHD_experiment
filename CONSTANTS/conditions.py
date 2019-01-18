@@ -82,6 +82,7 @@ class OFC:
            ]
     timing_override = [False, False, False, True, True]
     training_start_day = [1, 1, 1, 1, 1]
+    min_neurons= 52
 
 class OFC_STATE:
     name = 'OFC_STATE'
@@ -306,6 +307,7 @@ class BLA:
            ]
     timing_override = [True, True, True, True]
     training_start_day = [1, 1, 1, 1]
+    min_neurons = 22
 
 class BLA_STATE:
     name = 'BLA_STATE'

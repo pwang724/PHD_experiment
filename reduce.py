@@ -4,7 +4,7 @@ import numpy as np
 
 import filter
 from tools.utils import append_defaultdicts
-
+from scipy import stats as sstats
 
 def _sort(res, rank_keys):
     rank = []
@@ -14,7 +14,6 @@ def _sort(res, rank_keys):
     sorted_ranks = sorted(enumerate(rank), key=lambda x: (x[1][0], x[1][1]))
     sorted_ranks = [i[0] for i in sorted_ranks]
     return sorted_ranks
-
 
 def reduce_by_concat(res, key, rank_keys = None, verbose = False):
     data = res[key]
@@ -38,28 +37,36 @@ def reduce_by_concat(res, key, rank_keys = None, verbose = False):
                     print(str)
     return concatenated_res
 
-
 def reduce_by_mean(res, key, verbose = False):
     data = res[key]
 
     try:
         mean = np.mean(data, axis=0)
         std = np.std(data, axis=0)
+        sem = sstats.sem(data, axis=0)
     except:
-        mean = np.mean(data[data!=None], axis=0)
-        std = np.std(data[data!=None], axis=0)
-        print('mean of entries for {} could not be computed. took the mean of non-None entries: {}'
-              ' for mouse {}'.
-            format(key, data, res['mouse']))
+        if np.all(data == None):
+            mean = None
+            std = None
+            sem = None
+        else:
+            mean = np.mean(data[data!=None], axis=0)
+            std = np.std(data[data!=None], axis=0)
+            sem = sstats.sem(data[data!=None], axis=0)
+            print('mean of entries for {} could not be computed. took the mean of non-None entries: {}'
+                  ' for mouse {}'.
+                format(key, data, res['mouse']))
 
     out_res = defaultdict(list)
     for k, v in res.items():
         if k == key:
             out_res[k] = mean
             out_res[k + '_std'] = std
+            out_res[k + '_sem'] = sem
         else:
             if type(v[0]) == np.ndarray or type(v[0]) == list:
-                out_res[k] = v[0]
+                # out_res[k] = v[0]
+                pass
             else:
                 try:
                     if len(set(v)) == 1:
