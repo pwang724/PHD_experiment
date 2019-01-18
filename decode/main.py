@@ -3,6 +3,7 @@ import analysis
 import filter
 import reduce
 import plot
+from analysis import align_days
 from tools import experiment_tools
 import os
 from behavior.behavior_analysis import get_days_per_mouse
@@ -23,7 +24,7 @@ ANALYZE = True
 argTest = True
 
 #inputs
-condition = experimental_conditions.OFC_LONGTERM
+condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
 
@@ -106,6 +107,7 @@ if 'vary_decoding_style_odor' in experiments:
     if ANALYZE:
         res = analysis.load_results(experiment_path)
         analysis.analyze_results(res, condition)
+        align_days(res, last_day_per_mouse - learned_day_per_mouse)
         filter.assign_composite(res, ['mouse', 'shuffle'])
         filter.assign_composite(res, ['decode_style', 'shuffle'])
         if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':

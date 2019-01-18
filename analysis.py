@@ -125,3 +125,12 @@ def add_decode_stats(res, condition, arg='different'):
     res['sem'] = np.array(res['sem'])
     res['max'] = np.array(res['max'])
 
+
+def align_days(res, list_of_days):
+    new_days = np.zeros_like(res['day'])
+    mice, ix = np.unique(res['mouse'], return_inverse=True)
+    for i, mice in enumerate(mice):
+        current_ix = ix == i
+        days = res['day'][current_ix]
+        new_days[current_ix] = days - list_of_days[i]
+    res['day_aligned'] = new_days

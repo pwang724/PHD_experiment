@@ -14,13 +14,16 @@ def get_days_per_mouse(data_path, condition):
     res = analysis.load_all_cons(data_path)
     last_day_per_mouse = np.array(filter.get_last_day_per_mouse(res))
 
-    res_behavior = analyze_behavior(data_path, condition)
-    res_behavior_csp = filter.filter(res_behavior, {'odor_valence': 'CS+'})
-    res_behavior_summary = reduce.filter_reduce(res_behavior_csp, filter_key='mouse', reduce_key='learned_day')
-    mice, ix = np.unique(res_behavior_summary['mouse'], return_inverse=True)
-    temp = res_behavior_summary['learned_day'][ix]
-    temp[temp == None] = last_day_per_mouse[temp == None]
-    learned_days_per_mouse = np.ceil(temp.astype(int))
+    if hasattr(condition, 'csp'):
+        res_behavior = analyze_behavior(data_path, condition)
+        res_behavior_csp = filter.filter(res_behavior, {'odor_valence': 'CS+'})
+        res_behavior_summary = reduce.filter_reduce(res_behavior_csp, filter_key='mouse', reduce_key='learned_day')
+        mice, ix = np.unique(res_behavior_summary['mouse'], return_inverse=True)
+        temp = res_behavior_summary['learned_day'][ix]
+        temp[temp == None] = last_day_per_mouse[temp == None]
+        learned_days_per_mouse = np.ceil(temp.astype(int))
+    else:
+        learned_days_per_mouse = last_day_per_mouse
     return learned_days_per_mouse, last_day_per_mouse
 
 def analyze_behavior(data_path, condition):
