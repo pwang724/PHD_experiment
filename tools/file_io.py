@@ -2,7 +2,6 @@ import json
 import os
 import pickle
 import numpy as np
-from init.cons import Cons
 
 
 def save_pickle(save_path, save_name, data):

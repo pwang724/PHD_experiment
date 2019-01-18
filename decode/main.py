@@ -17,13 +17,13 @@ from tools.utils import chain_defaultdicts
 #
 core_experiments = ['vary_neuron_odor', 'vary_decoding_style_odor', 'vary_decoding_style_days',
                     'plot_vary_neuron_pir_ofc_bla']
-experiments = ['vary_neuron_odor']
+experiments = ['vary_decoding_style_odor']
 EXPERIMENT = False
 ANALYZE = True
 argTest = True
 
 #inputs
-condition = experimental_conditions.OFC
+condition = experimental_conditions.OFC_LONGTERM
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
 
@@ -94,7 +94,7 @@ if 'vary_decoding_style_odor' in experiments:
             style = ['identity','csp_identity','csm_identity']
         elif condition.name == 'PIR_NAIVE':
             style = ['identity']
-        elif condition.name == 'OFC' or condition.name == 'BLA':
+        elif condition.name == 'OFC' or condition.name == 'BLA' or condition.name == 'OFC_LONGTERM':
             style = ['csp_identity', 'csm_identity','valence']
         else:
             raise ValueError('condition name not recognized')
@@ -122,7 +122,7 @@ if 'vary_decoding_style_odor' in experiments:
             for j, dc in enumerate(decode_styles):
                 select_dict = {'mouse':mouse, 'decode_style': dc}
                 plot.plot_results(res, x_key='time', y_key='mean', loop_keys=loopkey,
-                                  plot_function= plt.fill_between,
+                                  plot_function= plt.fill_between, error_key= 'sem',
                                   select_dict=select_dict, path=save_path, ax_args=ax_args, plot_args=fill_args,
                                   save=False)
                 plot.plot_results(res, x_key='time', y_key='mean', loop_keys=loopkey,
@@ -160,7 +160,7 @@ if 'vary_decoding_style_odor' in experiments:
         summary_res_shuffle = reduce.filter_reduce(res_shuffle, 'decode_style', 'max')
         chain_defaultdicts(summary_res_shuffle, summary_res_nonshuffle)
         plot.plot_results(summary_res_shuffle, x_key='decode_style_shuffle', y_key='max',
-                          path = save_path, plot_function=plt.bar, plot_args=line_args, ax_args=ax_args,
+                          path = save_path, plot_function=plt.bar, plot_args=bar_args, ax_args=ax_args,
                           save=True, reuse=True, sort=True)
 
 

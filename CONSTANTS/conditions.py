@@ -177,6 +177,7 @@ class OFC_LONGTERM:
            ]
     timing_override = [True, True, True, True]
     training_start_day = [0, 0, 0, 0]
+    min_neurons = 58
 
 class OFC_JAWS:
     name = 'OFC_JAWS'

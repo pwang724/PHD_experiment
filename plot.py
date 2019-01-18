@@ -71,6 +71,8 @@ def _plot(plot_function, x, y, color, label, plot_args):
         for i in range(x.shape[0]):
             plot_function(x[i], y[i], color=color, label=label, **plot_args)
     else:
+        x = np.squeeze(x)
+        y = np.squeeze(y)
         plot_function(x, y, color=color, label=label, **plot_args)
 
 def _plot_error(plot_function, x, y, err, color, label, plot_args):
@@ -79,6 +81,9 @@ def _plot_error(plot_function, x, y, err, color, label, plot_args):
         for i in range(x.shape[0]):
             plot_function(x[i], y[i], err[i], color=color, label=label, **plot_args)
     else:
+        x = np.squeeze(x)
+        y = np.squeeze(y)
+        err = np.squeeze(err)
         plot_function(x, y, err, color=color, label=label, **plot_args)
 
 def _plot_fill(plot_function, x, y, err, color, label, plot_args):
@@ -87,6 +92,9 @@ def _plot_fill(plot_function, x, y, err, color, label, plot_args):
         for i in range(x.shape[0]):
             plot_function(x[i], y[i]-err[i], y[i] + err[i], color=color, label=label, **plot_args)
     else:
+        x = np.squeeze(x)
+        y = np.squeeze(y)
+        err = np.squeeze(err)
         plot_function(x, y-err, y+err, color=color, label=label, **plot_args)
 
 def plot_results(res, x_key, y_key, loop_keys =None,

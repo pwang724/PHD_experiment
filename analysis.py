@@ -106,7 +106,7 @@ def add_decode_stats(res, condition, arg='different'):
         data_reshaped = np.reshape(data.transpose([0, 2, 1]),
                                    [data.shape[0], data.shape[1] * data.shape[2]])
         mean = np.mean(data_reshaped, axis=1)
-        std = sstats.sem(data_reshaped, axis=1)
+        sem = sstats.sem(data_reshaped, axis=1)
 
         if arg == 'different':
             if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':
@@ -118,7 +118,7 @@ def add_decode_stats(res, condition, arg='different'):
         else:
             raise ValueError('Argument for calculating summary decoding metric, max, is not known: {}'.format(arg))
         res['mean'].append(mean)
-        res['sem'].append(std)
+        res['sem'].append(sem)
         res['max'].append(max)
 
     res['mean'] = np.array(res['mean'])
