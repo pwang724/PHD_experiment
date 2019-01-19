@@ -5,8 +5,7 @@ import filter
 from _CONSTANTS import conditions as experimental_conditions
 from _CONSTANTS.config import Config
 from behavior.behavior_analysis import analyze_behavior
-from reduce import filter_reduce
-from tools.utils import chain_defaultdicts
+from reduce import filter_reduce, chain_defaultdicts
 import plot
 import matplotlib.pyplot as plt
 import numpy as np

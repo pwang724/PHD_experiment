@@ -2,13 +2,12 @@ import analysis
 import filter
 import reduce
 import plot
-from analysis import align_days
+from analysis import add_aligned_days
 from tools import experiment_tools
 import os
 import glob
 import time
 from tools import utils
-from behavior.behavior_analysis import get_days_per_mouse
 import copy
 import tools.file_io as fio
 import numpy as np
@@ -147,7 +146,7 @@ def load_pca(save_path):
     experiment_dirs = sorted([os.path.join(save_path, d) for d in os.listdir(save_path)])
     for d in experiment_dirs:
         temp_res = fio.load_pickle(d)
-        utils.chain_defaultdicts(res, temp_res)
+        reduce.chain_defaultdicts(res, temp_res)
     return res
 
 def analyze_pca(res):
@@ -187,28 +186,34 @@ config.average = False
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'PCA_' + config.style, condition.name)
 figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'PCA', config.style, condition.name)
-do_PCA(condition, config, data_path, save_path)
 
-res = load_pca(save_path)
-analysis.add_indices(res)
-analysis.add_time(res)
-analysis.add_odor_value(res, condition)
-analyze_pca(res)
+EXPERIMENT = False
+ANALYZE = True
 
-summary_res = defaultdict(list)
-valences = np.unique(res['odor_valence'])
-mice = np.unique(res['mouse'])
-for valence in valences:
+if EXPERIMENT:
+    do_PCA(condition, config, data_path, save_path)
+
+if ANALYZE:
+    res = load_pca(save_path)
+    analysis.add_indices(res)
+    analysis.add_time(res)
+    analysis.add_odor_value(res, condition)
+    analyze_pca(res)
+
+    summary_res = defaultdict(list)
+    valences = np.unique(res['odor_valence'])
+    mice = np.unique(res['mouse'])
+    for valence in valences:
+        for mouse in mice:
+            temp = filter.filter(res, filter_dict={'odor_valence': valence, 'mouse': mouse})
+            reduced_temp = reduce.filter_reduce(temp, filter_key='day', reduce_key='distance')
+            reduce.chain_defaultdicts(summary_res, reduced_temp)
+
+    normalize_per_mouse(summary_res, 'distance')
     for mouse in mice:
-        temp = filter.filter(res, filter_dict={'odor_valence': valence, 'mouse': mouse})
-        reduced_temp = reduce.filter_reduce(temp, filter_key='day', reduce_key='distance')
-        utils.chain_defaultdicts(summary_res, reduced_temp)
-
-normalize_per_mouse(summary_res, 'distance')
-for mouse in mice:
-    plot.plot_results(summary_res, x_key='day', y_key='distance', loop_keys='odor_valence',
-                      select_dict={'mouse':mouse},
-                      path=figure_path)
+        plot.plot_results(summary_res, x_key='day', y_key='distance', loop_keys='odor_valence',
+                          select_dict={'mouse':mouse},
+                          path=figure_path)
 
 # print(res['score'])
 # data = res['mean']

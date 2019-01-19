@@ -5,11 +5,11 @@ import filter
 from _CONSTANTS import conditions as experimental_conditions
 from _CONSTANTS.config import Config
 from behavior.behavior_analysis import analyze_behavior
-from reduce import filter_reduce
-from tools.utils import chain_defaultdicts
+from reduce import filter_reduce, chain_defaultdicts
 import plot
 import matplotlib.pyplot as plt
 import numpy as np
+import reduce
 import analysis
 
 core_experiments = ['individual', 'individual_half_max', 'summary','basic_3']
@@ -18,8 +18,9 @@ conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experime
               experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
               experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
 
-experiments = ['individual', 'individual_half_max','basic_3']
-conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA]
+experiments = ['individual']
+# conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA]
+conditions = [experimental_conditions.PIR]
 
 list_of_res = []
 for i, condition in enumerate(conditions):
@@ -38,17 +39,27 @@ if 'individual' in experiments:
                    'xlim': [0, 100]}
 
         mice = np.unique(res['mouse'])
-        for i, mouse in enumerate(mice):
-            select_dict = {'mouse': mouse}
-            plot.plot_results(res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
-                              path=save_path)
-            plot.plot_results(res, x_key='trial', y_key='lick', loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
-                              path=save_path)
-            plot.plot_results(res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=plot_args,
-                              path=save_path)
+        # for i, mouse in enumerate(mice):
+        #     select_dict = {'mouse': mouse}
+        #     plot.plot_results(res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_standard',
+        #                       select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
+        #                       path=save_path)
+        #     plot.plot_results(res, x_key='trial', y_key='lick', loop_keys='odor_standard',
+        #                       select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
+        #                       path=save_path)
+        #     plot.plot_results(res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor_standard',
+        #                       select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=plot_args,
+        #                       path=save_path)
+
+        summary_res = defaultdict(list)
+        for valence in np.unique(res['odor_valence']):
+            for mouse in mice:
+                temp_res = filter.filter(res, filter_dict={'mouse':mouse, 'odor_valence':valence})
+                out_res = filter_reduce(temp_res, filter_key='odor_valence', reduce_key='lick_smoothed')
+                reduce.chain_defaultdicts(summary_res, out_res)
+        plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_valence',
+                          colors = ['green','red'], ax_args=ax_args, plot_args=plot_args,
+                          path=save_path)
 
 
 if 'individual_half_max' in experiments:
@@ -119,7 +130,8 @@ if 'basic_3' in experiments:
                       plot_function= plt.scatter, plot_args= plot_args, ax_args= ax_args, save=False)
 
     plot_args = {'fmt':'.', 'capsize':2, 'elinewidth':1, 'markersize':2, 'alpha': .5}
-    plot.plot_results(mean_std_res, x_key='condition_name', y_key='half_max', loop_keys=None, path=save_path,
+    plot.plot_results(mean_std_res, x_key='condition_name', y_key='half_max', error_key='half_max_sem',
+                      loop_keys=None, path=save_path,
                       select_dict= select_dict,
                       plot_function= plt.errorbar, plot_args= plot_args, ax_args = ax_args, save=True, reuse=True)
 
@@ -129,5 +141,6 @@ if 'basic_3' in experiments:
                       plot_function= plt.scatter, plot_args= plot_args, ax_args= ax_args, save=False)
 
     plot_args = {'fmt':'.', 'capsize':2, 'elinewidth':1, 'markersize':2, 'alpha': .5}
-    plot.plot_results(mean_std_res, x_key='condition_name', y_key='half_max', loop_keys=None, path=save_path,
+    plot.plot_results(mean_std_res, x_key='condition_name', y_key='half_max', error_key='half_max_sem',
+                      loop_keys=None, path=save_path,
                       plot_function= plt.errorbar, plot_args= plot_args, ax_args = ax_args, save=True, reuse=True)

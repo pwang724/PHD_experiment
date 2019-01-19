@@ -3,7 +3,7 @@ import analysis
 import filter
 import reduce
 import plot
-from analysis import align_days
+from analysis import add_aligned_days
 from tools import experiment_tools
 import os
 from behavior.behavior_analysis import get_days_per_mouse
@@ -13,7 +13,7 @@ from _CONSTANTS.config import Config
 import _CONSTANTS.conditions as experimental_conditions
 import matplotlib.pyplot as plt
 from collections import defaultdict
-from tools.utils import chain_defaultdicts
+from reduce import chain_defaultdicts
 
 #
 core_experiments = ['vary_neuron_odor', 'vary_decoding_style_odor', 'vary_decoding_style_days',
@@ -107,7 +107,7 @@ if 'vary_decoding_style_odor' in experiments:
     if ANALYZE:
         res = analysis.load_results(experiment_path)
         analysis.analyze_results(res, condition)
-        align_days(res, last_day_per_mouse - learned_day_per_mouse)
+        add_aligned_days(res, last_day_per_mouse - learned_day_per_mouse)
         filter.assign_composite(res, ['mouse', 'shuffle'])
         filter.assign_composite(res, ['decode_style', 'shuffle'])
         if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':
