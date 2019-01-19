@@ -25,10 +25,10 @@ def _easy_copy(old, new):
     else:
         raise ValueError('did not copy {}'.format(old))
 
-efty_dir = r'E:\IMPORTANT DATA\STORAGE_EFTY'
-roi_dir = r'E:\IMPORTANT DATA\STORAGE_ROI'
-data_dir = r'E:\IMPORTANT DATA\STORAGE_DATA'
-x_dir = r'E:\IMPORTANT DATA\DATA_X'
+efty_dir = r'E:\IMPORTANT _DATA\STORAGE_EFTY'
+roi_dir = r'E:\IMPORTANT _DATA\STORAGE_ROI'
+data_dir = r'E:\IMPORTANT _DATA\STORAGE_DATA'
+x_dir = r'E:\IMPORTANT _DATA\DATA_X'
 
 old_efty_str = '__EFTYf'
 new_efty_str = '_EFTY_F'
@@ -41,7 +41,7 @@ z_str = '_z'
 old_mask_str = 'm'
 new_mask_str = '_m.tif'
 
-base_dir = r'E:\IMPORTANT DATA\DATA_2P\M187_ofc'
+base_dir = r'E:\IMPORTANT _DATA\DATA_2P\M187_ofc'
 date_dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) if d[0].isdigit()]
 
 for current_dir in date_dirs:

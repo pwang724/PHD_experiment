@@ -30,11 +30,11 @@ class ConstantCons(baseCons):
     def __init__(self):
         super(ConstantCons, self).__init__()
 
-        self.FOLDER_ANALYSIS = 'E:\IMPORTANT DATA\DATA_X'
-        self.DIR_STORAGE_EFTY = 'E:\IMPORTANT DATA\STORAGE_EFTY'
-        self.DIR_STORAGE_ROI = 'E:\IMPORTANT DATA\STORAGE_ROI'
-        self.DIR_STORAGE_DATA = 'E:\IMPORTANT DATA\STORAGE_DATA'
-        self.DIR_VIZ_PICS = 'E:\IMPORTANT DATA\VIZ_PICS'
+        self.FOLDER_ANALYSIS = 'E:\IMPORTANT _DATA\DATA_X'
+        self.DIR_STORAGE_EFTY = 'E:\IMPORTANT _DATA\STORAGE_EFTY'
+        self.DIR_STORAGE_ROI = 'E:\IMPORTANT _DATA\STORAGE_ROI'
+        self.DIR_STORAGE_DATA = 'E:\IMPORTANT _DATA\STORAGE_DATA'
+        self.DIR_VIZ_PICS = 'E:\IMPORTANT _DATA\VIZ_PICS'
         self.KEY_EFTY = '_EFTY'
 
         self.DAQ_O = 1

@@ -14,10 +14,10 @@ class Config:
 
     cwd = r'C:\Users\P\Desktop\PYTHON\PHD_experiment'
     # cwd = '/Users/pwang/Desktop/GITHUB_PROJECTS/PHD_experiment'
-    LOCAL_DATA_PATH = os.path.join(cwd,'DATA')
+    LOCAL_DATA_PATH = os.path.join(cwd,'_DATA')
     LOCAL_DATA_SINGLE_FOLDER = 'single'
     LOCAL_DATA_TIMEPOINT_FOLDER = 'timepoint'
 
-    LOCAL_FIGURE_PATH = os.path.join(cwd,'FIGURES')
-    LOCAL_EXPERIMENT_PATH = os.path.join(cwd,'EXPERIMENTS')
-    LOCAL_ANALYSIS_PATH = os.path.join('ANALYSIS')
+    LOCAL_FIGURE_PATH = os.path.join(cwd,'_FIGURES')
+    LOCAL_EXPERIMENT_PATH = os.path.join(cwd,'_EXPERIMENTS')
+    LOCAL_ANALYSIS_PATH = os.path.join('_ANALYSIS')

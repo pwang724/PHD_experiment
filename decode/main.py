@@ -9,8 +9,8 @@ import os
 from behavior.behavior_analysis import get_days_per_mouse
 import copy
 import numpy as np
-from CONSTANTS.config import Config
-import CONSTANTS.conditions as experimental_conditions
+from _CONSTANTS.config import Config
+import _CONSTANTS.conditions as experimental_conditions
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from tools.utils import chain_defaultdicts

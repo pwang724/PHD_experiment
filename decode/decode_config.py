@@ -1,5 +1,5 @@
-import CONSTANTS.conditions as conditions
-from CONSTANTS.config import Config
+import _CONSTANTS.conditions as conditions
+from _CONSTANTS.config import Config
 import os
 
 class BaseConfig(object):

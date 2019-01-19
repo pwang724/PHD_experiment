@@ -1,4 +1,4 @@
-from CONSTANTS.config import Config
+from _CONSTANTS.config import Config
 import numpy as np
 import os
 import glob
@@ -87,6 +87,35 @@ def add_time(res):
         res['xticks'].append(xticks)
     res['time'] = np.array(res['time'])
     res['xticks'] = np.array(res['xticks'])
+
+def add_odor_value(res, condition):
+    mice, ix = np.unique(res['mouse'], return_inverse=True)
+    valence_array = np.zeros_like(res['odor']).astype(object)
+    standard_array = np.zeros_like(res['odor']).astype(object)
+
+    for i, mouse in enumerate(mice):
+        odors = condition.odors[i]
+        csps = condition.csp[i]
+        csms = [x for x in odors if not np.isin(x, csps)]
+        standard_dict = {}
+        valence_dict = {}
+        j=1
+        for csp in csps:
+            standard_dict[csp] = 'CS+' + str(j)
+            valence_dict[csp] = 'CS+'
+            j+=1
+        j=1
+        for csm in csms:
+            standard_dict[csm] = 'CS-' + str(j)
+            valence_dict[csm] = 'CS-'
+            j+=1
+
+        mouse_ix = ix == i
+        mouse_odors = res['odor'][mouse_ix]
+        valence_array[mouse_ix] = [valence_dict[o] for o in mouse_odors]
+        standard_array[mouse_ix] = [standard_dict[o] for o in mouse_odors]
+    res['odor_valence'] = valence_array
+    res['odor_standard'] = standard_array
 
 #add relevant stats
 def add_decode_stats(res, condition, arg='different'):

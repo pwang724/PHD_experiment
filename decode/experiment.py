@@ -2,10 +2,10 @@ import numpy as np
 import os
 from decode import decoding, decode_config
 import glob
-from CONSTANTS.config import Config
+from _CONSTANTS.config import Config
 import time
 import tools.file_io as fio
-import CONSTANTS.conditions as experimental_conditions
+import _CONSTANTS.conditions as experimental_conditions
 from collections import OrderedDict
 from tools.experiment_tools import perform
 

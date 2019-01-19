@@ -5,8 +5,8 @@ import time
 import numpy as np
 import os
 import glob
-import CONSTANTS.conditions as conditions
-from CONSTANTS.config import Config
+import _CONSTANTS.conditions as conditions
+from _CONSTANTS.config import Config
 
 
 def copy_config_from_matlab(path):

@@ -3,10 +3,10 @@
 # import matlab
 # import init.load_matlab
 
-import CONSTANTS.conditions as experimental_conditions
+import _CONSTANTS.conditions as experimental_conditions
 import os
 import glob
-from CONSTANTS.config import Config
+from _CONSTANTS.config import Config
 
 def _look_at_timing(cons):
     on = cons.DAQ_O_ON_F
