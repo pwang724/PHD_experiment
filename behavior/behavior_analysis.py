@@ -4,15 +4,13 @@ from behavior.behavior_config import behaviorConfig
 import filter
 import reduce
 from scipy.signal import savgol_filter
-
-from reduce import reduce_by_concat
 from tools.utils import append_defaultdicts
 import copy
 import analysis
 
 def get_days_per_mouse(data_path, condition):
     res = analysis.load_all_cons(data_path)
-    last_day_per_mouse = np.array(filter.get_last_day_per_mouse(res))
+    last_day_per_mouse = np.array(analysis.get_last_day_per_mouse(res))
 
     if hasattr(condition, 'csp'):
         res_behavior = analyze_behavior(data_path, condition)
@@ -32,7 +30,7 @@ def analyze_behavior(data_path, condition):
     analysis.add_time(res)
     lick_res = convert(res, condition)
     plot_res = agglomerate_days(lick_res, condition, condition.training_start_day,
-                                filter.get_last_day_per_mouse(res))
+                                analysis.get_last_day_per_mouse(res))
     get_behavior_stats(plot_res)
     return plot_res
 
@@ -88,6 +86,37 @@ def convert(res, condition):
     return new_res
 
 def agglomerate_days(res, condition, first_day, last_day):
+    def _sort(res, rank_keys):
+        rank = []
+        for rank_key in rank_keys:
+            rank.append(res[rank_key])
+        rank = np.array(rank).transpose()
+        sorted_ranks = sorted(enumerate(rank), key=lambda x: (x[1][0], x[1][1]))
+        sorted_ranks = [i[0] for i in sorted_ranks]
+        return sorted_ranks
+
+    def reduce_by_concat(res, key, rank_keys=None, verbose=False):
+        data = res[key]
+        if rank_keys:
+            ixs = _sort(res, rank_keys)
+            data = data[ixs]
+        data = np.array(data)
+        concatenated_res = defaultdict(list)
+        for k, v in res.items():
+            if k == key:
+                concatenated_res[k] = data
+            elif rank_keys and k in rank_keys:
+                pass
+            else:
+                try:
+                    if len(set(v)) == 1:
+                        concatenated_res[k] = v[0]
+                except:
+                    str = 'Did not parse {}'.format(k)
+                    if verbose:
+                        print(str)
+        return concatenated_res
+
     mice = np.unique(res['mouse'])
     out = defaultdict(list)
 

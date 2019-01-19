@@ -5,22 +5,6 @@ import numpy as np
 import plot
 
 
-def get_last_day_per_mouse(res):
-    '''
-    returns the value of the last day of imaging per mouse
-    :param res: flattened dict of results
-    :return: list of last day per each mouse
-    '''
-    out = []
-    list_of_dates = res['NAME_DATE']
-    list_of_mice = res['NAME_MOUSE']
-    _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
-    for mouse_ix in np.unique(mouse_ixs):
-        mouse_dates = list_of_dates[mouse_ixs == mouse_ix]
-        counts = np.unique(mouse_dates).size - 1
-        out.append(counts)
-    return out
-
 def filter_days_per_mouse(res, days_per_mouse):
     '''
     Filter results to only include the days specified by days_per_mouse.
@@ -47,21 +31,6 @@ def filter_days_per_mouse(res, days_per_mouse):
         ix[ix == True]= membership
         list_of_ixs.append(ix)
 
-    select_ixs = np.any(list_of_ixs, axis=0)
-    for key, value in res.items():
-        out[key] = value[select_ixs]
-    return out
-
-def filter_odors_per_mouse(res, odors):
-    out = copy.copy(res)
-    list_of_ixs = []
-    list_of_odors = res['odor']
-    list_of_mice = res['mouse']
-    mouse_names, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
-    for i, mouse_name in enumerate(mouse_names):
-        mouse_mask = list_of_mice == mouse_name
-        odor_mask = np.isin(list_of_odors, odors[i])
-        list_of_ixs.append(np.all((mouse_mask, odor_mask), axis=0))
     select_ixs = np.any(list_of_ixs, axis=0)
     for key, value in res.items():
         out[key] = value[select_ixs]

@@ -77,11 +77,11 @@ def load_condition(condition):
         load_timepoint_from_matlab(path, name, condition.timing_override[i])
 
 if __name__ == '__main__':
-    # example_path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/7-19-2016/420'
+    # example_path = 'E:/IMPORTANT _DATA/DATA_2P/M187_ofc/7-19-2016/420'
     # mat, config = load_single_from_matlab(example_path)
 
     # condition = 'OFC'
-    # path = 'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING'
+    # path = 'E:/IMPORTANT _DATA/DATA_2P/M187_ofc/training_LEARNING'
     # load_timepoint_from_matlab(path, condition, save=True)
 
     # for condition in conditions.all_conditions():

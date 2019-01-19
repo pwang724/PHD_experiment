@@ -163,3 +163,20 @@ def align_days(res, list_of_days):
         days = res['day'][current_ix]
         new_days[current_ix] = days - list_of_days[i]
     res['day_aligned'] = new_days
+
+
+def get_last_day_per_mouse(res):
+    '''
+    returns the value of the last day of imaging per mouse
+    :param res: flattened dict of results
+    :return: list of last day per each mouse
+    '''
+    out = []
+    list_of_dates = res['NAME_DATE']
+    list_of_mice = res['NAME_MOUSE']
+    _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
+    for mouse_ix in np.unique(mouse_ixs):
+        mouse_dates = list_of_dates[mouse_ixs == mouse_ix]
+        counts = np.unique(mouse_dates).size - 1
+        out.append(counts)
+    return out
