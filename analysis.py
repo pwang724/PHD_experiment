@@ -73,7 +73,7 @@ def add_indices(res):
     res['day'] = days
 
 def add_time(res):
-    nExperiments = res['TRIAL_FRAMES'].size
+    nExperiments = res['DAQ_O_ON'].size
     for i in range(nExperiments):
         nF = res['TRIAL_FRAMES'][i]
         period = res['TRIAL_PERIOD'][i]
@@ -88,7 +88,8 @@ def add_time(res):
     res['time'] = np.array(res['time'])
     res['xticks'] = np.array(res['xticks'])
 
-def add_aligned_days(res, list_of_days):
+def add_aligned_days(res, last_days, learned_days):
+    list_of_days = learned_days
     new_days = np.zeros_like(res['day'])
     mice, ix = np.unique(res['mouse'], return_inverse=True)
     for i, mice in enumerate(mice):
@@ -97,34 +98,6 @@ def add_aligned_days(res, list_of_days):
         new_days[current_ix] = days - list_of_days[i]
     res['day_aligned'] = new_days
 
-def add_odor_value(res, condition):
-    mice, ix = np.unique(res['mouse'], return_inverse=True)
-    valence_array = np.zeros_like(res['odor']).astype(object)
-    standard_array = np.zeros_like(res['odor']).astype(object)
-
-    for i, mouse in enumerate(mice):
-        odors = condition.odors[i]
-        csps = condition.csp[i]
-        csms = [x for x in odors if not np.isin(x, csps)]
-        standard_dict = {}
-        valence_dict = {}
-        j=1
-        for csp in csps:
-            standard_dict[csp] = 'CS+' + str(j)
-            valence_dict[csp] = 'CS+'
-            j+=1
-        j=1
-        for csm in csms:
-            standard_dict[csm] = 'CS-' + str(j)
-            valence_dict[csm] = 'CS-'
-            j+=1
-
-        mouse_ix = ix == i
-        mouse_odors = res['odor'][mouse_ix]
-        valence_array[mouse_ix] = [valence_dict[o] for o in mouse_odors]
-        standard_array[mouse_ix] = [standard_dict[o] for o in mouse_odors]
-    res['odor_valence'] = valence_array
-    res['odor_standard'] = standard_array
 
 #add relevant stats
 def add_decode_stats(res, condition, arg='different'):

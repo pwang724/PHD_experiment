@@ -16,11 +16,11 @@ core_experiments = ['individual', 'individual_half_max', 'summary','basic_3']
 # experiments = ['individual', 'individual_half_max', 'basic_3']
 conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA,
               experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
-              experimental_conditions.OFC_JAWS, experimental_conditions.BLA_JAWS]
+              experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH, experimental_conditions.BLA_JAWS]
 
 experiments = ['individual']
 # conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA]
-conditions = [experimental_conditions.PIR]
+conditions = [experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH]
 
 list_of_res = []
 for i, condition in enumerate(conditions):
@@ -32,34 +32,34 @@ if 'individual' in experiments:
     for res, condition in zip(list_of_res, conditions):
         save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
         colors = ['green', 'lime', 'red', 'maroon']
-        plot_args = {'marker': 'o', 'markersize': 1, 'alpha': .6, 'linewidth': 1}
-        ax_args = {'yticks': [0, 10, 20, 30, 40], 'ylim': [-1, 41], 'xticks': [0, 20, 40, 60, 80, 100],
-                   'xlim': [0, 100]}
-        bool_ax_args = {'yticks': [0, 25, 50, 75, 100], 'ylim': [-5, 105], 'xticks': [0, 20, 40, 60, 80, 100],
-                   'xlim': [0, 100]}
+        plot_args = {'marker': 'o', 'markersize': 0, 'alpha': .3, 'linewidth': 1}
+        ax_args = {'yticks': [0, 10, 20], 'ylim': [-1, 21], 'xticks': [0, 50, 100, 150],
+                   'xlim': [0, 150]}
+        bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150],
+                   'xlim': [0, 150]}
 
         mice = np.unique(res['mouse'])
-        # for i, mouse in enumerate(mice):
-        #     select_dict = {'mouse': mouse}
-        #     plot.plot_results(res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_standard',
-        #                       select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
-        #                       path=save_path)
-        #     plot.plot_results(res, x_key='trial', y_key='lick', loop_keys='odor_standard',
-        #                       select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
-        #                       path=save_path)
-        #     plot.plot_results(res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor_standard',
-        #                       select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=plot_args,
-        #                       path=save_path)
+        for i, mouse in enumerate(mice):
+            select_dict = {'mouse': mouse}
+            plot.plot_results(res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
+                              path=save_path)
+            plot.plot_results(res, x_key='trial', y_key='lick', loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=plot_args,
+                              path=save_path)
+            plot.plot_results(res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=plot_args,
+                              path=save_path)
 
-        summary_res = defaultdict(list)
-        for valence in np.unique(res['odor_valence']):
-            for mouse in mice:
-                temp_res = filter.filter(res, filter_dict={'mouse':mouse, 'odor_valence':valence})
-                out_res = filter_reduce(temp_res, filter_key='odor_valence', reduce_key='lick_smoothed')
-                reduce.chain_defaultdicts(summary_res, out_res)
-        plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_valence',
-                          colors = ['green','red'], ax_args=ax_args, plot_args=plot_args,
-                          path=save_path)
+        csp_res = filter.filter(res, {'odor_valence': 'CS+'})
+        csp_summary = filter_reduce(csp_res, filter_key='mouse', reduce_key='lick_smoothed')
+        csm_res = filter.filter(res, {'odor_valence': 'CS-'})
+        csm_summary = filter_reduce(csm_res, filter_key='mouse', reduce_key='lick_smoothed')
+        chain_defaultdicts(csp_summary, csm_summary)
+        summary_res = csp_summary
+        plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
+                            colors= ['lime','salmon'], ax_args=ax_args, plot_args=plot_args,
+                            path=save_path)
 
 
 if 'individual_half_max' in experiments:
@@ -88,23 +88,23 @@ if 'individual_half_max' in experiments:
             print('Cannot get half_max data for: {}'.format(condition.name))
             # raise ValueError('Cannot summarize: {}'.format(condition.name))
 
-if 'summary' in experiments:
-    plot_args = {'marker': '.', 'markersize': 1, 'alpha': .6, 'linewidth': 1}
-    ax_args = {'yticks': [0, 10, 20, 30, 40], 'ylim': [-1, 41], 'xticks': [0, 20, 40, 60, 80, 100],
-               'xlim': [0, 100]}
-    for res, condition in zip(list_of_res, conditions):
-        save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
-
-        csp_res = filter.filter(res, {'odor_valence': 'CS+'})
-        csp_summary = filter_reduce(csp_res, filter_key='mouse', reduce_key='lick_smoothed')
-        csm_res = filter.filter(res, {'odor_valence': 'CS-'})
-        csm_summary = filter_reduce(csm_res, filter_key='mouse', reduce_key='lick_smoothed')
-        chain_defaultdicts(csp_summary, csm_summary)
-        summary_res = csp_summary
-
-        plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
-                            colors= ['lime','salmon'], ax_args=ax_args, plot_args=plot_args,
-                            path=save_path)
+# if 'summary' in experiments:
+#     plot_args = {'marker': '.', 'markersize': 1, 'alpha': .6, 'linewidth': 1}
+#     ax_args = {'yticks': [0, 10, 20, 30, 40], 'ylim': [-1, 41], 'xticks': [0, 20, 40, 60, 80, 100],
+#                'xlim': [0, 100]}
+#     for res, condition in zip(list_of_res, conditions):
+#         save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
+#
+#         csp_res = filter.filter(res, {'odor_valence': 'CS+'})
+#         csp_summary = filter_reduce(csp_res, filter_key='mouse', reduce_key='lick_smoothed')
+#         csm_res = filter.filter(res, {'odor_valence': 'CS-'})
+#         csm_summary = filter_reduce(csm_res, filter_key='mouse', reduce_key='lick_smoothed')
+#         chain_defaultdicts(csp_summary, csm_summary)
+#         summary_res = csp_summary
+#
+#         plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
+#                             colors= ['lime','salmon'], ax_args=ax_args, plot_args=plot_args,
+#                             path=save_path)
 
 
 if 'basic_3' in experiments:

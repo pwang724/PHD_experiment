@@ -1,5 +1,5 @@
 from init.cons import Cons
-import matlab.engine
+# import matlab.engine
 import matlab
 import time
 import numpy as np
@@ -70,11 +70,33 @@ def load_timepoint_from_matlab(path, name, timing_override = False):
         Config.save_mat_f(save_path, save_name, data=mat)
         Config.save_cons_f(save_path, save_name, data=cons)
 
-def load_condition(condition):
+def load_behavior_folders_from_matlab(path, name, timing_override = False):
+    date_dirs = [os.path.join(path,x) for x in os.listdir(path)]
+    for date_dir in date_dirs:
+        start_time = time.time()
+        dirs = [os.path.join(date_dir, x) for x in os.listdir(date_dir) if 'cycle' not in x]
+        for dir in dirs:
+            cons = Cons(dir, timing_override)
+            print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(dir, time.time() - start_time))
+            save_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_BEHAVIOR_FOLDER,
+                                     name)
+            save_name = cons.NAME_MOUSE + '__' + cons.NAME_DATE + '__' + cons.NAME_PLANE
+            Config.save_cons_f(save_path, save_name, data=cons)
+
+
+
+def load_condition(condition, arg = 'timepoint'):
     name = condition.name
     paths = condition.paths
     for i, path in enumerate(paths):
-        load_timepoint_from_matlab(path, name, condition.timing_override[i])
+        if arg == 'timepoint':
+            load_timepoint_from_matlab(path, name, condition.timing_override[i])
+        elif arg == 'behavior':
+            load_behavior_folders_from_matlab(path, name, condition.timing_override[i])
+        else:
+            raise ValueError('argument for loading matlab files is not recognized')
+
+
 
 if __name__ == '__main__':
     # example_path = 'E:/IMPORTANT _DATA/DATA_2P/M187_ofc/7-19-2016/420'
@@ -87,5 +109,12 @@ if __name__ == '__main__':
     # for condition in conditions.all_conditions():
     #     load_condition(condition)
 
-    condition = conditions.PIR
-    load_condition(condition)
+    # condition = conditions.PIR
+    # load_condition(condition)
+
+    # condition = conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
+    # load_condition(condition, arg = 'behavior')
+
+    condition = conditions.OFC_JAWS
+    condition.paths = [condition.paths[-1]]
+    load_condition(condition, arg = 'behavior')

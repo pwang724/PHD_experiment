@@ -1,8 +1,8 @@
 import analysis
+import behavior.behavior_analysis
 import filter
 import reduce
 import plot
-from analysis import add_aligned_days
 from tools import experiment_tools
 import os
 import glob
@@ -15,6 +15,7 @@ from _CONSTANTS.config import Config
 import _CONSTANTS.conditions as experimental_conditions
 import sklearn.decomposition as skdecomp
 from scipy import stats as sstats
+from behavior.behavior_analysis import get_days_per_mouse
 
 import matplotlib.pyplot as plt
 from collections import defaultdict
@@ -61,11 +62,17 @@ def do_PCA(condition, PCAConfig, data_path, save_path):
         for cons in list_of_cons:
             assert cons.NAME_MOUSE == mouse_name, 'Wrong mouse file!'
 
-        odor = condition.odors[i]
-        if PCAConfig.style == 'all':
-            csp = None
-        else:
+        if hasattr(condition, 'odors'):
+            odor = condition.odors[i]
             csp = condition.csp[i]
+        else:
+            odor = condition.dt_odors[i] + condition.pt_csp[i]
+            csp = condition.dt_csp[i] + condition.pt_csp[i]
+        #
+        # if PCAConfig.style == 'all':
+        #     csp = None
+        # else:
+        #     csp = condition.csp[i]
 
         name = list_of_cons[0].NAME_MOUSE
         out, variance_explained = PCA(list_of_cons, list_of_data, odor, csp, PCAConfig)
@@ -110,6 +117,8 @@ def PCA(list_of_cons, list_of_data, odor, csp, pca_config):
     pca = skdecomp.PCA(n_components=pca_nPCs)
     pca.fit(pca_data)
     variance_explained = pca.explained_variance_ratio_
+    components = pca.components_
+    variance = pca.explained_variance_
 
     res = defaultdict(list)
     for cons, data in zip(list_of_cons, list_of_data):
@@ -117,25 +126,26 @@ def PCA(list_of_cons, list_of_data, odor, csp, pca_config):
         data_trial_time_cell = utils.reshape_data(data, trial_axis=0, cell_axis=2, time_axis=1,
                                                   nFrames=cons.TRIAL_FRAMES)
         list_transformed_data = []
-        for ix in list_of_ixs:
-            cur = data_trial_time_cell[ix]
-            transformed_data = []
-            for trial in range(cur.shape[0]):
-                transformed_data.append(pca.transform(cur[trial]))
+        for i, ix in enumerate(list_of_ixs):
+            if any(ix):
+                o = chosen_odors[i]
+                cur = data_trial_time_cell[ix]
+                transformed_data = []
+                for trial in range(cur.shape[0]):
+                    transformed_data.append(pca.transform(cur[trial]))
+                transformed_data = np.stack(transformed_data, axis=0)
 
-            transformed_data = np.stack(transformed_data, axis=0)
-            list_transformed_data.append(transformed_data)
-
-        for o, data in zip(chosen_odors, list_transformed_data):
-            # data is in format of trials X time X cells
-            res['data'].append(data)
-            res['odor'].append(o)
-            res['variance_explained'].append(variance_explained)
-            for key, val in pca_config.__dict__.items():
-                res[key].append(val)
-            for key, val in cons.__dict__.items():
-                if type(val) != list and type(val) != np.ndarray:
+                # data is in format of trials X time X cells
+                res['data'].append(transformed_data)
+                res['odor'].append(o)
+                res['variance_explained'].append(variance_explained)
+                # res['components'].append(components)
+                # res['variance'].append(variance)
+                for key, val in pca_config.__dict__.items():
                     res[key].append(val)
+                for key, val in cons.__dict__.items():
+                    if type(val) != list and type(val) != np.ndarray:
+                        res[key].append(val)
 
     for key, val in res.items():
         res[key] = np.array(val)
@@ -150,6 +160,11 @@ def load_pca(save_path):
     return res
 
 def analyze_pca(res):
+    '''
+    first average across all trials, then
+    :param res:
+    :return:
+    '''
     list_of_data = res['data']
     O_on = res['DAQ_O_ON_F'].astype(np.int)
     O_off = res['DAQ_O_OFF_F'].astype(np.int)
@@ -159,13 +174,27 @@ def analyze_pca(res):
         mean = np.mean(data, axis=0)
         std = np.std(data, axis=0)
         sem = sstats.sem(data, axis=0)
-        score = np.max(mean[O_on[i]:W_on[i],:], axis=0) - np.mean(mean[:O_on[i]], axis=0)
-        distance = np.linalg.norm(score * variance_explained[i])
+        distances = mean * variance_explained[i]
+        distance = np.max(distances[O_on[i]:W_on[i]]) - np.mean(distances[:O_on[i]])
+
         res['mean'].append(mean)
         res['std'].append(std)
         res['sem'].append(sem)
-        res['score'].append(score)
         res['distance'].append(distance)
+
+        # for j in range(data.shape[0]):
+        #     for k in range(data.shape[1]):
+        #         data[j,k,] *= variance_explained[i]
+        #
+        # distance = np.linalg.norm(data, axis=2)
+        # mean = np.mean(distance, axis=0)
+        # std = np.std(distance, axis=0)
+        # sem = sstats.sem(distance, axis=0)
+        # distance_score = np.max(mean[O_on[i]:W_on[i]]) - np.mean(mean[:O_on[i]])
+        # res['mean'].append(mean)
+        # res['std'].append(std)
+        # res['sem'].append(sem)
+        # res['distance'].append(distance_score)
     for key, val in res.items():
         res[key] = np.array(val)
 
@@ -174,11 +203,13 @@ def normalize_per_mouse(res, key):
     for i, mouse in enumerate(mice):
         ix = mouse_ix == i
         data = res[key][ix]
-        data /= np.max(data)
+        max = np.max(data)
+        min = np.min(data)
+        data = (data - min)/(max - min)
         res[key][ix] = data
 
 
-condition = experimental_conditions.OFC_LONGTERM
+condition = experimental_conditions.MPFC_COMPOSITE
 config = PCAConfig()
 config.style = 'all'
 config.n_principal_components = 5
@@ -187,17 +218,22 @@ data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOL
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'PCA_' + config.style, condition.name)
 figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'PCA', config.style, condition.name)
 
-EXPERIMENT = False
+EXPERIMENT = True
 ANALYZE = True
+
+ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05]}
+line_args = {'alpha': .5, 'linewidth': 1, 'marker': 'o', 'markersize': 1}
 
 if EXPERIMENT:
     do_PCA(condition, config, data_path, save_path)
 
 if ANALYZE:
     res = load_pca(save_path)
+    learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
     analysis.add_indices(res)
     analysis.add_time(res)
-    analysis.add_odor_value(res, condition)
+    analysis.add_aligned_days(res, last_days=last_day_per_mouse, learned_days=learned_day_per_mouse)
+    behavior.behavior_analysis.add_odor_value(res, condition)
     analyze_pca(res)
 
     summary_res = defaultdict(list)
@@ -210,15 +246,25 @@ if ANALYZE:
             reduce.chain_defaultdicts(summary_res, reduced_temp)
 
     normalize_per_mouse(summary_res, 'distance')
-    for mouse in mice:
+    for i, mouse in enumerate(mice):
         plot.plot_results(summary_res, x_key='day', y_key='distance', loop_keys='odor_valence',
                           select_dict={'mouse':mouse},
+                          ax_args=ax_args, plot_args=line_args,
                           path=figure_path)
+    summary_csp_res = filter.filter(summary_res, filter_dict={'odor_valence':'CS+'})
+    plot.plot_results(summary_csp_res, x_key='day', y_key='distance', loop_keys= 'mouse',
+                      colors=['Black'] * mice.size,
+                      ax_args=ax_args, plot_args=line_args,
+                      path=figure_path)
 
-# print(res['score'])
-# data = res['mean']
-# x_data = data[:,:,0]
-# y_data = data[:,:,1]
-# z_data = data[:,:,2]
-# plt.plot(x_data.transpose(),y_data.transpose())
-# plt.show()
+    normalize_per_mouse(summary_res, 'distance')
+    for i, mouse in enumerate(mice):
+        plot.plot_results(summary_res, x_key='day_aligned', y_key='distance', loop_keys='odor_valence',
+                          select_dict={'mouse':mouse},
+                          ax_args=ax_args, plot_args=line_args,
+                          path=figure_path)
+    summary_csp_res = filter.filter(summary_res, filter_dict={'odor_valence':'CS+'})
+    plot.plot_results(summary_csp_res, x_key='day_aligned', y_key='distance', loop_keys= 'mouse',
+                      colors=['Black'] * mice.size,
+                      ax_args=ax_args, plot_args=line_args,
+                      path=figure_path)

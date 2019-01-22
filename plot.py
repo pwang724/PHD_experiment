@@ -29,7 +29,10 @@ def nice_names(key):
         'identity': 'ID',
         'valence': 'Valence',
         'False': '0',
-        'True': '1'
+        'True': '1',
+        'BEHAVIOR_OFC_JAWS_PRETRAINING': 'PT IH',
+        'BEHAVIOR_OFC_JAWS_DISCRIMINATION': 'DT IH',
+        'BEHAVIOR_OFC_YFP': 'YFP',
     }
 
     if key in nice_name_dict.keys():
@@ -81,9 +84,9 @@ def _plot_error(plot_function, x, y, err, color, label, plot_args):
         for i in range(x.shape[0]):
             plot_function(x[i], y[i], err[i], color=color, label=label, **plot_args)
     else:
-        x = np.squeeze(x)
-        y = np.squeeze(y)
-        err = np.squeeze(err)
+        # x = np.squeeze(x)
+        # y = np.squeeze(y)
+        # err = np.squeeze(err)
         plot_function(x, y, err, color=color, label=label, **plot_args)
 
 def _plot_fill(plot_function, x, y, err, color, label, plot_args):
@@ -156,8 +159,8 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         label = labels[i]
         plot_ix = loop_indices[i]
         x_plot = res[x_key][plot_ix]
-        if type(x_plot) != np.ndarray:
-            x_plot = np.array([nice_names(x) for x in x_plot])
+        if type(x_plot[0]) != np.ndarray:
+            x_plot = np.array([nice_names(x) for x in list(x_plot)])
         y_plot = res[y_key][plot_ix]
         if plot_function == plt.errorbar:
             error_plot = res[error_key][plot_ix]
@@ -185,7 +188,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
             handles, labels = ax.get_legend_handles_labels()
             by_label = OrderedDict(zip(labels, handles))
-            l = ax.legend(by_label.values(), by_label.keys(), ncol = 3, fontsize = 4)
+            l = ax.legend(by_label.values(), by_label.keys(), ncol = 4, fontsize = 4)
             l.set_title(nice_loop_str)
             plt.setp(l.get_title(), fontsize=4)
 
@@ -201,4 +204,4 @@ def plot_results(res, x_key, y_key, loop_keys =None,
             loop_str = '+'.join(loop_keys)
             folder_name += '_vary_' + loop_str
         save_path = os.path.join(path, folder_name)
-        _easy_save(save_path, name, dpi=300, pdf=False)
+        _easy_save(save_path, name, dpi=300, pdf=True)

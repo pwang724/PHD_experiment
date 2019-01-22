@@ -107,7 +107,7 @@ if 'vary_decoding_style_odor' in experiments:
     if ANALYZE:
         res = analysis.load_results(experiment_path)
         analysis.analyze_results(res, condition)
-        add_aligned_days(res, last_day_per_mouse - learned_day_per_mouse)
+        add_aligned_days(res, last_days=last_day_per_mouse, learned_days=learned_day_per_mouse)
         filter.assign_composite(res, ['mouse', 'shuffle'])
         filter.assign_composite(res, ['decode_style', 'shuffle'])
         if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':

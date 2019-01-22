@@ -46,6 +46,7 @@ def append_defaultdicts(dictA, dictB):
 
 def chain_defaultdicts(dictA, dictB):
     '''
+    works as intended
     :param dictA:
     :param dictB:
     :return:
@@ -101,7 +102,10 @@ def reduce_by_mean(res, key, verbose = False):
         else:
             mean = np.mean(data[data!=None], axis=0)
             std = np.std(data[data!=None], axis=0)
-            sem = sstats.sem(data[data!=None], axis=0)
+            if len(data[data!=None]) == 1:
+                sem = 0
+            else:
+                sem = sstats.sem(data[data!=None], axis=0)
             print('mean of entries for {} could not be computed. took the mean of non-None entries: {}'
                   ' for mouse {}'.
                 format(key, data, res['mouse']))

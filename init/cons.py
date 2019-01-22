@@ -121,9 +121,9 @@ class Cons(ConstantCons):
         self.NAME_PLANE = plane
 
     def _getOdors(self):
-        tif_pathnames = glob.glob(os.path.join(self.DIR_ORIG, '*.tif'))
-        tif_names = [os.path.splitext(os.path.split(x)[1])[0] for x in tif_pathnames]
-        odor_names = [x[4:] for x in tif_names]
+        mat_pathnames = glob.glob(os.path.join(self.DIR_ORIG, '*.mat'))
+        mat_names = [os.path.splitext(os.path.split(x)[1])[0] for x in mat_pathnames]
+        odor_names = [x[4:] for x in mat_names]
         odor_unique, odor_index = np.unique(odor_names, return_inverse= True)
 
         self.ODOR_TRIALIDX = odor_index
@@ -148,15 +148,15 @@ class Cons(ConstantCons):
         except:
             raise ValueError("""cannot read the xml file: {}""".format(xml_file))
 
-        tifs = glob.glob(os.path.join(self.DIR_ORIG, '*.tif'))
-        tif_file = tifs[0]
         try:
+            tifs = glob.glob(os.path.join(self.DIR_ORIG, '*.tif'))
+            tif_file = tifs[0]
             im = io.imread(tif_file)
+            self.TRIAL_FRAMES = im.shape[0]
         except:
-            raise ValueError("""cannot read the tiff file: {}""".format(tif_file))
+            print("""cannot read the tiff files in directory: {}""".format(self.DIR_ORIG))
 
         self.TRIAL_PERIOD = period
-        self.TRIAL_FRAMES = im.shape[0]
 
     def _getDaq(self, timing_override):
         def _get_odor_timing(O, timing_override=False):
