@@ -39,6 +39,16 @@ def get_days_per_mouse(data_path, condition):
         learned_days_per_mouse = last_day_per_mouse
     return learned_days_per_mouse, last_day_per_mouse
 
+def get_licks_per_day(data_path, condition):
+    res = analysis.load_all_cons(data_path)
+    analysis.add_indices(res)
+    analysis.add_time(res)
+    lick_res = convert(res, condition)
+    lick_res['lick_boolean'] = np.array([y > 0 for y in lick_res['lick']])
+    out = reduce.new_filter_reduce(lick_res, ['odor','day','mouse'], 'lick_boolean')
+    return out
+
+
 def analyze_behavior(data_path, condition):
     res = analysis.load_all_cons(data_path)
     analysis.add_indices(res)

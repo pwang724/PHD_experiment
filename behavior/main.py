@@ -12,15 +12,21 @@ import numpy as np
 import reduce
 import analysis
 
-core_experiments = ['individual', 'individual_half_max', 'summary','basic_3']
-# experiments = ['individual', 'individual_half_max', 'basic_3']
-conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA,
-              experimental_conditions.OFC_LONGTERM, experimental_conditions.BLA_LONGTERM,
-              experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH, experimental_conditions.BLA_JAWS]
+experiments = [
+    'individual',
+    'individual_half_max',
+    'basic_3'
+]
+conditions = [
+    experimental_conditions.PIR,
+    experimental_conditions.OFC,
+    # experimental_conditions.BLA,
+    # experimental_conditions.OFC_LONGTERM,
+    experimental_conditions.BLA_LONGTERM,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    # experimental_conditions.BLA_JAWS
+]
 
-experiments = ['individual']
-# conditions = [experimental_conditions.PIR, experimental_conditions.OFC, experimental_conditions.BLA]
-conditions = [experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH]
 
 list_of_res = []
 for i, condition in enumerate(conditions):
@@ -51,12 +57,7 @@ if 'individual' in experiments:
                               select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=plot_args,
                               path=save_path)
 
-        csp_res = filter.filter(res, {'odor_valence': 'CS+'})
-        csp_summary = filter_reduce(csp_res, filter_key='mouse', reduce_key='lick_smoothed')
-        csm_res = filter.filter(res, {'odor_valence': 'CS-'})
-        csm_summary = filter_reduce(csm_res, filter_key='mouse', reduce_key='lick_smoothed')
-        chain_defaultdicts(csp_summary, csm_summary)
-        summary_res = csp_summary
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['mouse', 'odor_valence'], reduce_key= 'lick_smoothed')
         plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
                             colors= ['lime','salmon'], ax_args=ax_args, plot_args=plot_args,
                             path=save_path)
@@ -86,55 +87,24 @@ if 'individual_half_max' in experiments:
                               ax_args=ax_args, save=True, reuse=True)
         except:
             print('Cannot get half_max data for: {}'.format(condition.name))
-            # raise ValueError('Cannot summarize: {}'.format(condition.name))
-
-# if 'summary' in experiments:
-#     plot_args = {'marker': '.', 'markersize': 1, 'alpha': .6, 'linewidth': 1}
-#     ax_args = {'yticks': [0, 10, 20, 30, 40], 'ylim': [-1, 41], 'xticks': [0, 20, 40, 60, 80, 100],
-#                'xlim': [0, 100]}
-#     for res, condition in zip(list_of_res, conditions):
-#         save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
-#
-#         csp_res = filter.filter(res, {'odor_valence': 'CS+'})
-#         csp_summary = filter_reduce(csp_res, filter_key='mouse', reduce_key='lick_smoothed')
-#         csm_res = filter.filter(res, {'odor_valence': 'CS-'})
-#         csm_summary = filter_reduce(csm_res, filter_key='mouse', reduce_key='lick_smoothed')
-#         chain_defaultdicts(csp_summary, csm_summary)
-#         summary_res = csp_summary
-#
-#         plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
-#                             colors= ['lime','salmon'], ax_args=ax_args, plot_args=plot_args,
-#                             path=save_path)
-
 
 if 'basic_3' in experiments:
     summary_all = defaultdict(list)
     for res, condition in zip(list_of_res, conditions):
         try:
             csp_res = filter.filter(res, {'odor_valence': 'CS+'})
-            summary_res = filter_reduce(csp_res, filter_key='mouse', reduce_key='half_max')
+            summary_res = reduce.new_filter_reduce(csp_res, filter_keys='mouse', reduce_key='half_max')
             summary_res['condition_name'] = [condition.name] * len(summary_res['half_max'])
             chain_defaultdicts(summary_all, summary_res)
         except:
             print('Cannot get half_max data for: {}'.format(condition.name))
     #TODO: bad work-around
-    summary_all.pop('learned_day')
+    summary_all.pop('half_max_sem')
+    summary_all.pop('half_max_std')
     mean_std_res = filter_reduce(summary_all, filter_key='condition_name', reduce_key='half_max')
-    select_dict = {'condition_name': ['PIR','OFC','BLA']}
-    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', 'TEST')
-    ax_args = {'yticks':[0, 20, 40, 60], 'ylim':[-5, 65]}
-
-    plot_args = {'marker':'o', 's':10, 'facecolors': 'none', 'alpha':1}
-    plot.plot_results(summary_all, x_key='condition_name', y_key='half_max', loop_keys=None, select_dict= select_dict,
-                      path=save_path,
-                      plot_function= plt.scatter, plot_args= plot_args, ax_args= ax_args, save=False)
-
-    plot_args = {'fmt':'.', 'capsize':2, 'elinewidth':1, 'markersize':2, 'alpha': .5}
-    plot.plot_results(mean_std_res, x_key='condition_name', y_key='half_max', error_key='half_max_sem',
-                      loop_keys=None, path=save_path,
-                      select_dict= select_dict,
-                      plot_function= plt.errorbar, plot_args= plot_args, ax_args = ax_args, save=True, reuse=True)
-
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', 'COMPOSITE',
+                             ','.join([c.name for c in conditions]))
+    ax_args = {'yticks':[0, 50, 100], 'ylim':[-5, 105]}
     plot_args = {'marker':'o', 's':10, 'facecolors': 'none', 'alpha':1}
     plot.plot_results(summary_all, x_key='condition_name', y_key='half_max', loop_keys=None,
                       path=save_path,

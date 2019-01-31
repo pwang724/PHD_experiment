@@ -6,23 +6,24 @@ import numpy as np
 import filter
 from scipy import stats as sstats
 
-def filter_reduce(res, filter_key, reduce_key):
-    def _regularize_length(res, key):
-        data = res[key]
-        if type(data[0]) == np.ndarray or type(data[0]) == list:
-            min_length = np.min([x.shape for x in data])
-            for k, v in res.items():
-                if type(v[0]) == np.ndarray or type(v[0]) == list:
-                    new_array = []
-                    for i, x in enumerate(v):
-                        if len(x) > min_length:
-                            new_array.append(x[:min_length])
-                        else:
-                            new_array.append(x)
-                    res[k] = new_array
-            for key, val in res.items():
-                res[key] = np.array(val)
 
+def _regularize_length(res, key):
+    data = res[key]
+    if type(data[0]) == np.ndarray or type(data[0]) == list:
+        min_length = np.min([x.shape for x in data])
+        for k, v in res.items():
+            if type(v[0]) == np.ndarray or type(v[0]) == list:
+                new_array = []
+                for i, x in enumerate(v):
+                    if len(x) > min_length:
+                        new_array.append(x[:min_length])
+                    else:
+                        new_array.append(x)
+                res[k] = new_array
+        for key, val in res.items():
+            res[key] = np.array(val)
+
+def filter_reduce(res, filter_key, reduce_key):
     out = defaultdict(list)
     unique_ixs = sorted(np.unique(res[filter_key], return_index=True)[-1])
     unique_vals = res[filter_key][unique_ixs]
@@ -38,6 +39,27 @@ def filter_reduce(res, filter_key, reduce_key):
     for key, val in out.items():
         out[key] = np.array(val)
     return out
+
+def new_filter_reduce(res, filter_keys, reduce_key):
+    out = defaultdict(list)
+    if isinstance(filter_keys, str):
+        filter_keys = [filter_keys]
+    unique_combinations, ixs = filter.retrieve_unique_entries(res, filter_keys)
+    for v in unique_combinations:
+        filter_dict = {filter_key: val for filter_key, val in zip(filter_keys, v)}
+        cur_res = filter.filter(res, filter_dict)
+
+        if len(cur_res[reduce_key]):
+            try:
+                _regularize_length(cur_res, reduce_key)
+            except:
+                print('cannot regularize the length of {}'.format(reduce_key))
+            temp_res = reduce_by_mean(cur_res, reduce_key)
+            append_defaultdicts(out, temp_res)
+    for key, val in out.items():
+        out[key] = np.array(val)
+    return out
+
 
 
 def append_defaultdicts(dictA, dictB):

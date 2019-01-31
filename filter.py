@@ -56,14 +56,13 @@ def filter(res, filter_dict):
         out[key] = value[select_ixs]
     return out
 
-
 def retrieve_unique_entries(res, loop_keys):
     unique_entries_per_loopkey = []
     for x in loop_keys:
         a = res[x]
-        indexes = np.unique(a, return_index=True)[1]
-        unique_entries_per_loopkey.append([a[index] for index in sorted(indexes)])
-
+        # indexes = np.unique(a, return_index=True)[1]
+        # unique_entries_per_loopkey.append([a[index] for index in sorted(indexes)])
+        unique_entries_per_loopkey.append(np.unique(a))
     unique_entry_combinations = list(itertools.product(*unique_entries_per_loopkey))
     nlines = len(unique_entry_combinations)
 

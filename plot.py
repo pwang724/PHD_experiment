@@ -84,9 +84,9 @@ def _plot_error(plot_function, x, y, err, color, label, plot_args):
         for i in range(x.shape[0]):
             plot_function(x[i], y[i], err[i], color=color, label=label, **plot_args)
     else:
-        # x = np.squeeze(x)
-        # y = np.squeeze(y)
-        # err = np.squeeze(err)
+        x = np.squeeze(x)
+        y = np.squeeze(y)
+        err = np.squeeze(err)
         plot_function(x, y, err, color=color, label=label, **plot_args)
 
 def _plot_fill(plot_function, x, y, err, color, label, plot_args):
@@ -103,7 +103,7 @@ def _plot_fill(plot_function, x, y, err, color, label, plot_args):
 def plot_results(res, x_key, y_key, loop_keys =None,
                  select_dict=None, path=None, colors= None, colormap='cool',
                  plot_function= plt.plot, ax_args={}, plot_args={},
-                 save = True, reuse = False, sort = False, error_key = '_sem'):
+                 save = True, reuse = False, twinax = False, sort = False, error_key = '_sem'):
     '''
 
     :param res: flattened dict of results
@@ -121,6 +121,8 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
     if reuse:
         ax = plt.gca()
+        if twinax:
+            ax = ax.twinx()
     else:
         fig = plt.figure(figsize=(2, 1.5))
         rect = [.2, .25, .7, .65]
@@ -180,7 +182,9 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         xticklabels = ['On', 'Off', 'US']
         ax.set_xticks(xticks)
         ax.set_xticklabels(xticklabels)
-    plot_utils.nicer_plot(ax)
+
+    if not twinax:
+        plot_utils.nicer_plot(ax)
 
     if save:
         if loop_keys:

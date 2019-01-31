@@ -26,6 +26,7 @@ class PCAConfig(object):
         #style can be 'all', 'csp', or 'csm'
         self.style = 'csp'
         self.average = True
+        self.shuffle_iterations = 100
 
 def do_PCA(condition, PCAConfig, data_path, save_path):
     '''
@@ -57,6 +58,7 @@ def do_PCA(condition, PCAConfig, data_path, save_path):
         else:
             start_day = 0
 
+        start_day = 0
         list_of_cons = list_of_all_cons[ix][start_day:]
         list_of_data = list_of_all_data[ix][start_day:]
         for cons in list_of_cons:
@@ -125,7 +127,6 @@ def PCA(list_of_cons, list_of_data, odor, csp, pca_config):
         list_of_ixs, chosen_odors = _get_trial_index(cons, pca_style, odor, csp)
         data_trial_time_cell = utils.reshape_data(data, trial_axis=0, cell_axis=2, time_axis=1,
                                                   nFrames=cons.TRIAL_FRAMES)
-        list_transformed_data = []
         for i, ix in enumerate(list_of_ixs):
             if any(ix):
                 o = chosen_odors[i]
@@ -158,6 +159,39 @@ def load_pca(save_path):
         temp_res = fio.load_pickle(d)
         reduce.chain_defaultdicts(res, temp_res)
     return res
+
+def shuffle_data(res, shuffle_keys):
+    out = copy.deepcopy(res)
+    data = out['data']
+
+    if isinstance(shuffle_keys, str):
+        shuffle_keys = [shuffle_keys]
+    unique_combinations, combination_ixs = filter.retrieve_unique_entries(out, shuffle_keys)
+
+    for ixs in combination_ixs:
+        current_data = data[ixs]
+        trials_per_condition = [x.shape[0] for x in current_data]
+        concatenated_data = np.concatenate(current_data, axis=0)
+        shuffled_ixs = np.random.permutation(concatenated_data.shape[0])
+        shuffled_ixs_per_condition = np.split(shuffled_ixs, np.cumsum(trials_per_condition))[:-1]
+        for i in range(len(shuffled_ixs_per_condition)):
+            assert(trials_per_condition[i] == len(shuffled_ixs_per_condition[i])), 'bad partitioning of shuffled ixs'
+
+        new_data = np.zeros(len(ixs), dtype=object)
+        for i, ix in enumerate(shuffled_ixs_per_condition):
+            new_data[i] = concatenated_data[ix]
+        out['data'][ixs] = new_data
+    return out
+
+def easy_shuffle(res, shuffle_keys, n):
+    shuffled_res = defaultdict(list)
+    for i in range(n):
+        temp = shuffle_data(res, shuffle_keys=shuffle_keys)
+        reduce.chain_defaultdicts(shuffled_res, temp)
+    shuffled_res['shuffle'] = np.ones(len(shuffled_res['odor']), dtype=int)
+    reduce.chain_defaultdicts(res, shuffled_res)
+    return res
+
 
 def analyze_pca(res):
     '''
@@ -208,63 +242,99 @@ def normalize_per_mouse(res, key):
         data = (data - min)/(max - min)
         res[key][ix] = data
 
+        res[key + '_sem'][ix] = res[key + '_sem'][ix] / (max-min)
+        res[key + '_std'][ix] = res[key + '_std'][ix] / (max-min)
 
-condition = experimental_conditions.MPFC_COMPOSITE
+experiments = [
+    'shuffle',
+]
+
+condition = experimental_conditions.OFC_LONGTERM
 config = PCAConfig()
-config.style = 'all'
-config.n_principal_components = 5
+config.style = 'csp'
+config.n_principal_components = 10
+config.shuffle_iterations = 50
 config.average = False
+
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'PCA_' + config.style, condition.name)
 figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'PCA', config.style, condition.name)
 
-EXPERIMENT = True
+EXPERIMENT = False
 ANALYZE = True
+shuffle = True
 
 ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05]}
+
+fill_args = {'zorder': 0, 'lw': 0, 'alpha': 0.3}
 line_args = {'alpha': .5, 'linewidth': 1, 'marker': 'o', 'markersize': 1}
+behavior_line_args = {'alpha': .5, 'linewidth': 1, 'marker': '.', 'markersize': 0, 'linestyle': '--'}
+error_args = {'fmt':'.', 'capsize':2, 'elinewidth':1, 'markersize':2, 'alpha': .5}
 
-if EXPERIMENT:
-    do_PCA(condition, config, data_path, save_path)
 
-if ANALYZE:
-    res = load_pca(save_path)
-    learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
-    analysis.add_indices(res)
-    analysis.add_time(res)
-    analysis.add_aligned_days(res, last_days=last_day_per_mouse, learned_days=learned_day_per_mouse)
-    behavior.behavior_analysis.add_odor_value(res, condition)
-    analyze_pca(res)
+if 'shuffle' in experiments:
+    if EXPERIMENT:
+        do_PCA(condition, config, data_path, save_path)
 
-    summary_res = defaultdict(list)
-    valences = np.unique(res['odor_valence'])
-    mice = np.unique(res['mouse'])
-    for valence in valences:
-        for mouse in mice:
-            temp = filter.filter(res, filter_dict={'odor_valence': valence, 'mouse': mouse})
-            reduced_temp = reduce.filter_reduce(temp, filter_key='day', reduce_key='distance')
-            reduce.chain_defaultdicts(summary_res, reduced_temp)
+    if ANALYZE:
+        shuffle_keys = ['mouse']
+        res = load_pca(save_path)
+        learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
+        analysis.add_indices(res)
+        analysis.add_time(res)
+        analysis.add_aligned_days(res, last_days=last_day_per_mouse, learned_days=learned_day_per_mouse)
+        behavior.behavior_analysis.add_odor_value(res, condition)
+        if hasattr(condition, 'training_start_day'):
+            list_of_start_days = condition.training_start_day
+        else:
+            list_of_start_days = [0] * np.unique(res['mouse']).size
+        list_of_days = []
+        for i, start_day in enumerate(list_of_start_days):
+            list_of_days.append(np.arange(start_day, last_day_per_mouse[i]+1))
+        res= filter.filter_days_per_mouse(res, list_of_days)
+        res = filter.filter(res, {'odor_valence':['CS+', 'CS-', 'PT CS+']})
+        res['shuffle'] = np.zeros(res['odor'].shape, dtype=int)
 
-    normalize_per_mouse(summary_res, 'distance')
-    for i, mouse in enumerate(mice):
-        plot.plot_results(summary_res, x_key='day', y_key='distance', loop_keys='odor_valence',
-                          select_dict={'mouse':mouse},
-                          ax_args=ax_args, plot_args=line_args,
-                          path=figure_path)
-    summary_csp_res = filter.filter(summary_res, filter_dict={'odor_valence':'CS+'})
-    plot.plot_results(summary_csp_res, x_key='day', y_key='distance', loop_keys= 'mouse',
-                      colors=['Black'] * mice.size,
-                      ax_args=ax_args, plot_args=line_args,
-                      path=figure_path)
+        res = easy_shuffle(res, shuffle_keys=shuffle_keys, n = config.shuffle_iterations)
+        analyze_pca(res)
+        summary_res = reduce.new_filter_reduce(res, ['mouse','day','odor_valence','shuffle'], reduce_key='distance')
+        normalize_per_mouse(summary_res, 'distance')
 
-    normalize_per_mouse(summary_res, 'distance')
-    for i, mouse in enumerate(mice):
-        plot.plot_results(summary_res, x_key='day_aligned', y_key='distance', loop_keys='odor_valence',
-                          select_dict={'mouse':mouse},
-                          ax_args=ax_args, plot_args=line_args,
-                          path=figure_path)
-    summary_csp_res = filter.filter(summary_res, filter_dict={'odor_valence':'CS+'})
-    plot.plot_results(summary_csp_res, x_key='day_aligned', y_key='distance', loop_keys= 'mouse',
-                      colors=['Black'] * mice.size,
-                      ax_args=ax_args, plot_args=line_args,
-                      path=figure_path)
+        lick_res = behavior.behavior_analysis.get_licks_per_day(data_path, condition)
+        behavior.behavior_analysis.add_odor_value(lick_res, condition)
+        lick_res = filter.filter_days_per_mouse(lick_res, list_of_days)
+        lick_res = filter.filter(lick_res, {'odor_valence':['CS+', 'CS-', 'PT CS+']})
+        lick_res = reduce.new_filter_reduce(lick_res, ['odor_valence','day','mouse'], reduce_key='lick_boolean')
+
+        valences = np.unique(res['odor_valence'])
+        mice = np.unique(res['mouse'])
+
+        for i, mouse in enumerate(mice):
+            plot.plot_results(lick_res, x_key='day', y_key='lick_boolean', loop_keys='odor_valence',
+                              select_dict={'mouse':mouse},
+                              ax_args=ax_args, plot_args=behavior_line_args,
+                              path=figure_path, save=False, sort=True)
+
+            plot.plot_results(summary_res, x_key='day', y_key='distance',
+                              select_dict={'mouse':mouse, 'shuffle': 1},
+                              colors=['gray']*5,
+                              ax_args=ax_args, plot_args=line_args,
+                              path=figure_path, reuse=True, save=False)
+
+            plot.plot_results(summary_res, x_key='day', y_key='distance', error_key='distance_sem',
+                              select_dict={'mouse':mouse, 'shuffle': 1},
+                              colors=['gray']*5, plot_function=plt.fill_between,
+                              ax_args=ax_args, plot_args=fill_args,
+                              path=figure_path, reuse=True, save=False)
+
+            plot.plot_results(summary_res, x_key='day', y_key='distance', loop_keys='odor_valence',
+                              select_dict={'mouse':mouse, 'shuffle':0},
+                              ax_args=ax_args, plot_args=line_args,
+                              path=figure_path, reuse=True, save=True)
+
+
+        # summary_csp_res = filter.filter(summary_res, filter_dict={'odor_valence':'CS+'})
+        # plot.plot_results(summary_csp_res, x_key='day', y_key='distance', loop_keys= 'mouse',
+        #                   colors=['Black'] * mice.size,
+        #                   ax_args=ax_args, plot_args=line_args,
+        #                   path=figure_path)
