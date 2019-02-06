@@ -77,7 +77,7 @@ def remove_plot_axes(ax):
         s.set_visible(False)
 
 
-def nicer_plot(ax, bounds=True):
+def nicer_plot(ax):
     ax.spines['top'].set_visible(False)
     ax.spines['right'].set_visible(False)
     ax.xaxis.set_ticks_position('bottom')

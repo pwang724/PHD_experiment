@@ -15,14 +15,14 @@ import analysis
 experiments = [
     'individual',
     'individual_half_max',
-    'basic_3'
+    # 'basic_3'
 ]
 conditions = [
     experimental_conditions.PIR,
-    experimental_conditions.OFC,
+    # experimental_conditions.OFC,
     # experimental_conditions.BLA,
     # experimental_conditions.OFC_LONGTERM,
-    experimental_conditions.BLA_LONGTERM,
+    # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BLA_JAWS
 ]
@@ -38,11 +38,11 @@ if 'individual' in experiments:
     for res, condition in zip(list_of_res, conditions):
         save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
         colors = ['green', 'lime', 'red', 'maroon']
-        plot_args = {'marker': 'o', 'markersize': 0, 'alpha': .3, 'linewidth': 1}
-        ax_args = {'yticks': [0, 10, 20], 'ylim': [-1, 21], 'xticks': [0, 50, 100, 150],
-                   'xlim': [0, 150]}
-        bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150],
-                   'xlim': [0, 150]}
+        plot_args = {'marker': 'o', 'markersize': 0, 'alpha': .7, 'linewidth': 1}
+        ax_args = {'yticks': [0, 10, 20], 'ylim': [-1, 21], 'xticks': [0, 25, 50, 75],
+                   'xlim': [0, 75]}
+        bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 25, 50, 75],
+                   'xlim': [0, 75]}
 
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
@@ -59,7 +59,7 @@ if 'individual' in experiments:
 
         summary_res = reduce.new_filter_reduce(res, filter_keys=['mouse', 'odor_valence'], reduce_key= 'lick_smoothed')
         plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
-                            colors= ['lime','salmon'], ax_args=ax_args, plot_args=plot_args,
+                            colors= ['green','red'], ax_args=ax_args, plot_args=plot_args,
                             path=save_path)
 
 

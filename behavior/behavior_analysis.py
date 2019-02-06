@@ -60,7 +60,7 @@ def analyze_behavior(data_path, condition):
     add_behavior_stats(plot_res)
     return plot_res
 
-def convert(res, condition):
+def convert(res, condition, includeRaw = False):
     '''
 
     :param res:
@@ -106,6 +106,8 @@ def convert(res, condition):
                 new_res['odor'].append(odor)
                 new_res['lick'].append(n_licks)
                 new_res['ix'].append(j)
+                if includeRaw:
+                    new_res['lick_raw_data'].append(lick_data)
                 for names in toConvert:
                     new_res[names].append(res[names][i])
     for key, val in new_res.items():

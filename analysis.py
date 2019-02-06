@@ -6,6 +6,14 @@ import tools.file_io
 from collections import defaultdict
 from scipy import stats as sstats
 
+def load_data(data_path):
+    res = load_all_cons(data_path)
+    data_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.mat_ext)))
+    list_of_all_data = np.array([Config.load_mat_f(d) for d in data_pathnames])
+    res['data'] = list_of_all_data
+    assert len(list_of_all_data) == len(res['TRIAL_FRAMES']), 'number of data files does not equal number of cons files'
+    return res
+
 def load_all_cons(data_path):
     res = defaultdict(list)
 

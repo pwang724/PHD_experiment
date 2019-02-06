@@ -6,7 +6,10 @@ import numpy as np
 import os
 from collections import OrderedDict
 
+mpl.rcParams['pdf.fonttype'] = 42
+mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.family'] = 'arial'
 
 def nice_names(key):
     nice_name_dict = {
@@ -174,9 +177,9 @@ def plot_results(res, x_key, y_key, loop_keys =None,
             _plot(plot_function, x_plot, y_plot, color=color, label=label, plot_args=plot_args)
 
     #format
-    plt.xticks(rotation=45)
-    ax.set_ylabel(nice_names(y_key), fontsize = 5)
-    ax.set_xlabel(nice_names(x_key), fontsize = 5)
+    # plt.xticks(rotation=45)
+    ax.set_ylabel(nice_names(y_key), fontsize = 7)
+    ax.set_xlabel(nice_names(x_key), fontsize = 7)
     if x_key == 'time':
         xticks = res['xticks'][0]
         xticklabels = ['On', 'Off', 'US']
@@ -192,7 +195,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
             handles, labels = ax.get_legend_handles_labels()
             by_label = OrderedDict(zip(labels, handles))
-            l = ax.legend(by_label.values(), by_label.keys(), ncol = 4, fontsize = 4)
+            l = ax.legend(by_label.values(), by_label.keys(), ncol = 4, fontsize = 4, frameon=False)
             l.set_title(nice_loop_str)
             plt.setp(l.get_title(), fontsize=4)
 
