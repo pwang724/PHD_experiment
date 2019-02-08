@@ -19,7 +19,7 @@ res = analysis.load_all_cons(data_path)
 analysis.add_indices(res)
 analysis.add_time(res)
 lick_res = behavior.behavior_analysis.convert(res, condition, includeRaw=True)
-behavior.behavior_analysis.add_odor_value(lick_res, condition)
+analysis.add_odor_value(lick_res, condition)
 mouse_res = filter.filter(lick_res, filter_dict={'mouse': mouse})
 
 mouse_cons = filter.filter(res, filter_dict={'mouse': mouse})

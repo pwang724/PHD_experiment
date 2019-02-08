@@ -1,18 +1,6 @@
-import os
-import filter
-from _CONSTANTS import conditions as experimental_conditions
-from _CONSTANTS.config import Config
-import glob
-import behavior.behavior_analysis
-import plot
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 import numpy as np
-import analysis
-from matplotlib.colors import LinearSegmentedColormap
-import tools.utils
 from matplotlib import lines
-from scipy import stats as sstats
+
 
 class PSTHConfig(object):
     def __init__(self):
@@ -31,7 +19,6 @@ def subtract_baseline(data, baseline_start, baseline_end):
     mean = np.mean(data, axis=0)
     baseline_mean = np.mean(mean[baseline_start:baseline_end])
     return data - baseline_mean
-
 
 def draw_scale_line_xy(ax, length=(1, .2), offset=(0, 0), **line_args):
     xmin, xmax, ymin, ymax = ax.axis()

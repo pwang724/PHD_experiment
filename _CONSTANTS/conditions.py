@@ -108,6 +108,7 @@ class OFC_STATE:
         ['pin', 'msy']
            ]
     timing_override = [True, True, True, True, True]
+    training_start_day = [0, 0, 0, 0, 0]
 
 class OFC_CONTEXT:
     name = 'OFC_CONTEXT'
@@ -130,6 +131,7 @@ class OFC_CONTEXT:
         ['euy', 'lim']
            ]
     timing_override = [True, True, True, True]
+    training_start_day = [0, 0, 0, 0]
 
 class OFC_REVERSAL:
     name = 'OFC_REVERSAL'
@@ -155,6 +157,7 @@ class OFC_REVERSAL:
         ['pin', 'msy']
            ]
     timing_override = [True, True, True, True, True]
+    training_start_day = [0, 0, 0, 0, 0]
 
 class OFC_LONGTERM:
     name = 'OFC_LONGTERM'

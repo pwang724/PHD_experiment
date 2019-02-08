@@ -1,5 +1,7 @@
 import numpy as np
 from collections import defaultdict
+
+from analysis import add_odor_value
 from behavior.behavior_config import behaviorConfig
 import filter
 import reduce
@@ -14,8 +16,8 @@ def _get_last_day_per_mouse(res):
     :return: list of last day per each mouse
     '''
     out = []
-    list_of_dates = res['NAME_DATE']
-    list_of_mice = res['NAME_MOUSE']
+    list_of_dates = res['day']
+    list_of_mice = res['mouse']
     _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
     for mouse_ix in np.unique(mouse_ixs):
         mouse_dates = list_of_dates[mouse_ixs == mouse_ix]
@@ -25,6 +27,7 @@ def _get_last_day_per_mouse(res):
 
 def get_days_per_mouse(data_path, condition):
     res = analysis.load_all_cons(data_path)
+    analysis.add_indices(res)
     last_day_per_mouse = np.array(_get_last_day_per_mouse(res))
 
     if hasattr(condition, 'csp'):
@@ -262,59 +265,3 @@ def add_behavior_stats(res, arg ='normal'):
         res[key] = np.array(val)
 
 
-def add_odor_value(res, condition):
-    mice, ix = np.unique(res['mouse'], return_inverse=True)
-    valence_array = np.zeros_like(res['odor']).astype(object)
-    standard_array = np.zeros_like(res['odor']).astype(object)
-
-    for i, mouse in enumerate(mice):
-        if hasattr(condition, 'odors'):
-            odors = condition.odors[i]
-            csps = condition.csp[i]
-            csms = [x for x in odors if not np.isin(x, csps)]
-            standard_dict = {}
-            valence_dict = {}
-            j=1
-            for csp in csps:
-                standard_dict[csp] = 'CS+' + str(j)
-                valence_dict[csp] = 'CS+'
-                j+=1
-            j=1
-            for csm in csms:
-                standard_dict[csm] = 'CS-' + str(j)
-                valence_dict[csm] = 'CS-'
-                j+=1
-        else:
-            dt_odors = condition.dt_odors[i]
-            dt_csp = condition.dt_csp[i]
-            dt_csm = [x for x in dt_odors if not np.isin(x, dt_csp)]
-            pt_odors = condition.pt_odors[i]
-            pt_csp = condition.pt_csp[i]
-            pt_naive = [x for x in pt_odors if not np.isin(x, pt_csp)]
-            assert len(pt_naive) <= 1, 'More than 1 pt naive odor'
-            assert len(pt_csp) <= 1, 'More than 1 pt CS+ odor'
-            standard_dict = {}
-            valence_dict = {}
-            j=1
-            for csp in dt_csp:
-                standard_dict[csp] = 'CS+' + str(j)
-                valence_dict[csp] = 'CS+'
-                j+=1
-            j=1
-            for csm in dt_csm:
-                standard_dict[csm] = 'CS-' + str(j)
-                valence_dict[csm] = 'CS-'
-                j+=1
-            if len(pt_naive):
-                standard_dict[pt_naive[0]] = 'PT Naive'
-                valence_dict[pt_naive[0]] = 'PT Naive'
-            standard_dict[pt_csp[0]] = 'PT CS+'
-            valence_dict[pt_csp[0]] = 'PT CS+'
-            j += 1
-
-        mouse_ix = ix == i
-        mouse_odors = res['odor'][mouse_ix]
-        valence_array[mouse_ix] = [valence_dict[o] for o in mouse_odors]
-        standard_array[mouse_ix] = [standard_dict[o] for o in mouse_odors]
-    res['odor_valence'] = valence_array
-    res['odor_standard'] = standard_array

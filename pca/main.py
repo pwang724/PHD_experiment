@@ -214,7 +214,7 @@ def analyze_pca(res):
         res['mean'].append(mean)
         res['std'].append(std)
         res['sem'].append(sem)
-        res['distance'].append(distance)
+        res['PCA Distance'].append(distance)
 
         # for j in range(data.shape[0]):
         #     for k in range(data.shape[1]):
@@ -228,7 +228,7 @@ def analyze_pca(res):
         # res['mean'].append(mean)
         # res['std'].append(std)
         # res['sem'].append(sem)
-        # res['distance'].append(distance_score)
+        # res['PCA Distance'].append(distance_score)
     for key, val in res.items():
         res[key] = np.array(val)
 
@@ -249,10 +249,10 @@ experiments = [
     'shuffle',
 ]
 
-condition = experimental_conditions.OFC_LONGTERM
+condition = experimental_conditions.OFC_CONTEXT
 config = PCAConfig()
-config.style = 'csp'
-config.n_principal_components = 10
+config.style = 'all'
+config.n_principal_components = 5
 config.shuffle_iterations = 50
 config.average = False
 
@@ -260,7 +260,7 @@ data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOL
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'PCA_' + config.style, condition.name)
 figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'PCA', config.style, condition.name)
 
-EXPERIMENT = False
+EXPERIMENT = True
 ANALYZE = True
 shuffle = True
 
@@ -270,6 +270,7 @@ fill_args = {'zorder': 0, 'lw': 0, 'alpha': 0.3}
 line_args = {'alpha': .5, 'linewidth': 1, 'marker': 'o', 'markersize': 1}
 behavior_line_args = {'alpha': .5, 'linewidth': 1, 'marker': '.', 'markersize': 0, 'linestyle': '--'}
 error_args = {'fmt':'.', 'capsize':2, 'elinewidth':1, 'markersize':2, 'alpha': .5}
+scatter_args = {'marker':'o', 's':5, 'facecolors': 'none', 'alpha':.5}
 
 
 if 'shuffle' in experiments:
@@ -283,7 +284,7 @@ if 'shuffle' in experiments:
         analysis.add_indices(res)
         analysis.add_time(res)
         analysis.add_aligned_days(res, last_days=last_day_per_mouse, learned_days=learned_day_per_mouse)
-        behavior.behavior_analysis.add_odor_value(res, condition)
+        analysis.add_odor_value(res, condition)
         if hasattr(condition, 'training_start_day'):
             list_of_start_days = condition.training_start_day
         else:
@@ -297,11 +298,11 @@ if 'shuffle' in experiments:
 
         res = easy_shuffle(res, shuffle_keys=shuffle_keys, n = config.shuffle_iterations)
         analyze_pca(res)
-        summary_res = reduce.new_filter_reduce(res, ['mouse','day','odor_valence','shuffle'], reduce_key='distance')
-        normalize_per_mouse(summary_res, 'distance')
+        summary_res = reduce.new_filter_reduce(res, ['mouse','day','odor_valence','shuffle'], reduce_key='PCA Distance')
+        normalize_per_mouse(summary_res, 'PCA Distance')
 
         lick_res = behavior.behavior_analysis.get_licks_per_day(data_path, condition)
-        behavior.behavior_analysis.add_odor_value(lick_res, condition)
+        analysis.add_odor_value(lick_res, condition)
         lick_res = filter.filter_days_per_mouse(lick_res, list_of_days)
         lick_res = filter.filter(lick_res, {'odor_valence':['CS+', 'CS-', 'PT CS+']})
         lick_res = reduce.new_filter_reduce(lick_res, ['odor_valence','day','mouse'], reduce_key='lick_boolean')
@@ -315,26 +316,77 @@ if 'shuffle' in experiments:
                               ax_args=ax_args, plot_args=behavior_line_args,
                               path=figure_path, save=False, sort=True)
 
-            plot.plot_results(summary_res, x_key='day', y_key='distance',
+            plot.plot_results(summary_res, x_key='day', y_key='PCA Distance',
                               select_dict={'mouse':mouse, 'shuffle': 1},
                               colors=['gray']*5,
                               ax_args=ax_args, plot_args=line_args,
                               path=figure_path, reuse=True, save=False)
 
-            plot.plot_results(summary_res, x_key='day', y_key='distance', error_key='distance_sem',
+            plot.plot_results(summary_res, x_key='day', y_key='PCA Distance', error_key='PCA Distance_sem',
                               select_dict={'mouse':mouse, 'shuffle': 1},
                               colors=['gray']*5, plot_function=plt.fill_between,
                               ax_args=ax_args, plot_args=fill_args,
                               path=figure_path, reuse=True, save=False)
 
-            plot.plot_results(summary_res, x_key='day', y_key='distance', loop_keys='odor_valence',
+            plot.plot_results(summary_res, x_key='day', y_key='PCA Distance', loop_keys='odor_valence',
                               select_dict={'mouse':mouse, 'shuffle':0},
                               ax_args=ax_args, plot_args=line_args,
                               path=figure_path, reuse=True, save=True)
 
 
-        # summary_csp_res = filter.filter(summary_res, filter_dict={'odor_valence':'CS+'})
-        # plot.plot_results(summary_csp_res, x_key='day', y_key='distance', loop_keys= 'mouse',
-        #                   colors=['Black'] * mice.size,
-        #                   ax_args=ax_args, plot_args=line_args,
-        #                   path=figure_path)
+
+            plot.plot_results(summary_res, x_key='day', y_key='PCA Distance',
+                              select_dict={'mouse':mouse, 'shuffle': 1},
+                              colors=['gray']*5,
+                              ax_args=ax_args, plot_args=line_args,
+                              path=figure_path, reuse=False, save=False)
+
+            plot.plot_results(summary_res, x_key='day', y_key='PCA Distance', error_key='PCA Distance_sem',
+                              select_dict={'mouse':mouse, 'shuffle': 1},
+                              colors=['gray']*5, plot_function=plt.fill_between,
+                              ax_args=ax_args, plot_args=fill_args,
+                              path=figure_path, reuse=True, save=False)
+
+            plot.plot_results(summary_res, x_key='day', y_key='PCA Distance', loop_keys='odor_valence',
+                              select_dict={'mouse':mouse, 'shuffle':0, 'odor_valence': 'CS+'},
+                              ax_args=ax_args, plot_args=line_args,
+                              path=figure_path, reuse=True, save=True)
+
+        summary_ax_args = copy.copy(ax_args)
+        summary_line_args = {'alpha': .3, 'linewidth': .5, 'linestyle': '--', 'marker': 'o', 'markersize': 1}
+        summary_res.pop('PCA Distance_std')
+        summary_res.pop('PCA Distance_sem')
+        summary_res = filter.filter(summary_res, filter_dict={'shuffle': 0})
+        mean_std_res = reduce.new_filter_reduce(summary_res, reduce_key='PCA Distance', filter_keys=['day','odor_valence'])
+        plot_cs = True
+        if condition.name == 'OFC_STATE' or condition.name == 'OFC_CONTEXT':
+            if condition.name == 'OFC_STATE':
+                summary_ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05],
+                           'xlim':[-.5, 1.5], 'xticks':[0, 1], 'xticklabels':['Thirsty','Sated']}
+            if condition.name == 'OFC_CONTEXT':
+                summary_ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05],
+                           'xlim':[-.5, 1.5], 'xticks':[0, 1], 'xticklabels':['+ Port','- Port']}
+
+            if plot_cs:
+                select_dict = {'odor_valence':'CS+'}
+            else:
+                select_dict = None
+
+            plot.plot_results(summary_res, x_key='day', y_key='PCA Distance', loop_keys=['odor_valence','mouse'],
+                              select_dict=select_dict,
+                              colors=['Green'] * mice.size + ['Red'] * mice.size,
+                              ax_args=summary_ax_args, plot_function=plt.plot, plot_args= summary_line_args,
+                              path=figure_path, save=False)
+
+            plot.plot_results(mean_std_res, x_key='day', y_key='PCA Distance', loop_keys='odor_valence',
+                              select_dict=select_dict,
+                              colors=['Green','Red'], plot_function=plt.plot,
+                              ax_args=ax_args, plot_args=line_args,
+                              path=figure_path, reuse=True, save=False)
+
+            plot.plot_results(mean_std_res, x_key='day', y_key='PCA Distance', loop_keys='odor_valence',
+                              select_dict=select_dict,
+                              error_key='PCA Distance_sem',
+                              colors=['Green','Red'], plot_function=plt.errorbar,
+                              ax_args=summary_ax_args, plot_args=error_args,
+                              path=figure_path, reuse=True, save=True)

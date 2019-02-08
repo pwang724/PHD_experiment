@@ -65,11 +65,20 @@ def analyze_results(res, condition, arg='different'):
     add_time(res)
     add_decode_stats(res, condition, arg)
 
-def add_indices(res):
+def add_indices(res, arg_plane = True):
+    #TODO: fix issue for multiple planes in the same day. add 'effective days'
     from scipy.stats import rankdata
 
     list_of_dates = res['NAME_DATE']
+    list_of_planes = res['NAME_PLANE']
     list_of_mice = res['NAME_MOUSE']
+
+    if arg_plane:
+        list_of_dates = list(list_of_dates)
+        for i in range(len(list_of_dates)):
+            list_of_dates[i] = list_of_dates[i] +'_' + list_of_planes[i]
+        list_of_dates = np.array(list_of_dates)
+
     days = np.zeros_like(list_of_dates, dtype=int)
     _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
     for mouse_ix in np.unique(mouse_ixs):
@@ -145,3 +154,65 @@ def add_decode_stats(res, condition, arg='different'):
     res['max'] = np.array(res['max'])
 
 
+def add_odor_value(res, condition):
+    mice, ix = np.unique(res['mouse'], return_inverse=True)
+    valence_array = np.zeros_like(res['odor']).astype(object)
+    standard_array = np.zeros_like(res['odor']).astype(object)
+
+    for i, mouse in enumerate(mice):
+        if hasattr(condition, 'odors'):
+            odors = condition.odors[i]
+            # if condition.name == 'OFC_CONTEXT' or condition.name == 'BLA_CONTEXT':
+            #     csms = condition.csp[i]
+            #     csps = [x for x in odors if not np.isin(x, csms)]
+            # else:
+            csps = condition.csp[i]
+            csms = [x for x in odors if not np.isin(x, csps)]
+            standard_dict = {}
+            valence_dict = {}
+            j=1
+            for csp in csps:
+                standard_dict[csp] = 'CS+' + str(j)
+                valence_dict[csp] = 'CS+'
+                j+=1
+            j=1
+            for csm in csms:
+                standard_dict[csm] = 'CS-' + str(j)
+                valence_dict[csm] = 'CS-'
+                j+=1
+            standard_dict['water'] = 'US'
+            valence_dict['water'] = 'US'
+        else:
+            dt_odors = condition.dt_odors[i]
+            dt_csp = condition.dt_csp[i]
+            dt_csm = [x for x in dt_odors if not np.isin(x, dt_csp)]
+            pt_odors = condition.pt_odors[i]
+            pt_csp = condition.pt_csp[i]
+            pt_naive = [x for x in pt_odors if not np.isin(x, pt_csp)]
+            assert len(pt_naive) <= 1, 'More than 1 pt naive odor'
+            assert len(pt_csp) <= 1, 'More than 1 pt CS+ odor'
+            standard_dict = {}
+            valence_dict = {}
+            j=1
+            for csp in dt_csp:
+                standard_dict[csp] = 'CS+' + str(j)
+                valence_dict[csp] = 'CS+'
+                j+=1
+            j=1
+            for csm in dt_csm:
+                standard_dict[csm] = 'CS-' + str(j)
+                valence_dict[csm] = 'CS-'
+                j+=1
+            if len(pt_naive):
+                standard_dict[pt_naive[0]] = 'PT Naive'
+                valence_dict[pt_naive[0]] = 'PT Naive'
+            standard_dict[pt_csp[0]] = 'PT CS+'
+            valence_dict[pt_csp[0]] = 'PT CS+'
+            j += 1
+
+        mouse_ix = ix == i
+        mouse_odors = res['odor'][mouse_ix]
+        valence_array[mouse_ix] = [valence_dict[o] for o in mouse_odors]
+        standard_array[mouse_ix] = [standard_dict[o] for o in mouse_odors]
+    res['odor_valence'] = valence_array
+    res['odor_standard'] = standard_array

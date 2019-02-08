@@ -33,6 +33,7 @@ def nice_names(key):
         'valence': 'Valence',
         'False': '0',
         'True': '1',
+        'day':'Day',
         'BEHAVIOR_OFC_JAWS_PRETRAINING': 'PT IH',
         'BEHAVIOR_OFC_JAWS_DISCRIMINATION': 'DT IH',
         'BEHAVIOR_OFC_YFP': 'YFP',
@@ -106,7 +107,8 @@ def _plot_fill(plot_function, x, y, err, color, label, plot_args):
 def plot_results(res, x_key, y_key, loop_keys =None,
                  select_dict=None, path=None, colors= None, colormap='cool',
                  plot_function= plt.plot, ax_args={}, plot_args={},
-                 save = True, reuse = False, twinax = False, sort = False, error_key = '_sem'):
+                 save = True, reuse = False, twinax = False, sort = False, error_key = '_sem',
+                 fig_size = (2, 1.5), legend = True):
     '''
 
     :param res: flattened dict of results
@@ -127,8 +129,8 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         if twinax:
             ax = ax.twinx()
     else:
-        fig = plt.figure(figsize=(2, 1.5))
-        rect = [.2, .25, .7, .65]
+        fig = plt.figure(figsize=fig_size)
+        rect = [.25, .25, .65, .65]
         ax = fig.add_axes(rect, **ax_args)
 
     if sort:
@@ -190,7 +192,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         plot_utils.nicer_plot(ax)
 
     if save:
-        if loop_keys:
+        if loop_keys and legend:
             nice_loop_str = '+'.join([nice_names(x) for x in loop_keys])
 
             handles, labels = ax.get_legend_handles_labels()
