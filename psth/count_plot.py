@@ -11,7 +11,8 @@ import copy
 from collections import defaultdict
 import psth.count_analyze
 import psth.psth_helper
-from psth.count_helper import get_responsive_cells, get_overlap_water, add_naive_learned
+from psth.count_helper import get_responsive_cells, get_overlap_water
+from analysis import add_naive_learned
 import psth.count_helper
 
 ax_args = {'yticks': [0, .2, .4, .6, .8], 'ylim': [0, .85]}
@@ -20,42 +21,33 @@ trace_ax_args = {'yticks': [0, .1, .2, .3], 'ylim': [0, .3]}
 
 trace_args = {'alpha':1, 'linewidth':1}
 line_args = {'alpha': .5, 'linewidth': 1, 'marker': 'o', 'markersize': 2}
-scatter_args = {'marker':'o', 's':10, 'facecolors': 'none', 'alpha':1}
-error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .5}
+scatter_args = {'marker':'o', 's':5, 'facecolors': 'none', 'alpha': .5}
+error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .8}
 fill_args = {'zorder': 0, 'lw': 0, 'alpha': 0.3}
+behavior_line_args = {'alpha': .5, 'linewidth': 1, 'marker': '.', 'markersize': 0, 'linestyle': '--'}
 
-condition_config = psth.count_analyze.OFC_Context_Config()
-
-config = psth.psth_helper.PSTHConfig()
-condition = condition_config.condition
-data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
-save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
-figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'COUNTING',  condition.name)
-
-#retrieving relevant days
-learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
-if condition_config.start_at_training and hasattr(condition, 'training_start_day'):
-    start_days_per_mouse = condition.training_start_day
-else:
-    start_days_per_mouse = [0] * len(learned_day_per_mouse)
-training_start_day_per_mouse = condition.training_start_day
-print(learned_day_per_mouse)
-
-#analysis
-res = fio.load_pickle(os.path.join(save_path, 'dict.pkl'))
-psth.count_analyze.analyze_data(res, condition_config)
-
-def plot_individual(res):
+def plot_individual(res, lick_res):
     ax_args_copy = ax_args.copy()
+    ax_args_copy.update({'ylim':[0,.65], 'yticks':[0, .3, .6]})
+    overlap_ax_args_copy = overlap_ax_args.copy()
     res = copy.copy(res)
     get_responsive_cells(res)
     summary_res = reduce.new_filter_reduce(res, reduce_key= 'Fraction Responsive',
                                            filter_keys=['odor_valence', 'mouse','day'])
     for mouse in np.unique(summary_res['mouse']):
         select_dict = {'mouse':mouse}
+
         plot.plot_results(summary_res, x_key='day', y_key='Fraction Responsive', loop_keys='odor_valence',
                           colors=['green','red','turquoise'],
-                          select_dict=select_dict, path=figure_path, ax_args=ax_args_copy)
+                          select_dict=select_dict, path=figure_path, ax_args=ax_args_copy, plot_args = line_args,
+                          save=False, sort=True)
+
+        plot.plot_results(lick_res, x_key='day', y_key='lick_boolean', loop_keys='odor_valence',
+                          select_dict={'mouse': mouse},
+                          colors=['green','red'],
+                          ax_args=overlap_ax_args_copy, plot_args=behavior_line_args,
+                          path=figure_path,
+                          reuse=True, save=True, twinax=True)
 
 def plot_summary_odor(res, start_days, end_days):
     ax_args_copy = ax_args.copy()
@@ -203,17 +195,101 @@ def plot_power(res, start_days, end_days):
                       colors = colors,
                       fig_size=(2, 1.5), reuse=True)
 
+def plot_reversal(res, start_days, end_days):
+    ax_args_copy = ax_args.copy()
+    res = copy.copy(res)
+    list_of_days = list(zip(start_days, end_days))
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
+    reversal_res, stats_res = psth.count_helper.get_reversal_sig(start_end_day_res)
+    filter.assign_composite(reversal_res, loop_keys=['day','odor_valence'])
+
+    mean_res = reduce.new_filter_reduce(reversal_res, filter_keys=['day','odor_valence'], reduce_key='Fraction')
+    plot.plot_results(mean_res,
+                      x_key='day_odor_valence', y_key='Fraction', error_key='Fraction_sem',
+                      path=figure_path,
+                      plot_function=plt.errorbar, plot_args=error_args, ax_args=ax_args_copy,
+                      fig_size=(2, 1.5), save=False)
+
+    plot.plot_results(reversal_res,
+                      x_key='day_odor_valence', y_key='Fraction', loop_keys= 'day_odor_valence',
+                      path=figure_path,
+                      colors = ['Green','Red','Red','Green'],
+                      plot_function=plt.scatter, plot_args=scatter_args, ax_args=ax_args_copy,
+                      fig_size=(2, 1.5), reuse=True, save=True,
+                      legend=False)
 
 
-if condition.name == 'OFC':
-    # plot_individual(res)
-    # plot_summary_odor(res, start_days_per_mouse, learned_day_per_mouse)
-    # plot_summary_water(res, training_start_day_per_mouse, learned_day_per_mouse)
-    # plot_overlap_water(res, training_start_day_per_mouse, learned_day_per_mouse)
+    titles = ['','CS+', 'CS-', 'None']
+    conditions = [['none-p','p-m','p-none', 'p-p'], ['p-m','p-none', 'p-p'],['m-m','m-none', 'm-p'],['none-m','none-none', 'none-p']]
+    labels = [['Added','Reversed','Lost','Retained'], ['Reversed','Lost','Retained'], ['Retained','Lost','Reversed'], ['to CS-','Retained','to CS+']]
+    for i, title in enumerate(titles):
+        mean_stats = reduce.new_filter_reduce(stats_res, filter_keys='condition', reduce_key= 'Fraction')
+        ax_args_copy.update({'ylim':[-.1, 1], 'yticks':[0, .5, 1], 'xticks':[0,1,2,3],
+                             'xticklabels':labels[i]})
+        plot.plot_results(mean_stats,
+                          select_dict={'condition': conditions[i]},
+                          x_key='condition', y_key='Fraction', loop_keys='mouse', error_key='Fraction_sem',
+                          sort=True,
+                          path=figure_path,
+                          colors=['Black'] * 10,
+                          plot_function=plt.errorbar, plot_args=error_args, ax_args=ax_args_copy,
+                          fig_size=(2, 1.5), save=False)
+        plt.title(title)
+
+        plot.plot_results(stats_res, select_dict={'condition': conditions[i]},
+                          x_key='condition', y_key='Fraction', loop_keys='mouse', sort=True,
+                          path = figure_path,
+                          colors=['Black']*10,
+                          plot_function=plt.scatter, plot_args=scatter_args, ax_args=ax_args_copy,
+                          fig_size=(2, 1.5),
+                          legend=False, save=True, reuse=True)
+
+condition_config = psth.count_analyze.OFC_LONGTERM_Config()
+
+config = psth.psth_helper.PSTHConfig()
+condition = condition_config.condition
+data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
+save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
+figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'COUNTING',  condition.name)
+
+#retrieving relevant days
+learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
+if condition_config.start_at_training and hasattr(condition, 'training_start_day'):
+    start_days_per_mouse = condition.training_start_day
+else:
+    start_days_per_mouse = [0] * len(learned_day_per_mouse)
+training_start_day_per_mouse = condition.training_start_day
+print(learned_day_per_mouse)
+
+#analysis
+res = fio.load_pickle(os.path.join(save_path, 'dict.pkl'))
+psth.count_analyze.analyze_data(res, condition_config)
+
+import behavior
+import analysis
+lick_res = behavior.behavior_analysis.get_licks_per_day(data_path, condition)
+analysis.add_odor_value(lick_res, condition)
+lick_res = filter.filter(lick_res, {'odor_valence': ['CS+', 'CS-', 'PT CS+']})
+lick_res = reduce.new_filter_reduce(lick_res, ['odor_valence', 'day', 'mouse'], reduce_key='lick_boolean')
+
+if condition.name == 'OFC' or condition.name == 'BLA':
+    plot_individual(res, lick_res)
+    plot_summary_odor(res, start_days_per_mouse, learned_day_per_mouse)
+    plot_summary_water(res, training_start_day_per_mouse, learned_day_per_mouse)
+    plot_overlap_water(res, training_start_day_per_mouse, learned_day_per_mouse)
     plot_overlap(res, start_days_per_mouse, learned_day_per_mouse)
 
+if condition.name == 'BLA_LONGTERM':
+    plot_individual(res, lick_res)
+    plot_summary_odor(res, start_days_per_mouse, learned_day_per_mouse)
+    plot_overlap(res, start_days_per_mouse, learned_day_per_mouse)
+
+if condition.name == 'OFC_LONGTERM':
+    plot_individual(res, lick_res)
+    plot_summary_odor(res, learned_day_per_mouse, last_day_per_mouse)
+
 if condition.name == 'PIR':
-    # plot_individual(res)
+    # plot_individual(res, lick_res)
     # plot_summary_odor(res, start_days_per_mouse, learned_day_per_mouse)
     # plot_summary_water(res, training_start_day_per_mouse, learned_day_per_mouse)
     plot_overlap(res, start_days_per_mouse, learned_day_per_mouse, delete_non_selective=True)
@@ -223,7 +299,9 @@ if condition.name == 'OFC_STATE':
     plot_power(res, start_days_per_mouse, last_day_per_mouse)
 
 if condition.name == 'OFC_REVERSAL':
-    plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse)
+    # plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse)
+    plot_reversal(res, start_days_per_mouse, last_day_per_mouse)
+
 
 if condition.name == 'OFC_CONTEXT':
     # plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse)

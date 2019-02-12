@@ -216,3 +216,16 @@ def add_odor_value(res, condition):
         standard_array[mouse_ix] = [standard_dict[o] for o in mouse_odors]
     res['odor_valence'] = valence_array
     res['odor_standard'] = standard_array
+
+
+def add_naive_learned(res, start_day_per_mouse, learned_day_per_mouse, str1 = 'Naive', str2='Learned'):
+    for i in range(len(res['day'])):
+        day = res['day'][i]
+        mouse = res['mouse'][i]
+        if start_day_per_mouse[mouse] == day:
+            res['training_day'].append(str1)
+        elif learned_day_per_mouse[mouse] == day:
+            res['training_day'].append(str2)
+        else:
+            raise ValueError('day is not either start day or learned day')
+    res['training_day'] = np.array(res['training_day'])

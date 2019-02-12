@@ -32,6 +32,7 @@ class OFC_Config(object):
         self.cells = [5, 31, 33, 48, 7]
         self.ylim = [-.1, 1]
         self.colors = ['lime', 'darkgreen', 'red', 'magenta']
+        self.name = 'odor'
 
 class OFC_Context_Config(object):
     def __init__(self):
@@ -63,8 +64,19 @@ class OFC_Reversal_Config(object):
         self.colors = ['lime', 'darkgreen', 'red', 'magenta']
         self.name = 'odor'
 
+class BLA_Config(object):
+    def __init__(self):
+        self.condition = experimental_conditions.BLA
+        self.mouse = 3
+        self.days = [[1, 4], [1, 4], [1, 4], [1, 4]]
+        self.cells = [1, 12, 15, 18]
+        self.ylim = [-.1, 1]
+        self.colors = ['lime', 'darkgreen', 'red', 'magenta', 'turquoise']
+        self.include_water = True
+        self.name = 'odor'
+
 config = PSTHConfig()
-condition_config = OFC_Reversal_Config()
+condition_config = BLA_Config()
 condition = condition_config.condition
 mouse = condition_config.mouse
 days = condition_config.days
@@ -77,6 +89,8 @@ res = analysis.load_data(data_path)
 analysis.add_indices(res)
 analysis.add_time(res)
 odors = condition.odors[mouse]
+if condition_config.include_water:
+    odors.append('water')
 
 for j, cell in enumerate(cells):
     res_mouse = filter.filter(res, filter_dict={'mouse': mouse, 'day': days[j]})

@@ -130,7 +130,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
             ax = ax.twinx()
     else:
         fig = plt.figure(figsize=fig_size)
-        rect = [.25, .25, .65, .65]
+        rect = [.2, .2, .6, .6]
         ax = fig.add_axes(rect, **ax_args)
 
     if sort:
@@ -189,7 +189,12 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         ax.set_xticklabels(xticklabels)
 
     if not twinax:
-        plot_utils.nicer_plot(ax)
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
+    else:
+        ax.spines['top'].set_visible(False)
 
     if save:
         if loop_keys and legend:

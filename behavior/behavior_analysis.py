@@ -37,7 +37,7 @@ def get_days_per_mouse(data_path, condition):
         mice, ix = np.unique(res_behavior_summary['mouse'], return_inverse=True)
         temp = res_behavior_summary['learned_day'][ix]
         temp[temp == None] = last_day_per_mouse[temp == None]
-        learned_days_per_mouse = np.ceil(temp.astype(int))
+        learned_days_per_mouse = np.ceil(temp)
     else:
         learned_days_per_mouse = last_day_per_mouse
     return learned_days_per_mouse, last_day_per_mouse

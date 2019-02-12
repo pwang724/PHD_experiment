@@ -36,6 +36,27 @@ class OFC_Config(Base_Config):
         self.start_at_training = False
         self.mouse = 0
 
+class OFC_LONGTERM_Config(Base_Config):
+    def __init__(self):
+        super(OFC_LONGTERM_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_LONGTERM
+        self.include_water = False
+        self.start_at_training = False
+
+class BLA_Config(Base_Config):
+    def __init__(self):
+        super(BLA_Config, self).__init__()
+        self.condition = experimental_conditions.BLA
+        self.include_water = True
+        self.start_at_training = False
+
+class BLA_LONGTERM_Config(Base_Config):
+    def __init__(self):
+        super(BLA_LONGTERM_Config, self).__init__()
+        self.condition = experimental_conditions.BLA_LONGTERM
+        self.include_water = False
+        self.start_at_training = False
+
 class PIR_Config(Base_Config):
     def __init__(self):
         super(PIR_Config, self).__init__()
@@ -171,7 +192,7 @@ def analyze_data(res, condition_config):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = OFC_State_Config()
+    condition_config = OFC_LONGTERM_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

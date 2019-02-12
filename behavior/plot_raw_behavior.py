@@ -9,7 +9,7 @@ import numpy as np
 import analysis
 from matplotlib.colors import LinearSegmentedColormap
 
-condition = experimental_conditions.PIR
+condition = experimental_conditions.OFC_JAWS
 mouse = 0
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

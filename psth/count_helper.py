@@ -3,7 +3,8 @@ from collections import defaultdict
 import numpy as np
 import filter
 import itertools
-import matplotlib.pyplot as plt
+import reduce
+
 
 def rolling_window(a, window):
     shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
@@ -32,6 +33,142 @@ def _respond_to_all(list_of_masks):
     non_selective_mask = np.all(arr, axis=1)
     return non_selective_mask
 
+def get_valence_sig(res):
+    #TODO: not tested yet
+    def _helper(res):
+        assert res['odor_valence'][0] == 'CS+', 'wrong odor'
+        assert res['odor_valence'][1] == 'CS-', 'wrong odor'
+        on = res['DAQ_O_ON_F'][0]
+        off = res['DAQ_W_ON_F'][0]
+        sig_p = res['sig'][0]
+        sig_m = res['sig'][1]
+        dff_p = res['dff'][0]
+        dff_m = res['dff'][1]
+        sig_p_mask = sig_p == 1
+        sig_m_mask = sig_m == 1
+        dff_mask = dff_p - dff_m
+        dff_mask = np.mean(dff_mask[:, on:off], axis=1)
+        p = [a and b for a, b in zip(sig_p_mask, dff_mask>0)]
+        m = [a and b for a, b in zip(sig_m_mask, dff_mask<0)]
+        return np.array(p), np.array(m)
+
+    mice = np.unique(res['mouse'])
+    res = filter.filter(res, filter_dict={'odor_valence':['CS+','CS-']})
+    sig_res = reduce.new_filter_reduce(res, reduce_key='sig', filter_keys=['mouse','day','odor_valence'])
+    dff_res = reduce.new_filter_reduce(res, reduce_key='dff', filter_keys=['mouse','day','odor_valence'])
+    sig_res['dff'] = dff_res['dff']
+
+    reversal_res = defaultdict(list)
+    day_strs = ['Lrn', 'Rev']
+    for mouse in mice:
+        mouse_res = filter.filter(sig_res, filter_dict={'mouse': mouse})
+        days = np.unique(mouse_res['day'])
+        p_list = []
+        m_list = []
+        for i, day in enumerate(days):
+            mouse_day_res = filter.filter(mouse_res, filter_dict={'day': day})
+            p, m = _helper(mouse_day_res)
+            reversal_res['mouse'].append(mouse)
+            reversal_res['mouse'].append(mouse)
+            reversal_res['day'].append(day_strs[i])
+            reversal_res['day'].append(day_strs[i])
+            reversal_res['odor_valence'].append('CS+')
+            reversal_res['odor_valence'].append('CS-')
+            reversal_res['sig'].append(p)
+            reversal_res['sig'].append(m)
+            reversal_res['Fraction'].append(np.mean(p))
+            reversal_res['Fraction'].append(np.mean(m))
+            p_list.append(p)
+            m_list.append(m)
+    for key, val in reversal_res.items():
+        reversal_res[key] = np.array(val)
+
+def get_reversal_sig(res):
+    def _helper(res):
+        assert res['odor_valence'][0] == 'CS+', 'wrong odor'
+        assert res['odor_valence'][1] == 'CS-', 'wrong odor'
+        on = res['DAQ_O_ON_F'][0]
+        off = res['DAQ_W_ON_F'][0]
+        sig_p = res['sig'][0]
+        sig_m = res['sig'][1]
+        dff_p = res['dff'][0]
+        dff_m = res['dff'][1]
+        sig_p_mask = sig_p == 1
+        sig_m_mask = sig_m == 1
+        dff_mask = dff_p - dff_m
+        dff_mask = np.mean(dff_mask[:, on:off], axis=1)
+        p = [a and b for a, b in zip(sig_p_mask, dff_mask>0)]
+        m = [a and b for a, b in zip(sig_m_mask, dff_mask<0)]
+        return np.array(p), np.array(m)
+
+    mice = np.unique(res['mouse'])
+    res = filter.filter(res, filter_dict={'odor_valence':['CS+','CS-']})
+    sig_res = reduce.new_filter_reduce(res, reduce_key='sig', filter_keys=['mouse','day','odor_valence'])
+    dff_res = reduce.new_filter_reduce(res, reduce_key='dff', filter_keys=['mouse','day','odor_valence'])
+    sig_res['dff'] = dff_res['dff']
+
+    reversal_res = defaultdict(list)
+    day_strs = ['Lrn','Rev']
+    for mouse in mice:
+        mouse_res = filter.filter(sig_res, filter_dict={'mouse':mouse})
+        days = np.unique(mouse_res['day'])
+        p_list = []
+        m_list = []
+        for i, day in enumerate(days):
+            mouse_day_res = filter.filter(mouse_res, filter_dict={'day':day})
+            p, m = _helper(mouse_day_res)
+            reversal_res['mouse'].append(mouse)
+            reversal_res['mouse'].append(mouse)
+            reversal_res['day'].append(day_strs[i])
+            reversal_res['day'].append(day_strs[i])
+            reversal_res['odor_valence'].append('CS+')
+            reversal_res['odor_valence'].append('CS-')
+            reversal_res['sig'].append(p)
+            reversal_res['sig'].append(m)
+            reversal_res['Fraction'].append(np.mean(p))
+            reversal_res['Fraction'].append(np.mean(m))
+            p_list.append(p)
+            m_list.append(m)
+    for key, val in reversal_res.items():
+        reversal_res[key] = np.array(val)
+
+    stats_res = defaultdict(list)
+    for mouse in mice:
+        mouse_res = filter.filter(reversal_res, filter_dict={'mouse':mouse})
+        combinations, list_of_ixs = filter.retrieve_unique_entries(mouse_res, ['day','odor_valence'])
+
+        assert len(combinations) == 4, 'not equal to 4'
+        assert combinations[0][-1] == 'CS+'
+        assert combinations[1][-1] == 'CS-'
+        assert combinations[2][-1] == 'CS+'
+        assert combinations[3][-1] == 'CS-'
+        assert combinations[0][0] == day_strs[0]
+        assert combinations[1][0] == day_strs[0]
+        assert combinations[2][0] == day_strs[1]
+        assert combinations[3][0] == day_strs[1]
+
+        p_before = mouse_res['sig'][0]
+        m_before = mouse_res['sig'][1]
+        n_before = np.invert([a or b for a, b in zip(p_before, m_before)])
+        p_after = mouse_res['sig'][2]
+        m_after = mouse_res['sig'][3]
+        n_after = np.invert([a or b for a, b in zip(p_after, m_after)])
+
+        list_before = [p_before, m_before, n_before]
+        list_after = [p_after, m_after, n_after]
+        str = ['p', 'm', 'none']
+        for i, before in enumerate(list_before):
+            for j, after in enumerate(list_after):
+                ix_intersect =np.intersect1d(np.where(before)[0], np.where(after)[0])
+                fraction = len(ix_intersect) / np.sum(before)
+                stats_res['mouse'].append(mouse)
+                stats_res['condition'].append(str[i]  + '-' + str[j])
+                stats_res['Fraction'].append(fraction)
+    for key, val in stats_res.items():
+        stats_res[key] = np.array(val)
+    return reversal_res, stats_res
+
+
 def get_overlap(res, delete_non_selective):
     def _subsets(S, m):
         return set(itertools.combinations(S, m))
@@ -44,7 +181,6 @@ def get_overlap(res, delete_non_selective):
             mouse_day_res = filter.filter(mouse_res,
                                           filter_dict={'day':day, 'odor_valence':['CS+','CS-']})
             non_selective_mask = _respond_to_all(mouse_day_res['sig'])
-            print(np.sum(non_selective_mask))
 
             odors, odor_ix = np.unique(mouse_day_res['odor_standard'], return_index= True)
             assert len(odor_ix) == 4, 'Number of odors does not equal 4'
@@ -138,16 +274,3 @@ def get_overlap_water(res, arg):
                     else:
                         raise ValueError('overlap arg not recognized')
                     res['Overlap'][odor_ix] = overlap
-
-
-def add_naive_learned(res, start_day_per_mouse, learned_day_per_mouse):
-    for i in range(len(res['day'])):
-        day = res['day'][i]
-        mouse = res['mouse'][i]
-        if start_day_per_mouse[mouse] == day:
-            res['training_day'].append('Naive')
-        elif learned_day_per_mouse[mouse] == day:
-            res['training_day'].append('Learned')
-        else:
-            raise ValueError('day is not either start day or learned day')
-    res['training_day'] = np.array(res['training_day'])

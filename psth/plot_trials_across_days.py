@@ -20,13 +20,24 @@ class OFC_Config(object):
     def __init__(self):
         self.condition = experimental_conditions.OFC
         self.mouse = 0
-        self.days = [[1,4],[1,5],[1,5],[1,5]]
-        self.cells = [31, 33, 48, 7]
+        self.days = [[1,4]]
+        self.cells = [31]
         self.vlim = .7
         self.title = ['Naive','Learned']
 
+class BLA_Config(object):
+    def __init__(self):
+        self.condition = experimental_conditions.BLA
+        self.mouse = 3
+        self.days = [[1,2,4]]
+        self.cells = [1]
+        self.vlim = .7
+        self.title = ['Naive','Learning','Learned']
+
+condition_config = BLA_Config()
+
+
 config = PSTHConfig()
-condition_config = OFC_Config()
 condition = condition_config.condition
 mouse = condition_config.mouse
 days = condition_config.days
