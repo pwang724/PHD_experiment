@@ -264,6 +264,7 @@ class OFC_COMPOSITE:
     naive_dt_day = [0, 0, 0, 0]
     naive_pt_day = [1, 1, 1, 1]
     last_pt_day = [3, 3, 5, 3]
+    first_dt_day = [4, 4, 6, 4]
 
 
 class MPFC_COMPOSITE:
@@ -307,6 +308,7 @@ class MPFC_COMPOSITE:
     naive_dt_day = [0, 0, 0, 0]
     naive_pt_day = [None, None, 1, 1]
     last_pt_day = [2, 2, 3, 3]
+    first_dt_day = [3, 3, 4, 4]
 
 class BLA_JAWS:
     #TODO

@@ -108,7 +108,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
                  select_dict=None, path=None, colors= None, colormap='cool',
                  plot_function= plt.plot, ax_args={}, plot_args={},
                  save = True, reuse = False, twinax = False, sort = False, error_key = '_sem',
-                 fig_size = (2, 1.5), legend = True):
+                 fig_size = (2, 1.5), legend = True, name_str = ''):
     '''
 
     :param res: flattened dict of results
@@ -212,6 +212,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
             name = ''
             for k, v in select_dict.items():
                 name += k + '_' + str(v) + '_'
+            name += name_str
 
         folder_name = y_key + '_vs_' + x_key
         if loop_keys:

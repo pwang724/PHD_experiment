@@ -180,7 +180,6 @@ def get_overlap(res, delete_non_selective):
         for day in days:
             mouse_day_res = filter.filter(mouse_res,
                                           filter_dict={'day':day, 'odor_valence':['CS+','CS-']})
-            non_selective_mask = _respond_to_all(mouse_day_res['sig'])
 
             odors, odor_ix = np.unique(mouse_day_res['odor_standard'], return_index= True)
             assert len(odor_ix) == 4, 'Number of odors does not equal 4'
@@ -190,6 +189,7 @@ def get_overlap(res, delete_non_selective):
                 mask2 = mouse_day_res['sig'][comparison[1]]
 
                 if delete_non_selective:
+                    non_selective_mask = _respond_to_all(mouse_day_res['sig'])
                     mask1 = np.all([mask1, np.invert(non_selective_mask)], axis=0).astype(int)
                     mask2 = np.all([mask2, np.invert(non_selective_mask)], axis=0).astype(int)
 

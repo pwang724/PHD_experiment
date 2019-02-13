@@ -43,6 +43,20 @@ class OFC_LONGTERM_Config(Base_Config):
         self.include_water = False
         self.start_at_training = False
 
+class OFC_COMPOSITE_Config(Base_Config):
+    def __init__(self):
+        super(OFC_COMPOSITE_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_COMPOSITE
+        self.include_water = False
+        self.start_at_training = True
+
+class MPFC_COMPOSITE_Config(Base_Config):
+    def __init__(self):
+        super(MPFC_COMPOSITE_Config, self).__init__()
+        self.condition = experimental_conditions.MPFC_COMPOSITE
+        self.include_water = False
+        self.start_at_training = True
+
 class BLA_Config(Base_Config):
     def __init__(self):
         super(BLA_Config, self).__init__()
@@ -100,7 +114,12 @@ def convert(res, condition_config):
         odor_trials = res['ODOR_TRIALS'][i]
         assert data.shape[1] == len(odor_trials), 'number of trials in cons does not match trials in data'
         mouse = res['mouse'][i]
-        relevant_odors = copy.copy(condition_config.condition.odors[mouse])
+
+        condition = condition_config.condition
+        if hasattr(condition, 'odors'):
+            relevant_odors = copy.copy(condition.odors[mouse])
+        else:
+            relevant_odors = copy.copy(condition.pt_odors[mouse] + condition.dt_odors[mouse])
         if condition_config.include_water:
             relevant_odors.append('water')
 
@@ -136,7 +155,13 @@ def parse_data(res):
 
             #statistical significance
             f = lambda y: mannwhitneyu(baseline, y, use_continuity=True, alternative='less')[-1]
-            p = [f(y) for y in data_time_pixels]
+            p = []
+            for y in data_time_pixels:
+                try:
+                    out = f(y)
+                except:
+                    out = 1
+                p.append(out)
             while (len(p) < cell_data.shape[-1]):
                 p.append(p[-1])
 
@@ -189,10 +214,9 @@ def analyze_data(res, condition_config):
     for key, val in res.items():
         res[key] = np.array(val)
 
-
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = OFC_LONGTERM_Config()
+    condition_config = MPFC_COMPOSITE_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

@@ -26,8 +26,24 @@ class PIRConfig(object):
         self.negative_threshold = -0.05
         self.title = 'odor'
 
+class OFC_COMPOSITE_Config(object):
+    def __init__(self):
+        self.condition = experimental_conditions.OFC_COMPOSITE
+        self.mouse = 0
+        self.days = [1,2,3]
+        self.sort_day_ix = 0
+        self.vlim = .2
+        self.threshold = .02
+        self.negative_threshold = -0.05
+        self.title = 'odor'
+        self.sort_method = 'onset'
+        self.sort_style = 'CS+'
+        self.independent_sort = True
+        self.include_water = False
+        self.period = 'pt'
+
 config = PSTHConfig()
-condition_config = PIRConfig()
+condition_config = OFC_COMPOSITE_Config()
 condition = condition_config.condition
 mouse = condition_config.mouse
 days = condition_config.days

@@ -14,14 +14,14 @@ import analysis
 
 experiments = [
     # 'individual',
-    'individual_half_max',
+    # 'individual_half_max',
     # 'summary',
-    # 'basic_3'
+    'basic_3'
 ]
 conditions = [
     experimental_conditions.BEHAVIOR_OFC_YFP,
     experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.OFC_COMPOSITE,
     # experimental_conditions.MPFC_COMPOSITE
 ]
@@ -130,7 +130,7 @@ if 'summary' in experiments:
 
 
 if 'basic_3' in experiments:
-    reduce_key = 'criterion'
+    reduce_key = 'half_max'
 
     for valence in ['CS+','CS-', 'PT CS+']:
         summary_all = defaultdict(list)

@@ -8,8 +8,7 @@ import matplotlib as mpl
 import numpy as np
 import analysis
 import tools.utils as utils
-from psth.psth_helper import PSTHConfig, subtract_baseline, draw_scale_line_xy
-from scipy.stats import sem
+from psth.psth_helper import PSTHConfig, subtract_baseline
 import copy
 
 mpl.rcParams['pdf.fonttype'] = 42
@@ -34,7 +33,17 @@ class BLA_Config(object):
         self.vlim = .7
         self.title = ['Naive','Learning','Learned']
 
-condition_config = BLA_Config()
+class PIR_Config(object):
+    def __init__(self):
+        self.condition = experimental_conditions.PIR
+        self.mouse = 1
+        self.days = [[0, 1, 2]]
+        self.cells = [0, 22, 45, 18]
+        self.cells = [22]
+        self.vlim = .5
+        self.title = ['Naive', 'Learning', 'Learned']
+
+condition_config = PIR_Config()
 
 
 config = PSTHConfig()
@@ -71,7 +80,8 @@ for i,_ in enumerate(cell_days):
     for j, odor in enumerate(odors):
         ix = odor == odor_trials
         cur_data = data[cell, ix, :]
-        cur_data = subtract_baseline(cur_data, config.baseline_start, odor_on - config.baseline_end)
+        cur_data -= 1
+        # cur_data = subtract_baseline(cur_data, config.baseline_start, odor_on - config.baseline_end)
         list_of_psths.append(cur_data)
     min_trial = np.min([x.shape[0] for x in list_of_psths])
     list_of_psths = [x[:min_trial,:] for x in list_of_psths]

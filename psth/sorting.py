@@ -37,26 +37,77 @@ def sort_by_onset(list_of_psths, odor_on, water_on, condition_config):
 
     list_of_ixs = []
     cutoff_ix = water_on - odor_on - 1
-    if condition_config.sort_style == 'individual':
+    if condition_config.sort_onset_style == 'individual':
         for argmax in list_of_argmax:
             ixs = np.argsort(argmax)
             cutoff = np.argmax(argmax[ixs] > cutoff_ix)
             list_of_ixs.append((ixs[:cutoff]))
 
-    if condition_config.sort_style == 'CS+':
-        argmax = np.array([(x + y)/2 for x, y in zip(list_of_argmax[0], list_of_argmax[1])])
+    if condition_config.sort_onset_style == 'CS+':
+        if condition_config.period == 'pt':
+            number_of_odors = 1
+        else:
+            number_of_odors = 2
+        argmax = np.mean(list_of_argmax[0:number_of_odors], axis=0)
         ixs = np.argsort(argmax)
         cutoff = np.argmax(argmax[ixs] > cutoff_ix)
         list_of_ixs.append((ixs[:cutoff]))
 
-        argmax = np.array([(x + y)/2 for x, y in zip(list_of_argmin[0], list_of_argmin[1])])
-        ixs = np.argsort(argmax)[::-1]
-        cutoff = np.argmin(argmax[ixs] > cutoff_ix)
+        argmin = np.mean(list_of_argmin[0:number_of_odors], axis=0)
+        ixs = np.argsort(argmin)[::-1]
+        cutoff = np.argmin(argmin[ixs] > cutoff_ix)
         list_of_ixs.append((ixs[:cutoff]))
 
     list_of_ixs.append(np.arange(list_of_psths[0].shape[0]))
     final_ixs = _sort_by_ixs(list_of_ixs)
     return final_ixs
+
+def sort_by_plus_minus(list_of_psths, odor_on, water_on, condition_config):
+    list_of_argmax = []
+    for psth in list_of_psths:
+        binary_psth = psth[:, odor_on:water_on] > condition_config.threshold
+        argmax = _sort_onset(binary_psth, odor_on, water_on, condition_config)
+        list_of_argmax.append(argmax)
+
+    list_of_argmin = []
+    for psth in list_of_psths:
+        binary_psth = psth[:, odor_on:water_on] < condition_config.negative_threshold
+        argmax = _sort_onset(binary_psth, odor_on, water_on, condition_config)
+        list_of_argmin.append(argmax)
+
+    list_of_ixs = []
+    cutoff_ix = water_on - odor_on - 4
+    argmax = np.mean(list_of_argmax[0:2], axis=0)
+    ixs = np.argsort(argmax)
+    cutoff = np.argmax(argmax[ixs] > cutoff_ix)
+    list_of_ixs.append((ixs[:cutoff]))
+
+    argmax = np.mean(list_of_argmax[2:4], axis=0)
+    ixs = np.argsort(argmax)
+    cutoff = np.argmax(argmax[ixs] > cutoff_ix)
+    list_of_ixs.append((ixs[:cutoff]))
+
+    argmin = np.mean(list_of_argmin[0:4], axis=0)
+    ixs = np.argsort(argmin)[::-1]
+    cutoff = np.argmin(argmin[ixs] > cutoff_ix)
+    list_of_ixs.append((ixs[:cutoff]))
+
+    list_of_ixs.append(np.arange(list_of_psths[0].shape[0]))
+    final_ixs = _sort_by_ixs(list_of_ixs)
+    return final_ixs
+
+def _sort_onset(binary_psth, odor_on, water_on, condition_config):
+    responsive = np.any(binary_psth, axis=1)
+    argmax = np.argmax(binary_psth == 1, axis=1)
+    argmax[np.invert(responsive)] = 100
+    return argmax
+
+
+def sort_max(psth, odor_on, water_on, condition_config):
+    max = np.max(psth[:, odor_on:water_on])
+    argmax = np.argmax(max)
+    return argmax
+
 
 
 def _sort_by_ixs(list_of_ixs):

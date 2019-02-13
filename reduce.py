@@ -5,7 +5,7 @@ import numpy as np
 
 import filter
 from scipy import stats as sstats
-
+import copy
 
 def _regularize_length(res, key):
     data = res[key]
@@ -66,17 +66,24 @@ def append_defaultdicts(dictA, dictB):
     for k in dictB.keys():
         dictA[k].append(dictB[k])
 
-def chain_defaultdicts(dictA, dictB):
+def chain_defaultdicts(dictA, dictB, copy_dict = False):
     '''
     works as intended
     :param dictA:
     :param dictB:
     :return:
     '''
+
+    if copy_dict:
+        dictA = copy.copy(dictA)
+
     for k in dictB.keys():
         dictA[k] = list(itertools.chain(dictA[k], dictB[k]))
     for key, val in dictA.items():
         dictA[key] = np.array(val)
+
+    if copy_dict:
+        return dictA
 
 
 def reduce_by_concat(res, key, rank_keys=None, verbose=False):
@@ -110,24 +117,25 @@ def reduce_by_concat(res, key, rank_keys=None, verbose=False):
     return concatenated_res
 
 def reduce_by_mean(res, key, verbose = False):
-    data = res[key]
+    data = res[key].astype(float)
 
     try:
         mean = np.mean(data, axis=0)
         std = np.std(data, axis=0)
         sem = sstats.sem(data, axis=0)
     except:
-        if np.all(data == None):
+        if np.all(np.isnan(data)):
             mean = None
             std = None
             sem = None
         else:
-            mean = np.mean(data[data!=None], axis=0)
-            std = np.std(data[data!=None], axis=0)
+            ix = np.invert(np.isnan(data))
+            mean = np.mean(data[ix], axis=0)
+            std = np.std(data[ix], axis=0)
             if len(data[data!=None]) == 1:
                 sem = 0
             else:
-                sem = sstats.sem(data[data!=None], axis=0)
+                sem = sstats.sem(data[ix], axis=0)
             print('mean of entries for {} could not be computed. took the mean of non-None entries: {}'
                   ' for mouse {}'.
                 format(key, data, res['mouse']))

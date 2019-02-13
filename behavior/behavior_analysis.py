@@ -9,34 +9,39 @@ from scipy.signal import savgol_filter
 from reduce import append_defaultdicts, reduce_by_concat
 import analysis
 
-def _get_last_day_per_mouse(res):
-    '''
-    returns the value of the last day of imaging per mouse
-    :param res: flattened dict of results
-    :return: list of last day per each mouse
-    '''
-    out = []
-    list_of_dates = res['day']
-    list_of_mice = res['mouse']
+def _get_days_per_condition(data_path, condition, odor_valence = None):
+    res = analysis.load_all_cons(data_path)
+    analysis.add_indices(res)
+    lick_res = convert(res, condition)
+    add_odor_value(lick_res, condition)
+    if odor_valence is not None:
+        lick_res = filter.filter(lick_res, {'odor_valence': odor_valence})
+
+    days = []
+    list_of_dates = lick_res['day']
+    list_of_mice = lick_res['mouse']
     _, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
     for mouse_ix in np.unique(mouse_ixs):
         mouse_dates = list_of_dates[mouse_ixs == mouse_ix]
-        counts = np.unique(mouse_dates).size - 1
-        out.append(counts)
-    return out
+        counts = np.unique(mouse_dates)
+        days.append(counts)
+    return days
 
-def get_days_per_mouse(data_path, condition):
+def get_days_per_mouse(data_path, condition, odor_valence ='CS+'):
     res = analysis.load_all_cons(data_path)
     analysis.add_indices(res)
-    last_day_per_mouse = np.array(_get_last_day_per_mouse(res))
+    days_per_mouse = np.array(_get_days_per_condition(data_path, condition, odor_valence))
+    first_day_per_mouse = np.array([x[0] for x in days_per_mouse])
+    last_day_per_mouse = np.array([x[-1] for x in days_per_mouse])
 
-    if hasattr(condition, 'csp'):
+    if hasattr(condition, 'csp') or hasattr(condition, 'pt_csp'):
         res_behavior = analyze_behavior(data_path, condition)
-        res_behavior_csp = filter.filter(res_behavior, {'odor_valence': 'CS+'})
+        res_behavior_csp = filter.filter(res_behavior, {'odor_valence': odor_valence})
         res_behavior_summary = reduce.filter_reduce(res_behavior_csp, filter_key='mouse', reduce_key='learned_day')
         mice, ix = np.unique(res_behavior_summary['mouse'], return_inverse=True)
         temp = res_behavior_summary['learned_day'][ix]
         temp[temp == None] = last_day_per_mouse[temp == None]
+        temp[np.isnan(temp)] = last_day_per_mouse[np.isnan(temp)]
         learned_days_per_mouse = np.ceil(temp)
     else:
         learned_days_per_mouse = last_day_per_mouse
@@ -57,8 +62,9 @@ def analyze_behavior(data_path, condition):
     analysis.add_indices(res)
     analysis.add_time(res)
     lick_res = convert(res, condition)
-    plot_res = agglomerate_days(lick_res, condition, condition.training_start_day,
-                                _get_last_day_per_mouse(res))
+    days_per_mouse = _get_days_per_condition(data_path, condition)
+    last_day_per_mouse = np.array([x[-1] for x in days_per_mouse])
+    plot_res = agglomerate_days(lick_res, condition, condition.training_start_day, last_day_per_mouse)
     add_odor_value(plot_res, condition)
     add_behavior_stats(plot_res)
     return plot_res
@@ -238,21 +244,25 @@ def add_behavior_stats(res, arg ='normal'):
 
     for i, half_max in enumerate(res['half_max']):
         odor_valence = res['odor_valence'][i]
-        y = res['boolean_smoothed'][i]
+        y = res['lick'][i] > 0
         days = res['day'][i]
-        y_ = np.copy(y)
-        y_[:half_max] = 0
+        unique_days, ixs = np.unique(days, return_inverse=True)
+        mean_licks_per_day = []
+        for i, day in enumerate(unique_days):
+            ix = ixs == i
+            mean_licks_per_day.append(np.mean(y[ix]))
+        mean_licks_per_day = np.array(mean_licks_per_day) * 100
 
         if odor_valence == 'CS+' or odor_valence == 'PT CS+':
-            if any(y_ > config.fully_learned_threshold_up):
-                ix = np.argmax(y_ > config.fully_learned_threshold_up)
-                day = days[ix]
+            if any(mean_licks_per_day > config.fully_learned_threshold_up):
+                ix = np.argmax(mean_licks_per_day > config.fully_learned_threshold_up)
+                day = unique_days[ix]
             else:
                 day = None
         elif odor_valence == 'CS-':
-            if any(y_ < config.fully_learned_threshold_down):
-                ix = np.argmax(y_ < config.fully_learned_threshold_down)
-                day = days[ix]
+            if any(mean_licks_per_day < config.fully_learned_threshold_down):
+                ix = np.argmax(mean_licks_per_day < config.fully_learned_threshold_down)
+                day = unique_days[ix]
             else:
                 day=None
         elif odor_valence == 'PT Naive':

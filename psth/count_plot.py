@@ -58,6 +58,7 @@ def plot_summary_odor(res, start_days, end_days):
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
     add_naive_learned(start_end_day_res, start_days, end_days)
     filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
+
     odor_list = ['CS+1', 'CS+2','CS-1', 'CS-2']
     colors = ['Green','Green','Red','Red']
     ax_args_copy = ax_args_copy.copy()
@@ -70,13 +71,51 @@ def plot_summary_odor(res, start_days, end_days):
         if i == len(odor_list) -1:
             save_arg = True
 
-        temp = filter.filter(start_end_day_res, {'odor_standard':odor})
-        plot.plot_results(temp,
+        plot.plot_results(start_end_day_res,
+                          select_dict= {'odor_standard':odor},
                           x_key='odor_standard_training_day', y_key='Fraction Responsive', loop_keys='mouse',
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           save=save_arg, reuse=reuse_arg,
-                          fig_size=(2.5, 1.5),legend=False)
+                          fig_size=(2.5, 1.5),legend=False, name_str = ','.join([str(x) for x in start_days]))
+
+def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive):
+    ax_args_copy = ax_args.copy()
+    res = copy.copy(res)
+    get_responsive_cells(res)
+    list_of_days = list(zip(start_days, end_days))
+    mice = np.unique(res['mouse'])
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+
+    if arg_naive:
+        day_start = filter.filter(start_end_day_res, {'odor_standard': 'PT Naive'})
+        day_start['odor_standard'] = np.array(['PT CS+'] * len(day_start['odor_standard']))
+        day_end = filter.filter_days_per_mouse(res, days_per_mouse= end_days)
+        reduce.chain_defaultdicts(day_start, day_end)
+        start_end_day_res = day_start
+
+    add_naive_learned(start_end_day_res, start_days, end_days)
+    filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
+
+    odor_list = ['PT CS+']
+    colors = ['Orange']
+    ax_args_copy = ax_args_copy.copy()
+    ax_args_copy.update({'xlim':[-1, 2]})
+    for i, odor in enumerate(odor_list):
+        save_arg = False
+        reuse_arg = True
+        if i == 0:
+            reuse_arg = False
+        if i == len(odor_list) -1:
+            save_arg = True
+
+        plot.plot_results(start_end_day_res,
+                          select_dict= {'odor_standard':odor},
+                          x_key='odor_standard_training_day', y_key='Fraction Responsive', loop_keys='mouse',
+                          colors= [colors[i]]*len(mice),
+                          path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
+                          save=save_arg, reuse=reuse_arg,
+                          fig_size=(1.25, 1.5),legend=False)
 
 def plot_summary_water(res, start_days, end_days):
     ax_args_copy = ax_args.copy()
@@ -244,7 +283,7 @@ def plot_reversal(res, start_days, end_days):
                           fig_size=(2, 1.5),
                           legend=False, save=True, reuse=True)
 
-condition_config = psth.count_analyze.OFC_LONGTERM_Config()
+condition_config = psth.count_analyze.OFC_COMPOSITE_Config()
 
 config = psth.psth_helper.PSTHConfig()
 condition = condition_config.condition
@@ -252,18 +291,18 @@ data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOL
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
 figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'COUNTING',  condition.name)
 
-#retrieving relevant days
-learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
-if condition_config.start_at_training and hasattr(condition, 'training_start_day'):
-    start_days_per_mouse = condition.training_start_day
-else:
-    start_days_per_mouse = [0] * len(learned_day_per_mouse)
-training_start_day_per_mouse = condition.training_start_day
-print(learned_day_per_mouse)
-
 #analysis
 res = fio.load_pickle(os.path.join(save_path, 'dict.pkl'))
 psth.count_analyze.analyze_data(res, condition_config)
+
+# retrieving relevant days
+learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
+print(learned_day_per_mouse)
+if condition_config.start_at_training and hasattr(condition, 'training_start_day'):
+    start_days_per_mouse = condition.training_start_day
+else:
+    start_days_per_mouse = [0] * len(np.unique(res['mouse']))
+training_start_day_per_mouse = condition.training_start_day
 
 import behavior
 import analysis
@@ -306,3 +345,29 @@ if condition.name == 'OFC_REVERSAL':
 if condition.name == 'OFC_CONTEXT':
     # plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse)
     plot_power(res, start_days_per_mouse, last_day_per_mouse)
+if condition.name == 'OFC_COMPOSITE':
+    pt_learned = [3, 3, 4, 3]
+    pt_start = condition.naive_pt_day
+    plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=True)
+
+    dt_start = [x+1 for x in condition.last_pt_day]
+    dt_end = [x+1 for x in learned_day_per_mouse]
+    dt_last = [x for x in last_day_per_mouse]
+    plot_summary_odor(res, [0,0,0,0], dt_end)
+
+if condition.name == 'MPFC_COMPOSITE':
+    pt_learned = [3, 3, 3, 3]
+    pt_start = condition.naive_pt_day
+
+    dt_start = [x+1 for x in condition.last_pt_day]
+    dt_end = [x+1 for x in learned_day_per_mouse]
+    dt_last = [x for x in last_day_per_mouse]
+    dt_res = filter.filter(res, filter_dict={'odor_valence':['CS+','CS-']})
+
+    plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=False)
+    plot_summary_odor(res, [0,0,0,0], dt_last)
+    plot_summary_odor(res, dt_start, dt_last)
+    plot_overlap(dt_res, dt_start, dt_last)
+
+
+

@@ -23,7 +23,7 @@ conditions = [
     # experimental_conditions.BLA,
     # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BLA_JAWS
 ]
 
