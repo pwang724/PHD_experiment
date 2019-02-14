@@ -28,7 +28,7 @@ experiments = [
     'shuffle',
 ]
 
-condition = experimental_conditions.OFC_COMPOSITE
+condition = experimental_conditions.PIR
 config = PCAConfig()
 config.style = 'csp'
 config.n_principal_components = 5
@@ -39,7 +39,7 @@ data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOL
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'PCA_' + config.style, condition.name)
 figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'PCA', config.style, condition.name)
 
-EXPERIMENT = False
+EXPERIMENT = True
 ANALYZE = True
 shuffle = True
 

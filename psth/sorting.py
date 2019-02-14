@@ -1,12 +1,18 @@
 import numpy as np
 
-def sort_by_selectivity(list_of_psths, odor_on, water_on, condition_config):
+def sort_by_selectivity(list_of_psths, odor_on, water_on, condition_config, delete_nonselective = False):
     list_of_ixs = []
     for psth in list_of_psths:
         max_dff = np.max(psth[:, odor_on:water_on], axis=1)
         ixs = np.argsort(max_dff)[::-1]
         cutoff = np.argmin(max_dff[ixs] > condition_config.threshold)
         list_of_ixs.append(ixs[:cutoff])
+
+    #respond to all
+    if delete_nonselective:
+        respond_to_all = list(set.intersection(*[set(x) for x in list_of_ixs]))
+    else:
+        respond_to_all = []
 
     for psth in list_of_psths:
         max_dff = np.min(psth[:, odor_on:water_on], axis=1)
@@ -16,6 +22,7 @@ def sort_by_selectivity(list_of_psths, odor_on, water_on, condition_config):
 
     list_of_ixs.append(np.arange(list_of_psths[0].shape[0]))
     final_ixs = _sort_by_ixs(list_of_ixs)
+    final_ixs = np.array([x for x in final_ixs if x not in respond_to_all])
     return final_ixs
 
 def sort_by_onset(list_of_psths, odor_on, water_on, condition_config):

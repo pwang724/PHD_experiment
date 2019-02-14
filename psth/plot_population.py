@@ -34,6 +34,10 @@ class Base_Config(object):
         self.period = None
         self.across_days = False
         self.across_day_titles = None
+        self.plot_big = False
+        self.plot_big_days = None
+        self.plot_big_naive = None
+        self.delete_nonselective = False
 
 class PIR_Config(Base_Config):
     def __init__(self):
@@ -44,6 +48,7 @@ class PIR_Config(Base_Config):
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
+        self.delete_nonselective = True
 
 class OFC_Config(Base_Config):
     def __init__(self):
@@ -91,6 +96,19 @@ class OFC_COMPOSITE_PT_Config(Base_Config):
         self.across_days = True
         self.across_days_titles = ['Naive', 'Learned']
 
+class OFC_COMPOSITE_DT_Config(Base_Config):
+    def __init__(self):
+        super(OFC_COMPOSITE_DT_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_COMPOSITE
+        self.mouse = 0
+        self.days = [9]
+        self.sort_day_ix = 0
+        self.vlim = .2
+        self.threshold = .02
+        self.independent_sort = True
+        self.include_water = False
+        self.period = 'dt'
+
 class MPFC_COMPOSITE_PT_Config(Base_Config):
     def __init__(self):
         super(MPFC_COMPOSITE_PT_Config, self).__init__()
@@ -121,124 +139,204 @@ class MPFC_COMPOSITE_DT_Config(Base_Config):
         self.period = 'dt'
         self.sort_method = 'plus_minus'
 
-class OFC_COMPOSITE_DT_Config(Base_Config):
+class PIR_BIG_Config(Base_Config):
     def __init__(self):
-        super(OFC_COMPOSITE_DT_Config, self).__init__()
-        self.condition = experimental_conditions.OFC_COMPOSITE
-        self.mouse = 0
-        self.days = [9]
+        super(PIR_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.PIR
+        self.threshold = .1
+        self.sort_method = 'selectivity'
+        self.plot_big = True
+        self.plot_big_days = [3,2,3,3,3,3]
+        self.plot_big_naive = False
+        self.sort_day_ix = 0
+
+class OFC_BIG_Config(Base_Config):
+    def __init__(self):
+        super(OFC_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.OFC
+        self.plot_big = True
+        self.plot_big_days = [4,4,3,3,3]
+        self.threshold = 0.04
+        self.vlim = .25
+        self.plot_big_naive = False
+        self.sort_day_ix = 0
+
+class MPFC_BIG_Config(Base_Config):
+    def __init__(self):
+        super(MPFC_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.MPFC_COMPOSITE
+        self.sort_day_ix = 0
+        self.vlim = .25
+        self.threshold = .03
+        self.period = 'dt'
+        self.sort_method = 'plus_minus'
+        self.plot_big = True
+        self.plot_big_days = [7, 6, 5, 7]
+        self.plot_big_naive = False
+
+class BLA_BIG_Config(Base_Config):
+    def __init__(self):
+        super(BLA_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.BLA
+        self.sort_method = 'selectivity'
         self.sort_day_ix = 0
         self.vlim = .2
         self.threshold = .02
-        self.independent_sort = True
-        self.include_water = False
-        self.period = 'dt'
-
+        self.plot_big = True
+        self.plot_big_days = [5, 4, 6, 6]
+        self.plot_big_naive = False
 
 config = PSTHConfig()
-condition_config = MPFC_COMPOSITE_PT_Config()
+condition_config = OFC_BIG_Config()
 condition = condition_config.condition
-mouse = condition_config.mouse
-days = condition_config.days
-
-if hasattr(condition, 'odors'):
-    odors = condition.odors[mouse]
-elif condition_config.period == 'pt':
-    odors = condition.pt_csp[mouse]
-elif condition_config.period == 'dt':
-    odors = condition.dt_odors[mouse]
-else:
-    raise ValueError('odor condition not recognized')
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'PSTH',  condition.name, 'POPULATION')
 
-res = analysis.load_data(data_path)
-analysis.add_indices(res)
-analysis.add_time(res)
-res_mouse = filter.filter(res, filter_dict={'mouse': mouse, 'day':days})
+# from behavior import behavior_analysis
+# learned_days = behavior_analysis.get_days_per_mouse(data_path, condition)
 
-#sorting step
-if not condition_config.independent_sort:
-    odors_copy = copy.copy(odors)
-    i=condition_config.sort_day_ix
-    if days[i] >= condition.training_start_day[mouse] and condition_config.include_water:
-        odors_copy.append('water')
-    odor_on = res_mouse['DAQ_O_ON_F'][i]
-    water_on = res_mouse['DAQ_W_ON_F'][i]
-    odor_trials = res_mouse['ODOR_TRIALS'][i]
-    frames_per_trial = res_mouse['TRIAL_FRAMES'][i]
+def helper(res, mouse, days, condition_config):
+    res_mouse = filter.filter(res, filter_dict={'mouse': mouse, 'day': days})
 
-    data = utils.reshape_data(res_mouse['data'][i], nFrames= frames_per_trial,
-                                                    cell_axis=0, trial_axis=1, time_axis=2)
-    list_of_psths = []
-    for j, odor in enumerate(odors):
-        ix = odor == odor_trials
-        cur_data = data[:, ix, :]
-        for k, cell in enumerate(cur_data):
-            cur_data[k,:,:] = subtract_baseline(cell, config.baseline_start, odor_on - config.baseline_end)
-        mean = np.mean(cur_data, axis=1)
-        list_of_psths.append(mean)
-
-    if condition_config.sort_method == 'selectivity':
-        ixs = sort.sort_by_selectivity(list_of_psths, odor_on, water_on, condition_config)
-    elif condition_config.sort_method == 'onset':
-        ixs = sort.sort_by_onset(list_of_psths, odor_on, water_on, condition_config)
+    if hasattr(condition, 'odors'):
+        odors = condition.odors[mouse]
+    elif condition_config.period == 'pt':
+        odors = condition.pt_csp[mouse]
+    elif condition_config.period == 'dt':
+        odors = condition.dt_odors[mouse]
     else:
-        print('sorting method is not recognized')
+        raise ValueError('odor condition not recognized')
 
-#plotting step
-images = []
-odor_on_times = []
-water_on_times = []
-list_of_odor_names = []
-for i,_ in enumerate(days):
-    odors_copy = copy.copy(odors)
-    if days[i] >= condition.training_start_day[mouse] and condition_config.include_water:
-        odors_copy.append('water')
+    # sorting step
+    if not condition_config.independent_sort:
+        odors_copy = copy.copy(odors)
+        i = condition_config.sort_day_ix
+        if days[i] >= condition.training_start_day[mouse] and condition_config.include_water:
+            odors_copy.append('water')
+        odor_on = res_mouse['DAQ_O_ON_F'][i]
+        water_on = res_mouse['DAQ_W_ON_F'][i]
+        odor_trials = res_mouse['ODOR_TRIALS'][i]
+        frames_per_trial = res_mouse['TRIAL_FRAMES'][i]
 
-    odor_on = res_mouse['DAQ_O_ON_F'][i]
-    water_on = res_mouse['DAQ_W_ON_F'][i]
-    odor_trials = res_mouse['ODOR_TRIALS'][i]
-    frames_per_trial = res_mouse['TRIAL_FRAMES'][i]
+        data = utils.reshape_data(res_mouse['data'][i], nFrames=frames_per_trial,
+                                  cell_axis=0, trial_axis=1, time_axis=2)
+        list_of_psths = []
+        for j, odor in enumerate(odors):
+            ix = odor == odor_trials
+            cur_data = data[:, ix, :]
+            for k, cell in enumerate(cur_data):
+                cur_data[k, :, :] = subtract_baseline(cell, config.baseline_start, odor_on - config.baseline_end)
+            mean = np.mean(cur_data, axis=1)
+            list_of_psths.append(mean)
 
-    data = utils.reshape_data(res_mouse['data'][i], nFrames=frames_per_trial,
-                              cell_axis=0, trial_axis=1, time_axis=2)
-    list_of_psths = []
-    for j, odor in enumerate(odors_copy):
-        ix = odor == odor_trials
-        cur_data = data[:, ix, :]
-        for k, cell in enumerate(cur_data):
-            cur_data[k, :, :] = subtract_baseline(cell, config.baseline_start, odor_on - config.baseline_end)
-        mean = np.mean(cur_data, axis=1)
-        list_of_psths.append(mean)
-
-    if condition_config.independent_sort:
         if condition_config.sort_method == 'selectivity':
-            ixs = sort.sort_by_selectivity(list_of_psths, odor_on, water_on, condition_config)
+            ixs = sort.sort_by_selectivity(list_of_psths, odor_on, water_on, condition_config,
+                                           delete_nonselective= condition_config.delete_nonselective)
         elif condition_config.sort_method == 'onset':
             ixs = sort.sort_by_onset(list_of_psths, odor_on, water_on, condition_config)
         elif condition_config.sort_method == 'plus_minus':
             ixs = sort.sort_by_plus_minus(list_of_psths, odor_on, water_on, condition_config)
         else:
-            raise ValueError('sorting method is not recognized')
+            print('sorting method is not recognized')
 
-    psth = np.concatenate(list_of_psths, axis=1)
-    psth = psth[ixs,:]
-    images.append(psth)
-    odor_on_times.append(odor_on)
-    water_on_times.append(water_on)
-    list_of_odor_names.append(odors_copy)
+    # plotting step
+    images = []
+    odor_on_times = []
+    water_on_times = []
+    list_of_odor_names = []
+    for i, _ in enumerate(days):
+        odors_copy = copy.copy(odors)
+        if days[i] >= condition.training_start_day[mouse] and condition_config.include_water:
+            odors_copy.append('water')
 
-if condition_config.across_days:
-    images = [np.concatenate(images, axis=1)]
-    odor_on_times = [odor_on_times[0]]
-    water_on_times = [water_on_times[0]]
-    if condition_config.across_days_titles:
-        list_of_odor_names = [condition_config.across_days_titles]
+        odor_on = res_mouse['DAQ_O_ON_F'][i]
+        water_on = res_mouse['DAQ_W_ON_F'][i]
+        odor_trials = res_mouse['ODOR_TRIALS'][i]
+        frames_per_trial = res_mouse['TRIAL_FRAMES'][i]
+
+        data = utils.reshape_data(res_mouse['data'][i], nFrames=frames_per_trial,
+                                  cell_axis=0, trial_axis=1, time_axis=2)
+        list_of_psths = []
+        for odor in odors_copy:
+            ix = odor == odor_trials
+            cur_data = data[:, ix, :]
+            for k, cell in enumerate(cur_data):
+                cur_data[k, :, :] = subtract_baseline(cell, config.baseline_start, odor_on - config.baseline_end)
+            mean = np.mean(cur_data, axis=1)
+            list_of_psths.append(mean)
+
+        if condition_config.independent_sort:
+            if condition_config.sort_method == 'selectivity':
+                ixs = sort.sort_by_selectivity(list_of_psths[:4], odor_on, water_on, condition_config,
+                                               delete_nonselective=condition_config.delete_nonselective)
+            elif condition_config.sort_method == 'onset':
+                ixs = sort.sort_by_onset(list_of_psths, odor_on, water_on, condition_config)
+            elif condition_config.sort_method == 'plus_minus':
+                ixs = sort.sort_by_plus_minus(list_of_psths, odor_on, water_on, condition_config)
+            else:
+                raise ValueError('sorting method is not recognized')
+        sorted_list_of_psths = [x[ixs,:] for x in list_of_psths]
+        psth = np.concatenate(list_of_psths, axis=1)
+        psth = psth[ixs, :]
+        images.append(psth)
+        odor_on_times.append(odor_on)
+        water_on_times.append(water_on)
+        list_of_odor_names.append(odors_copy)
+        return images, odor_on_times, water_on_times, list_of_odor_names, sorted_list_of_psths
+
+
+res = analysis.load_data(data_path)
+analysis.add_indices(res)
+analysis.add_time(res)
+if condition_config.plot_big:
+    mice = np.unique(res['mouse'])
+    list_of_days_per_mouse = condition_config.plot_big_days
+    list_of_images = []
+    list_of_list_of_psths = []
+    odor_on_times = []
+    water_on_times = []
+    days = [int(not condition_config.plot_big_naive)]
+    for i, day in enumerate(list_of_days_per_mouse):
+        mouse = mice[i]
+        images, odor_on_times, water_on_times, list_of_odor_names, list_of_psth = helper(res, mouse, [day], condition_config)
+        list_of_list_of_psths.append(list_of_psth)
+        list_of_images.append(images[0])
+
+    list_of_psths = np.concatenate(list_of_list_of_psths, axis=1)
+    image = np.concatenate(list_of_images, axis=0)
+    odor_on = odor_on_times[0]
+    water_on = water_on_times[0]
+
+    if condition_config.sort_method == 'selectivity':
+        ixs = sort.sort_by_selectivity(list_of_psths[:4], odor_on, water_on, condition_config)
+    elif condition_config.sort_method == 'onset':
+        ixs = sort.sort_by_onset(list_of_psths, odor_on, water_on, condition_config)
+    elif condition_config.sort_method == 'plus_minus':
+        ixs = sort.sort_by_plus_minus(list_of_psths, odor_on, water_on, condition_config)
     else:
-        list_of_odor_names = [np.array(list_of_odor_names).flatten()]
+        raise ValueError('sorting method is not recognized')
+    image = image[ixs,:]
+    images = [image]
 
+    list_of_odor_names = [['CS+1','CS+2','CS-1','CS-2']]
+    if condition_config.include_water:
+        list_of_odor_names[0].append('water')
+
+else:
+    mouse = condition_config.mouse
+    days = condition_config.days
+    images, odor_on_times, water_on_times, list_of_odor_names, _ = helper(res, mouse, days, condition_config)
+    if condition_config.across_days:
+        images = [np.concatenate(images, axis=1)]
+        odor_on_times = [odor_on_times[0]]
+        water_on_times = [water_on_times[0]]
+        if condition_config.across_days_titles:
+            list_of_odor_names = [condition_config.across_days_titles]
+        else:
+            list_of_odor_names = [np.array(list_of_odor_names).flatten()]
+
+frames_per_trial = 75
 for i, image in enumerate(images):
     odor_on = odor_on_times[i]
     water_on = water_on_times[i]
@@ -281,7 +379,7 @@ for i, image in enumerate(images):
     for line in condition_lines:
         plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.5)
 
-    for j, x in enumerate(odor_on_lines):
+    for j, x in enumerate(odor_on_lines_raw):
         plt.text(x, -1, titles[j].upper())
 
     ax = fig.add_axes(rect_cb)
@@ -290,9 +388,10 @@ for i, image in enumerate(images):
     cb.set_label(r'$\Delta$ F/F', fontsize=7, labelpad=-10)
     plt.tick_params(axis='both', which='major', labelsize=7)
 
-    plot._easy_save(save_path,
-                    'mouse_' + str(mouse) +
-                    '_day_' + str(res_mouse['day'][i]))
+    name = 'mouse_' + str(mouse) +'_day_' + str(days[i])
+    if condition_config.plot_big:
+        name += '_big'
+    plot._easy_save(save_path, name)
 
 
 

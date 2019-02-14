@@ -190,17 +190,22 @@ def analyze_data(res, condition_config):
         ssig_list = []
         msig_list = []
         sig_list = []
+        odor = res['odor'][i]
         for p, dff in zip(p_list, dff_list):
             ssig = np.array(p) < condition_config.p_threshold
             reached_ssig = [np.all(x) for x in psth.count_helper.rolling_window(ssig, condition_config.p_window)]
-            if np.any(reached_ssig[list_odor_on[i]:list_water_on[i]]):
+            if odor == 'water':
+                s, e = list_water_on[i], list_water_on[i] + 15
+            else:
+                s, e = list_odor_on[i], list_water_on[i]
+            if np.any(reached_ssig[s:e]):
                 statistical_significance = True
             else:
                 statistical_significance = False
 
             msig = dff > condition_config.m_threshold
             reached_msig = np.array([np.all(x) for x in psth.count_helper.rolling_window(msig, condition_config.m_window)])
-            if np.any(reached_msig[list_odor_on[i]:list_water_on[i]]):
+            if np.any(reached_msig[s:e]):
                 mag_significance = True
             else:
                 mag_significance = False
@@ -216,7 +221,7 @@ def analyze_data(res, condition_config):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = MPFC_COMPOSITE_Config()
+    condition_config = PIR_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -229,6 +234,6 @@ if __name__ == '__main__':
     odor_res = convert(res, condition_config)
     analysis.add_odor_value(odor_res, condition_config.condition)
 
-    parse_data(odor_res)
-    # odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict.pkl'))
-    # analyze_data(odor_res)
+    # parse_data(odor_res)
+    odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict.pkl'))
+    analyze_data(odor_res, condition_config)
