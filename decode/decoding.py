@@ -89,7 +89,53 @@ def decode_odor_labels(cons, data, chosen_odors, csp_odors, decode_config):
     out = np.stack(list_of_scores, axis=2)
     return out
 
+def test_odors_across_days(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
+    def _helper(day):
+        list_of_masks = _get_odor_masks(list_of_cons[day], chosen_odors, csp_odors, decode_style)
+        data_trial_cell_time = utils.reshape_data(list_of_data[day], trial_axis=0, cell_axis=1, time_axis=2,
+                                                  nFrames=list_of_cons[day].TRIAL_FRAMES)
+        good_trials = np.any(list_of_masks, axis=0)
+        labels = _assign_odor_labels(list_of_masks)[good_trials]
+        data = data_trial_cell_time[good_trials]
+        if average_time:
+            on = list_of_cons[day].DAQ_O_ON_F
+            off = list_of_cons[day].DAQ_W_ON_F
+            if decode_config.no_end_time:
+                data = np.max(data[:, :, on:], axis=2, keepdims=True)
+            else:
+                data = np.max(data[:,:,on:off], axis=2, keepdims=True)
+        return data, labels
+
+    decode_style = decode_config.decode_style
+    decode_neurons = decode_config.neurons
+    decode_shuffle = decode_config.shuffle
+    decode_repeat = decode_config.repeat
+    average_time = decode_config.average_time
+
+    res = defaultdict(list)
+    for train_day, _ in enumerate(list_of_cons):
+        data, labels = _helper(train_day)
+        for r in range(decode_repeat):
+            nCells = data.shape[1]
+            cell_ixs = np.random.choice(nCells, size=decode_neurons, replace=False)
+            models = model_odors_time_bin(data[:, cell_ixs, :], labels, shuffle=decode_shuffle)
+
+            for test_day, _ in enumerate(list_of_cons):
+                test_data, test_labels = _helper(test_day)
+                if test_day != train_day:
+                    scores = test_odors_time_bin(test_data[:, cell_ixs, :], test_labels, models)
+                else:
+                    scores = decode_odors_time_bin(test_data, test_labels, number_of_cells=decode_neurons, cv=5)
+                    scores = np.mean(scores)
+                res['Training Day'].append(train_day)
+                res['Test Day'].append(test_day)
+                res['scores'].append(scores)
+    for key, val in res.items():
+        res[key] = np.array(val)
+    return res
+
 def decode_day_labels(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
+    #TODO: obsolete, need to fix before using
     '''
 
     :param cons:
@@ -135,54 +181,7 @@ def decode_day_labels(list_of_cons, list_of_data, chosen_odors, csp_odors, decod
     out = np.stack(list_of_scores, axis=2)
     return out
 
-def test_odors_across_days(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
-    def _helper(day):
-        list_of_masks = _get_odor_masks(list_of_cons[day], chosen_odors, csp_odors, decode_style)
-        data_trial_cell_time = utils.reshape_data(list_of_data[day], trial_axis=0, cell_axis=1, time_axis=2,
-                                                  nFrames=list_of_cons[day].TRIAL_FRAMES)
-        good_trials = np.any(list_of_masks, axis=0)
-        labels = _assign_odor_labels(list_of_masks)[good_trials]
-        data = data_trial_cell_time[good_trials]
-        if average_time:
-            on = list_of_cons[day].DAQ_O_ON_F
-            off = list_of_cons[day].DAQ_W_ON_F
-            if decode_config.no_end_time:
-                data = np.max(data[:, :, on:], axis=2, keepdims=True)
-            else:
-                data = np.max(data[:,:,on:off], axis=2, keepdims=True)
-        return data, labels
-
-    decode_style = decode_config.decode_style
-    decode_neurons = decode_config.neurons
-    decode_shuffle = decode_config.shuffle
-    decode_repeat = decode_config.repeat
-    average_time = decode_config.average_time
-
-    res = defaultdict(list)
-    for train_day, _ in enumerate(list_of_cons):
-        data, labels = _helper(train_day)
-        for r in range(decode_repeat):
-            models, cell_ixs = model_odors_time_bin(data, labels,
-                                           number_of_cells=decode_neurons,
-                                           shuffle=decode_shuffle)
-
-            for test_day, _ in enumerate(list_of_cons):
-                test_data, test_labels = _helper(test_day)
-                if test_day != train_day:
-                    scores = test_odors_time_bin(test_data, test_labels, models, cell_ixs)
-                else:
-                    scores = decode_odors_time_bin(test_data, test_labels, cv=5)
-                    scores = np.mean(scores)
-                res['Training Day'].append(train_day)
-                res['Test Day'].append(test_day)
-                res['scores'].append(scores)
-
-    for key, val in res.items():
-        res[key] = np.array(val)
-    return res
-
-
-def model_odors_time_bin(data, labels, model=None, number_of_cells=None, shuffle=False):
+def model_odors_time_bin(data, labels, model=None, shuffle=False):
     '''
 
     :param data: calcium activity, in format of trials X cells X time
@@ -196,18 +195,6 @@ def model_odors_time_bin(data, labels, model=None, number_of_cells=None, shuffle
     if model is None:
         model = SVC(kernel='linear')
 
-    if number_of_cells is not None:
-        nCells = data.shape[1]
-        if number_of_cells > nCells:
-            raise ValueError('number of cells for decoding: {} is larger than '
-                             'existing cells in dataset: {}'.format(
-                number_of_cells, nCells))
-        cell_ixs = np.random.choice(nCells, size=number_of_cells, replace=False)
-        data = data[:,cell_ixs,:]
-    else:
-        nCells = data.shape[1]
-        cell_ixs = np.arange(nCells)
-
     if shuffle == True:
         labels = np.random.permutation(labels)
 
@@ -216,10 +203,9 @@ def model_odors_time_bin(data, labels, model=None, number_of_cells=None, shuffle
         models.append(
             model.fit(X=data[:,:,t], y=labels)
         )
-    return models, cell_ixs
+    return models
 
-def test_odors_time_bin(data, labels, models, cell_ixs):
-    data = data[:,cell_ixs,:]
+def test_odors_time_bin(data, labels, models):
     scores = []
     for t, model in enumerate(models):
         scores.append(model.score(data[:,:,t], labels))

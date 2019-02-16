@@ -65,58 +65,6 @@ def organizer_decode_odor_within_day(condition, decodeConfig, data_path, save_pa
             fio.save_numpy(save_path=save_path, save_name=name, data=scores)
             print("Analyzed: {0:s} in {1:.2f} seconds".format(data_pn, time.time() - start_time))
 
-
-def organizer_decode_day(condition, decodeConfig, data_path, save_path):
-    '''
-    Run decoding experiments with labels based on the day of presentation. Data is contained
-
-    :param condition: experimental condition. For example, condition OFC.
-    Must contain fields: name, paths, odors, csp
-    :param decodeConfig: class config, contains as fields relevant parameters to run decoding experiment
-    :param data_path:
-    :param save_path:
-    :return:
-    '''
-    data_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.mat_ext)))
-    config_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.cons_ext)))
-
-    list_of_all_data = np.array([Config.load_mat_f(d) for d in data_pathnames])
-    list_of_all_cons = np.array([Config.load_cons_f(d) for d in config_pathnames])
-    mouse_names_per_file = np.array([cons.NAME_MOUSE for cons in list_of_all_cons])
-    mouse_names, list_of_mouse_ix = np.unique(mouse_names_per_file, return_inverse=True)
-
-    if mouse_names.size != len(condition.paths):
-        raise ValueError("res has {0:d} mice, but filter has {1:d} mice".
-                         format(mouse_names.size, len(condition.paths)))
-
-    for i, mouse_name in enumerate(mouse_names):
-        start_time = time.time()
-        ix = mouse_name == mouse_names_per_file
-        list_of_cons = list_of_all_cons[ix]
-        list_of_data = list_of_all_data[ix]
-        for cons in list_of_cons:
-            assert cons.NAME_MOUSE == mouse_name, 'Wrong mouse file!'
-
-        cons = list_of_cons[0]
-        cons_dict = cons.__dict__
-        for key, value in cons_dict.items():
-            if isinstance(value, list) or isinstance(value, np.ndarray):
-                pass
-            else:
-                setattr(decodeConfig, key, value)
-        odor = condition.odors[i]
-        if decodeConfig.decode_style == 'identity':
-            csp = None
-        else:
-            csp = condition.csp[i]
-
-        scores = decoding.decode_day_labels(list_of_cons, list_of_data, odor, csp, decodeConfig)
-        name = cons.NAME_MOUSE
-        fio.save_json(save_path=save_path, save_name=name, config=decodeConfig)
-        fio.save_numpy(save_path=save_path, save_name=name, data=scores)
-        print("Analyzed: {0:s} in {1:.2f} seconds".format(name, time.time() - start_time))
-
-
 def organizer_test_odor_across_day(condition, decodeConfig, data_path, save_path):
     '''
 
@@ -174,4 +122,56 @@ def organizer_test_odor_across_day(condition, decodeConfig, data_path, save_path
         name = cons.NAME_MOUSE
         fio.save_json(save_path=save_path, save_name=name, config=decodeConfig)
         fio.save_pickle(save_path=save_path, save_name=name, data=scores_res)
+        print("Analyzed: {0:s} in {1:.2f} seconds".format(name, time.time() - start_time))
+
+
+def organizer_decode_day(condition, decodeConfig, data_path, save_path):
+    #TODO: obsolete right now. need to fix before using
+    '''
+    Run decoding experiments with labels based on the day of presentation. Data is contained
+
+    :param condition: experimental condition. For example, condition OFC.
+    Must contain fields: name, paths, odors, csp
+    :param decodeConfig: class config, contains as fields relevant parameters to run decoding experiment
+    :param data_path:
+    :param save_path:
+    :return:
+    '''
+    data_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.mat_ext)))
+    config_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.cons_ext)))
+
+    list_of_all_data = np.array([Config.load_mat_f(d) for d in data_pathnames])
+    list_of_all_cons = np.array([Config.load_cons_f(d) for d in config_pathnames])
+    mouse_names_per_file = np.array([cons.NAME_MOUSE for cons in list_of_all_cons])
+    mouse_names, list_of_mouse_ix = np.unique(mouse_names_per_file, return_inverse=True)
+
+    if mouse_names.size != len(condition.paths):
+        raise ValueError("res has {0:d} mice, but filter has {1:d} mice".
+                         format(mouse_names.size, len(condition.paths)))
+
+    for i, mouse_name in enumerate(mouse_names):
+        start_time = time.time()
+        ix = mouse_name == mouse_names_per_file
+        list_of_cons = list_of_all_cons[ix]
+        list_of_data = list_of_all_data[ix]
+        for cons in list_of_cons:
+            assert cons.NAME_MOUSE == mouse_name, 'Wrong mouse file!'
+
+        cons = list_of_cons[0]
+        cons_dict = cons.__dict__
+        for key, value in cons_dict.items():
+            if isinstance(value, list) or isinstance(value, np.ndarray):
+                pass
+            else:
+                setattr(decodeConfig, key, value)
+        odor = condition.odors[i]
+        if decodeConfig.decode_style == 'identity':
+            csp = None
+        else:
+            csp = condition.csp[i]
+
+        scores = decoding.decode_day_labels(list_of_cons, list_of_data, odor, csp, decodeConfig)
+        name = cons.NAME_MOUSE
+        fio.save_json(save_path=save_path, save_name=name, config=decodeConfig)
+        fio.save_numpy(save_path=save_path, save_name=name, data=scores)
         print("Analyzed: {0:s} in {1:.2f} seconds".format(name, time.time() - start_time))

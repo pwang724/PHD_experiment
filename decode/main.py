@@ -1,3 +1,4 @@
+import decode.decode_analysis
 import decode.organizer
 from decode import experiment_configs
 import analysis
@@ -19,13 +20,13 @@ from reduce import chain_defaultdicts
 
 #
 experiments = [
-    # 'vary_neuron_odor',
-    'vary_decoding_style_odor',
-    # 'vary_decoding_style_days',
+    'vary_neuron_odor',
+    # 'vary_decoding_style_odor',
     # 'test_odor_across_days'
+    # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
 ]
-EXPERIMENT = False
+EXPERIMENT = True
 ANALYZE = True
 argTest = True
 
@@ -75,7 +76,7 @@ if 'test_odor_across_days' in experiments:
                                  save_path=experiment_path)
 
     if ANALYZE:
-        res = analysis.load_results_train_test_scores(experiment_path)
+        res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
         summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day'], reduce_key='top_score')
 
         for style in np.unique(summary_res['decode_style']):
@@ -113,8 +114,10 @@ if 'vary_decoding_style_days' in experiments:
                                  save_path=experiment_path)
 
     if ANALYZE:
-        res = analysis.load_results_scores(experiment_path)
-        analysis.analyze_results(res, condition)
+        res = decode.decode_analysis.load_results_cv_scores(experiment_path)
+        analysis.add_indices(res)
+        analysis.add_time(res)
+        decode.decode_analysis.add_decode_stats(res, condition)
         decode_styles = np.unique(res['decode_style'])
 
         #decoding, plot for each condition: mouse + decode style
@@ -163,8 +166,10 @@ if 'vary_decoding_style_odor' in experiments:
                                  save_path=experiment_path)
     if ANALYZE:
         learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
-        res = analysis.load_results_scores(experiment_path)
-        analysis.analyze_results(res, condition)
+        res = decode.decode_analysis.load_results_cv_scores(experiment_path)
+        analysis.add_indices(res)
+        analysis.add_time(res)
+        decode.decode_analysis.add_decode_stats(res, condition)
         add_aligned_days(res, last_days=last_day_per_mouse, learned_days=learned_day_per_mouse)
         filter.assign_composite(res, ['mouse', 'shuffle'])
         filter.assign_composite(res, ['decode_style', 'shuffle'])
@@ -173,7 +178,7 @@ if 'vary_decoding_style_odor' in experiments:
         else:
             day_use = last_day_per_mouse
         days_per_mouse = behavior.behavior_analysis._get_days_per_condition(data_path, condition, 'CS+')
-        res_final_day = [len(x) - 1 for x in days_per_mouse]
+        res_final_day = filter.filter_days_per_mouse(res, [len(x) - 1 for x in days_per_mouse])
         decode_styles = np.unique(res['decode_style'])
 
         # #decoding, plot for each condition: mouse + decode style
@@ -201,7 +206,7 @@ if 'vary_decoding_style_odor' in experiments:
                               ax_args=ax_args, plot_args=line_args)
 
         #summary for last day of each mouse, with shuffle
-        nMouse = np.unique(res_final_day['mouse']).size
+        nMouse = np.unique(res['mouse']).size
         res_first_final_day = filter.filter_days_per_mouse(res, days_per_mouse=[0] * mice.size)
         chain_defaultdicts(res_first_final_day, res_final_day)
         for i, decode_style in enumerate(decode_styles):
@@ -247,8 +252,10 @@ if 'vary_neuron_odor' in experiments:
                                  save_path=experiment_path)
 
     if ANALYZE:
-        res = analysis.load_results_scores(experiment_path)
-        analysis.analyze_results(res, condition)
+        res = decode.decode_analysis.load_results_cv_scores(experiment_path)
+        analysis.add_indices(res)
+        analysis.add_time(res)
+        decode.decode_analysis.add_decode_stats(res, condition)
         if condition.name == 'PIR':
             learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
             day_use = last_day_per_mouse
@@ -332,8 +339,10 @@ if 'plot_vary_neuron_pir_ofc_bla' in experiments:
 
             learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
 
-            res = analysis.load_results_scores(experiment_path)
-            analysis.analyze_results(res, condition, arg='same')
+            res = decode.decode_analysis.load_results_cv_scores(experiment_path)
+            analysis.add_indices(res)
+            analysis.add_time(res)
+            decode.decode_analysis.add_decode_stats(res, condition)
 
             res_learned_day = filter.filter_days_per_mouse(res, days_per_mouse=learned_day_per_mouse)
             # last_day_per_mouse = filter.get_last_day_per_mouse(res)
