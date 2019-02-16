@@ -309,6 +309,7 @@ class MPFC_COMPOSITE:
     naive_pt_day = [None, None, 1, 1]
     last_pt_day = [2, 2, 3, 3]
     first_dt_day = [3, 3, 4, 4]
+    min_neurons = 49
 
 class BLA_JAWS:
     #TODO

@@ -23,12 +23,19 @@ def _regularize_length(res, key):
         for key, val in res.items():
             res[key] = np.array(val)
 
-def filter_reduce(res, filter_key, reduce_key):
+def filter_reduce(res, filter_keys, reduce_key):
+    '''
+    #CAN ONLY HANDLE ONE FILTER KEY
+    :param res:
+    :param filter_keys:
+    :param reduce_key:
+    :return:
+    '''
     out = defaultdict(list)
-    unique_ixs = sorted(np.unique(res[filter_key], return_index=True)[-1])
-    unique_vals = res[filter_key][unique_ixs]
+    unique_ixs = sorted(np.unique(res[filter_keys], return_index=True)[-1])
+    unique_vals = res[filter_keys][unique_ixs]
     for v in unique_vals:
-        filter_dict = {filter_key: v}
+        filter_dict = {filter_keys: v}
         cur_res = filter.filter(res, filter_dict)
         try:
             _regularize_length(cur_res, reduce_key)

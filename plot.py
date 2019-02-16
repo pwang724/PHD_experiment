@@ -220,3 +220,64 @@ def plot_results(res, x_key, y_key, loop_keys =None,
             folder_name += '_vary_' + loop_str
         save_path = os.path.join(path, folder_name)
         _easy_save(save_path, name, dpi=300, pdf=True)
+
+
+def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, save_path):
+    x_len = len(np.unique(summary_res[x_key]))
+    y_len = len(np.unique(summary_res[y_key]))
+
+    x = summary_res[x_key]
+    y = summary_res[y_key]
+    z = summary_res[val_key]
+    w_plot = np.zeros((x_len, y_len))
+    w_plot[y, x] = z
+
+    rect = [0.15, 0.15, 0.65, 0.65]
+    rect_cb = [0.82, 0.15, 0.02, 0.65]
+    fig = plt.figure(figsize=(2.2, 2.2))
+    ax = fig.add_axes(rect)
+    im = plt.pcolor(w_plot, cmap='jet', vmin=vmin, vmax=vmax)
+    # im = plt.pcolor(w_plot, cmap='jet', vmin=vmin, vmax=vmax, interpolation='none', origin='lower')
+
+    def _show_values(pc, fmt="%.2f", **kw):
+        pc.update_scalarmappable()
+        for p, color, value in zip(pc.get_paths(), pc.get_facecolors(), pc.get_array()):
+            x, y = p.vertices[:-2, :].mean(0)
+            if (value - vmin)/(vmax-vmin) > .2:
+                color = (0.0, 0.0, 0.0)
+            else:
+                color = (1.0, 1.0, 1.0)
+            ax.text(x, y, fmt % value, ha="center", va="center", color=color, **kw)
+
+    _show_values(im)
+
+    # for i, j, k in zip(x, y, z):
+    #     plt.text(i-.15, j-.1, np.round(k,2))
+    # import seaborn as sns
+    # im = sns.heatmap(w_plot, annot=True)
+
+    plt.title(title, fontsize=7)
+    ax.set_xlabel(x_key, labelpad=2)
+    ax.set_ylabel(y_key, labelpad=2)
+    plt.axis('tight')
+    for loc in ['bottom', 'top', 'left', 'right']:
+        ax.spines[loc].set_visible(False)
+    ax.tick_params('both', length=0)
+    xticks = np.arange(0, w_plot.shape[1]) + .5
+    yticks = np.arange(0, w_plot.shape[0]) + .5
+    ax.set_xticks(xticks)
+    ax.set_yticks(yticks)
+    ax.set_xticklabels((xticks + .5).astype(int), fontsize = 7)
+    ax.set_yticklabels((yticks + .5).astype(int), fontsize = 7)
+    plt.axis('tight')
+
+    ax = fig.add_axes(rect_cb)
+    cb = plt.colorbar(cax=ax, ticks=[vmin, vmax])
+    cb.outline.set_linewidth(0.5)
+    cb.set_label('Accuracy', fontsize=7, labelpad=-5)
+    plt.tick_params(axis='both', which='major', labelsize=7)
+    plt.axis('tight')
+
+    folder_name = x_key + '_and_' + y_key + '_vs_' + val_key
+    p = os.path.join(save_path, folder_name)
+    _easy_save(p, 'figure', dpi=300, pdf=True)

@@ -85,7 +85,7 @@ if 'individual_half_max' in experiments:
 
         try:
             csp_res = filter.filter(res, {'odor_valence': 'CS+'})
-            summary_res = filter_reduce(csp_res, filter_key='mouse', reduce_key='half_max')
+            summary_res = filter_reduce(csp_res, filter_keys='mouse', reduce_key='half_max')
             ax_args = {'yticks': [0, 20, 40, 60, 80], 'ylim': [0, 80], }
             line_args = {'alpha': .6, 'fill': False}
             plot.plot_results(summary_res, x_key='mouse', y_key='half_max', loop_keys=None,
@@ -107,7 +107,7 @@ if 'basic_3' in experiments:
     #TODO: bad work-around
     summary_all.pop('half_max_sem')
     summary_all.pop('half_max_std')
-    mean_std_res = filter_reduce(summary_all, filter_key='condition_name', reduce_key='half_max')
+    mean_std_res = filter_reduce(summary_all, filter_keys='condition_name', reduce_key='half_max')
     save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', 'COMPOSITE',
                              ','.join([c.name for c in conditions]))
     ax_args = {'yticks':[0, 50, 100], 'ylim':[-5, 105]}

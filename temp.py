@@ -25,7 +25,7 @@ data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOL
 plot_res = analyze_behavior(data_path, condition)
 
 filtered_res = filter.filter(plot_res, {'odor_valence': 'CS+'})
-summary_res = filter_reduce(filtered_res, filter_key='mouse', reduce_key='learned_day')
+summary_res = filter_reduce(filtered_res, filter_keys='mouse', reduce_key='learned_day')
 mice, ix = np.unique(summary_res['mouse'], return_inverse=True)
 learned_days = summary_res['learned_day'][ix]
 print(learned_days)

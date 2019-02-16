@@ -5,6 +5,7 @@ import glob
 import tools.file_io
 from collections import defaultdict
 from scipy import stats as sstats
+import reduce
 
 def load_data(data_path):
     res = load_all_cons(data_path)
@@ -35,7 +36,7 @@ def load_all_cons(data_path):
             res[key] = np.array(val)
     return res
 
-def load_results(data_path):
+def load_results_scores(data_path):
     res = defaultdict(list)
     experiment_dirs = sorted([os.path.join(data_path, d) for d in os.listdir(data_path)])
     for exp_dir in experiment_dirs:
@@ -58,6 +59,35 @@ def load_results(data_path):
             for i, v in enumerate(val):
                 arr[i] = v
             res[key] = arr
+    return res
+
+def load_results_train_test_scores(data_path):
+    res = defaultdict(list)
+    experiment_dirs = sorted([os.path.join(data_path, d) for d in os.listdir(data_path)])
+
+    keys = ['DAQ_O_ON_F', 'DAQ_O_OFF_F', 'DAQ_W_ON_F',
+            'DAQ_O_ON', 'DAQ_O_OFF', 'DAQ_W_ON',
+            'TRIAL_FRAMES', 'TRIAL_PERIOD','NAME_MOUSE', 'NAME_PLANE', 'NAME_DATE',
+            'decode_style', 'neurons','shuffle']
+    for exp_dir in experiment_dirs:
+        data_dirs = sorted(glob.glob(os.path.join(exp_dir, '*' + '.pkl')))
+        config_dirs = sorted(glob.glob(os.path.join(exp_dir, '*.json')))
+        for data_dir, config_dir in zip(data_dirs,config_dirs):
+            config = tools.file_io.load_json(config_dir)
+            cur_res = tools.file_io.load_pickle(data_dir)
+
+            for k in keys:
+                cur_res[k] = np.array([config[k]] * len(cur_res['scores']))
+            reduce.chain_defaultdicts(res, cur_res)
+
+    add_indices(res)
+    add_time(res)
+
+    for i, _ in enumerate(res['scores']):
+        start =res['DAQ_O_ON_F'][i]
+        # res['top_score'].append(np.max(res['scores'][i][start:]))
+        res['top_score'].append(np.max(res['scores'][i]))
+    res['top_score'] = np.array(res['top_score'])
     return res
 
 def analyze_results(res, condition, arg='different'):
@@ -138,11 +168,14 @@ def add_decode_stats(res, condition, arg='different'):
 
         if arg == 'different':
             if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':
-                max = np.max(mean[O_on[i]: W_on[i]])
+                # max = np.max(mean[O_on[i]: W_on[i]])
+                max = np.max(mean)
             else:
-                max = np.mean(mean[O_off[i]: W_on[i]])
+                # max = np.mean(mean[O_off[i]: W_on[i]])
+                max = np.mean(mean)
         elif arg == 'same':
-            max = np.mean(mean[O_off[i]: W_on[i]])
+            # max = np.mean(mean[O_off[i]: W_on[i]])
+            max = np.mean(mean)
         else:
             raise ValueError('Argument for calculating summary decoding metric, max, is not known: {}'.format(arg))
         res['mean'].append(mean)

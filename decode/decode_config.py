@@ -16,3 +16,5 @@ class DecodeConfig(BaseConfig):
         self.neurons = 20
         self.repeat = 2
         self.shuffle = False
+        self.average_time = False
+        self.no_end_time = True

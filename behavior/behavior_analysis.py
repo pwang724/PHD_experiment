@@ -13,8 +13,8 @@ def _get_days_per_condition(data_path, condition, odor_valence = None):
     res = analysis.load_all_cons(data_path)
     analysis.add_indices(res)
     lick_res = convert(res, condition)
-    add_odor_value(lick_res, condition)
     if odor_valence is not None:
+        add_odor_value(lick_res, condition)
         lick_res = filter.filter(lick_res, {'odor_valence': odor_valence})
 
     days = []
@@ -37,7 +37,7 @@ def get_days_per_mouse(data_path, condition, odor_valence ='CS+'):
     if hasattr(condition, 'csp') or hasattr(condition, 'pt_csp'):
         res_behavior = analyze_behavior(data_path, condition)
         res_behavior_csp = filter.filter(res_behavior, {'odor_valence': odor_valence})
-        res_behavior_summary = reduce.filter_reduce(res_behavior_csp, filter_key='mouse', reduce_key='learned_day')
+        res_behavior_summary = reduce.filter_reduce(res_behavior_csp, filter_keys='mouse', reduce_key='learned_day')
         mice, ix = np.unique(res_behavior_summary['mouse'], return_inverse=True)
         temp = res_behavior_summary['learned_day'][ix]
         temp[temp == None] = last_day_per_mouse[temp == None]
@@ -95,11 +95,16 @@ def convert(res, condition, includeRaw = False):
             relevant_odors = condition.odors[mouse]
             csps = condition.csp[mouse]
             csms = [x for x in relevant_odors if not np.isin(x, csps)]
-        else:
+        elif hasattr(condition, 'dt_csp'):
             #composite
             relevant_odors = condition.dt_odors[mouse] + condition.pt_odors[mouse]
             csps = condition.pt_csp[mouse] + condition.dt_csp[mouse]
             csms = [x for x in relevant_odors if not np.isin(x, csps)]
+        else:
+            raise ValueError('cannot find odors')
+            # relevant_odors = condition.odors[mouse]
+            # csps = relevant_odors[:2]
+            # csms = relevant_odors[2:]
 
         for j, odor in enumerate(odorTrials):
             if odor in relevant_odors:
