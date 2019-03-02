@@ -20,8 +20,8 @@ from reduce import chain_defaultdicts
 
 #
 experiments = [
-    'vary_neuron_odor',
-    # 'vary_decoding_style_odor',
+    # 'vary_neuron_odor',
+    'vary_decoding_style_odor',
     # 'test_odor_across_days'
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
@@ -31,7 +31,7 @@ ANALYZE = True
 argTest = True
 
 #inputs
-condition = experimental_conditions.MPFC_COMPOSITE
+condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -95,57 +95,6 @@ if 'test_odor_across_days' in experiments:
             plot.plot_weight(temp, x_key, y_key, val_key, title, vmin, vmax, text= True,
                              save_path=os.path.join(save_path, temp['decode_style'][0]))
 
-if 'vary_decoding_style_days' in experiments:
-    experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'vary_decoding_style_days', condition.name)
-    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'vary_decoding_style_days', condition.name)
-
-    if EXPERIMENT:
-        if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':
-            style = ['identity']
-        elif condition.name == 'OFC':
-            style = ['identity','csp_identity','csm_identity']
-        else:
-            raise ValueError('condition name not recognized')
-
-        experiment_tools.perform(experiment=decode.organizer.organizer_decode_day,
-                                 condition=condition,
-                                 experiment_configs=experiment_configs.vary_decode_style(argTest=argTest, style=style),
-                                 data_path=data_path,
-                                 save_path=experiment_path)
-
-    if ANALYZE:
-        res = decode.decode_analysis.load_results_cv_scores(experiment_path)
-        analysis.add_indices(res)
-        analysis.add_time(res)
-        decode.decode_analysis.add_decode_stats(res, condition)
-        decode_styles = np.unique(res['decode_style'])
-
-        #decoding, plot for each condition: mouse + decode style
-        loopkey = ['shuffle']
-        mice = np.unique(res['mouse'])
-        for i, mouse in enumerate(mice):
-            for j, dc in enumerate(decode_styles):
-                select_dict = {'mouse':mouse, 'decode_style': dc}
-                plot.plot_results(res, x_key='time', y_key='mean', loop_keys=loopkey,
-                                  select_dict=select_dict, path=save_path, ax_args=ax_args)
-
-        #summary for last day of each mouse
-        nMouse = np.unique(res['mouse']).size
-        cur_ax_args = copy.copy(ax_args)
-        cur_ax_args['xticks'] = [0, 1]
-        for decode_style in decode_styles:
-            cur_res = filter.filter(res, {'decode_style': decode_style})
-            summary_res = reduce.filter_reduce(cur_res, 'shuffle','max')
-            plot.plot_results(summary_res, x_key='shuffle', y_key='max',
-                              path = save_path, plot_function=plt.bar, plot_args=bar_args, ax_args=ax_args,
-                              save=False)
-
-            plot.plot_results(res, x_key='shuffle', y_key='max', loop_keys='mouse',
-                              select_dict={'decode_style': decode_style},
-                              colors = ['Black'] * nMouse,
-                              path = save_path, plot_args= line_args, ax_args= cur_ax_args,
-                              save=True, reuse=True)
-
 if 'vary_decoding_style_odor' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING', 'vary_decoding_style', condition.name)
 
@@ -156,7 +105,7 @@ if 'vary_decoding_style_odor' in experiments:
         elif condition.name == 'PIR_NAIVE':
             style = ['identity']
         elif condition.name == 'OFC' or condition.name == 'BLA' or condition.name == 'OFC_LONGTERM' or condition.name == 'MPFC_COMPOSITE':
-            style = ['csp_identity', 'csm_identity','valence']
+            style = ['identity','csp_identity', 'csm_identity','valence']
         else:
             raise ValueError('condition name not recognized')
         experiment_tools.perform(experiment=decode.organizer.organizer_decode_odor_within_day,
@@ -357,3 +306,54 @@ if 'plot_vary_neuron_pir_ofc_bla' in experiments:
                           path=save_path, ax_args=ax_args)
 
 
+
+if 'vary_decoding_style_days' in experiments:
+    experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'vary_decoding_style_days', condition.name)
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'vary_decoding_style_days', condition.name)
+
+    if EXPERIMENT:
+        if condition.name == 'PIR' or condition.name == 'PIR_NAIVE':
+            style = ['identity']
+        elif condition.name == 'OFC':
+            style = ['identity','csp_identity','csm_identity']
+        else:
+            raise ValueError('condition name not recognized')
+
+        experiment_tools.perform(experiment=decode.organizer.organizer_decode_day,
+                                 condition=condition,
+                                 experiment_configs=experiment_configs.vary_decode_style(argTest=argTest, style=style),
+                                 data_path=data_path,
+                                 save_path=experiment_path)
+
+    if ANALYZE:
+        res = decode.decode_analysis.load_results_cv_scores(experiment_path)
+        analysis.add_indices(res)
+        analysis.add_time(res)
+        decode.decode_analysis.add_decode_stats(res, condition)
+        decode_styles = np.unique(res['decode_style'])
+
+        #decoding, plot for each condition: mouse + decode style
+        loopkey = ['shuffle']
+        mice = np.unique(res['mouse'])
+        for i, mouse in enumerate(mice):
+            for j, dc in enumerate(decode_styles):
+                select_dict = {'mouse':mouse, 'decode_style': dc}
+                plot.plot_results(res, x_key='time', y_key='mean', loop_keys=loopkey,
+                                  select_dict=select_dict, path=save_path, ax_args=ax_args)
+
+        #summary for last day of each mouse
+        nMouse = np.unique(res['mouse']).size
+        cur_ax_args = copy.copy(ax_args)
+        cur_ax_args['xticks'] = [0, 1]
+        for decode_style in decode_styles:
+            cur_res = filter.filter(res, {'decode_style': decode_style})
+            summary_res = reduce.filter_reduce(cur_res, 'shuffle','max')
+            plot.plot_results(summary_res, x_key='shuffle', y_key='max',
+                              path = save_path, plot_function=plt.bar, plot_args=bar_args, ax_args=ax_args,
+                              save=False)
+
+            plot.plot_results(res, x_key='shuffle', y_key='max', loop_keys='mouse',
+                              select_dict={'decode_style': decode_style},
+                              colors = ['Black'] * nMouse,
+                              path = save_path, plot_args= line_args, ax_args= cur_ax_args,
+                              save=True, reuse=True)

@@ -1,6 +1,6 @@
 import os
 
-import psth.count_helper
+import psth.junk
 from _CONSTANTS import conditions as experimental_conditions
 from _CONSTANTS.config import Config
 import analysis
@@ -149,7 +149,7 @@ def parse_data(res):
         for cell_data in data:
             baseline = cell_data[:, config.baseline_start:list_odor_on[i] - config.baseline_end]
             baseline = baseline.flatten()
-            data_trial_time_window = psth.count_helper.rolling_window(cell_data, window=condition_config.p_window)
+            data_trial_time_window = _rolling_window(cell_data, window=condition_config.p_window)
             data_time_trial_window = np.transpose(data_trial_time_window, [1, 0, 2])
             data_time_pixels = data_time_trial_window.reshape(data_time_trial_window.shape[0],-1)
 
@@ -180,9 +180,12 @@ def parse_data(res):
     res.pop('data')
     fio.save_pickle(save_path=save_path, save_name= 'dict', data= res)
 
-def analyze_data(res, condition_config):
+def analyze_data(res, condition_config, m_threshold=None):
     list_odor_on = res['DAQ_O_ON_F']
     list_water_on = res['DAQ_W_ON_F']
+    res['ssig'] = []
+    res['msig'] = []
+    res['sig'] = []
 
     for i in range(len(list_odor_on)):
         p_list = res['p'][i]
@@ -193,9 +196,9 @@ def analyze_data(res, condition_config):
         odor = res['odor'][i]
         for p, dff in zip(p_list, dff_list):
             ssig = np.array(p) < condition_config.p_threshold
-            reached_ssig = [np.all(x) for x in psth.count_helper.rolling_window(ssig, condition_config.p_window)]
+            reached_ssig = [np.all(x) for x in _rolling_window(ssig, condition_config.p_window)]
             if odor == 'water':
-                s, e = list_water_on[i], list_water_on[i] + 15
+                s, e = list_water_on[i], list_water_on[i] + 4
             else:
                 s, e = list_odor_on[i], list_water_on[i]
             if np.any(reached_ssig[s:e]):
@@ -203,8 +206,12 @@ def analyze_data(res, condition_config):
             else:
                 statistical_significance = False
 
-            msig = dff > condition_config.m_threshold
-            reached_msig = np.array([np.all(x) for x in psth.count_helper.rolling_window(msig, condition_config.m_window)])
+            if m_threshold == None:
+                magnitude_threshold = condition_config.m_threshold
+            else:
+                magnitude_threshold = m_threshold
+            msig = dff > magnitude_threshold
+            reached_msig = np.array([np.all(x) for x in _rolling_window(msig, condition_config.m_window)])
             if np.any(reached_msig[s:e]):
                 mag_significance = True
             else:
@@ -218,6 +225,12 @@ def analyze_data(res, condition_config):
         res['sig'].append(np.array(sig_list).astype(int))
     for key, val in res.items():
         res[key] = np.array(val)
+
+def _rolling_window(a, window):
+    shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
+    strides = a.strides + (a.strides[-1],)
+    return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
@@ -237,3 +250,4 @@ if __name__ == '__main__':
     # parse_data(odor_res)
     odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict.pkl'))
     analyze_data(odor_res, condition_config)
+

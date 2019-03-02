@@ -13,15 +13,15 @@ import reduce
 import analysis
 
 experiments = [
-    # 'individual',
-    # 'individual_half_max',
-    # 'summary',
-    'basic_3'
+    'individual',
+    'individual_half_max',
+    'summary',
+    # 'basic_3'
 ]
 conditions = [
-    experimental_conditions.BEHAVIOR_OFC_YFP,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.OFC_COMPOSITE,
     # experimental_conditions.MPFC_COMPOSITE
 ]

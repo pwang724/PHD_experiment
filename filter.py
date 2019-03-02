@@ -75,7 +75,13 @@ def retrieve_unique_entries(res, loop_keys):
         ind = np.all(list_of_ixs, axis=0)
         ind_ = np.where(ind)[0]
         list_of_ind.append(ind_)
-    return unique_entry_combinations, list_of_ind
+
+    a, b = [], []
+    for i, ix in enumerate(list_of_ind):
+        if len(ix):
+            a.append(unique_entry_combinations[i])
+            b.append(list_of_ind[i])
+    return a, b
 
 def assign_composite(res, loop_keys):
     '''

@@ -56,6 +56,7 @@ def _easy_save(path, name, dpi=300, pdf=True):
     '''
     os.makedirs(path, exist_ok=True)
     figname = os.path.join(path, name)
+    print('figure saved in {}'.format(figname))
     plt.savefig(os.path.join(figname + '.png'), dpi=dpi)
 
     if pdf:
@@ -159,6 +160,8 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         loop_indices = [np.arange(len(res[y_key]))]
         if colors is None:
             colors = ['black']
+        else:
+            colors = [colors]
         labels = [None]
 
     for i in range(loop_lines):
@@ -196,30 +199,32 @@ def plot_results(res, x_key, y_key, loop_keys =None,
     else:
         ax.spines['top'].set_visible(False)
 
+    if loop_keys and legend:
+        nice_loop_str = '+'.join([nice_names(x) for x in loop_keys])
+
+        handles, labels = ax.get_legend_handles_labels()
+        by_label = OrderedDict(zip(labels, handles))
+        l = ax.legend(by_label.values(), by_label.keys(), ncol = 4, fontsize = 4, frameon=False)
+        l.set_title(nice_loop_str)
+        plt.setp(l.get_title(), fontsize=4)
+
+    if select_dict is None:
+        name = 'figure'
+    else:
+        name = ''
+        for k, v in select_dict.items():
+            name += k + '_' + str(v) + '_'
+        name += name_str
+
+    folder_name = y_key + '_vs_' + x_key
+    if loop_keys:
+        loop_str = '+'.join(loop_keys)
+        folder_name += '_vary_' + loop_str
+    save_path = os.path.join(path, folder_name)
     if save:
-        if loop_keys and legend:
-            nice_loop_str = '+'.join([nice_names(x) for x in loop_keys])
-
-            handles, labels = ax.get_legend_handles_labels()
-            by_label = OrderedDict(zip(labels, handles))
-            l = ax.legend(by_label.values(), by_label.keys(), ncol = 4, fontsize = 4, frameon=False)
-            l.set_title(nice_loop_str)
-            plt.setp(l.get_title(), fontsize=4)
-
-        if select_dict is None:
-            name = 'figure'
-        else:
-            name = ''
-            for k, v in select_dict.items():
-                name += k + '_' + str(v) + '_'
-            name += name_str
-
-        folder_name = y_key + '_vs_' + x_key
-        if loop_keys:
-            loop_str = '+'.join(loop_keys)
-            folder_name += '_vary_' + loop_str
-        save_path = os.path.join(path, folder_name)
         _easy_save(save_path, name, dpi=300, pdf=True)
+    else:
+        return save_path, name
 
 
 def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, save_path):
