@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'arial'
 
 def nice_names(key):
@@ -204,7 +204,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
         handles, labels = ax.get_legend_handles_labels()
         by_label = OrderedDict(zip(labels, handles))
-        l = ax.legend(by_label.values(), by_label.keys(), ncol = 4, fontsize = 4, frameon=False)
+        l = ax.legend(by_label.values(), by_label.keys(), ncol = 2, fontsize = 4, frameon=False)
         l.set_title(nice_loop_str)
         plt.setp(l.get_title(), fontsize=4)
 

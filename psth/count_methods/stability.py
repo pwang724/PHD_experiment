@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import filter
 import plot
 import reduce
-from psth.plot_formatting import *
+from psth.format import *
 
 def plot_stability_across_days(res, start_days_per_mouse, learned_days_per_mouse, figure_path):
     absolute_threshold = .2
@@ -130,5 +130,22 @@ def plot_stability_across_days(res, start_days_per_mouse, learned_days_per_mouse
         y = numer/denom
         y_offset = .025
         plt.text(x, y + y_offset, str(numer) + '/' + str(denom), horizontalalignment = 'center', fontsize= fontsize)
+    plot._easy_save(save_path, name, pdf=True)
 
+    overall_stats_no_distinction = _helper(overall)
+    save_path, name = plot.plot_results(overall_stats_no_distinction, x_key='Type', y_key='Fraction', sort=True,
+                      colors=['Grey']*10,
+                      path=figure_path,
+                      plot_function=plt.bar, plot_args=bar_args, ax_args=ax_args_copy,
+                      save=False, reuse=False)
+    strs = ['down','new','up']
+    for i in range(3):
+        ix = overall_stats_no_distinction['Type'] == strs[i]
+        numer = overall_stats_no_distinction['numer'][ix][0]
+        denom = overall_stats_no_distinction['denom'][ix][0]
+
+        x = i
+        y = numer/denom
+        y_offset = .025
+        plt.text(x, y + y_offset, str(numer) + '/' + str(denom), horizontalalignment = 'center', fontsize= fontsize)
     plot._easy_save(save_path, name, pdf=True)

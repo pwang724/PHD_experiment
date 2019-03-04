@@ -23,8 +23,10 @@ conditions = [
     # experimental_conditions.BLA,
     # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
-    # experimental_conditions.BLA_JAWS
+    experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    # experimental_conditions.BLA_JAWS,
+    # experimental_conditions.OFC_REVERSAL,
+    # experimental_conditions.OFC_STATE
 ]
 
 colors = ['green', 'lime', 'red', 'maroon']
@@ -45,8 +47,13 @@ if 'individual' in experiments:
     for res, condition in zip(list_of_res, conditions):
         if condition.name == 'BEHAVIOR_OFC_JAWS_MUSH':
             ax_args.update({'xticks':[0,50,100,150], 'xlim':[0, 150]})
+            bool_ax_args.update({'xticks':[0,50,100,150], 'xlim':[0, 150]})
+        elif condition.name == 'OFC_STATE':
+            ax_args.update({'xticks': [0, 25], 'xlim': [0, 25]})
+            bool_ax_args.update({'xticks': [0, 25], 'xlim': [0, 25]})
         else:
             ax_args.update({'xticks': [0, 25, 50, 75], 'xlim': [0, 100]})
+            bool_ax_args.update({'xticks': [0, 25, 50, 75], 'xlim': [0, 100]})
 
         save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
 
@@ -66,6 +73,11 @@ if 'individual' in experiments:
         summary_res = reduce.new_filter_reduce(res, filter_keys=['mouse', 'odor_valence'], reduce_key= 'lick_smoothed')
         plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
                           colors= ['green','red'], ax_args=ax_args, plot_args=line_args,
+                          path=save_path)
+
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['mouse', 'odor_valence'], reduce_key= 'boolean_smoothed')
+        plot.plot_results(summary_res, x_key='trial', y_key='boolean_smoothed', loop_keys= 'odor_valence',
+                          colors= ['green','red'], ax_args=bool_ax_args, plot_args=line_args,
                           path=save_path)
 
 

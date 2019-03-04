@@ -3,7 +3,7 @@ class behaviorConfig(object):
         #extra time (seconds) given to CS- odors after water onset for quantification.
         self.extra_csm_time = 0
         self.smoothing_window = 5
-        self.smoothing_window_boolean = 5
+        self.smoothing_window_boolean = 7
         self.polynomial_degree = 0
 
         self.halfmax_up_threshold = 50

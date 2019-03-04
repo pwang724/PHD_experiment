@@ -78,7 +78,14 @@ class PIR_Config(Base_Config):
         self.include_water = True
         self.start_at_training = False
         self.m_threshold = 0.1
-        self.mouse = 0
+
+class PIR_NAIVE_Config(Base_Config):
+    def __init__(self):
+        super(PIR_NAIVE_Config, self).__init__()
+        self.condition = experimental_conditions.PIR_NAIVE
+        self.start_at_training = False
+        self.m_threshold = 0.1
+
 
 class OFC_State_Config(Base_Config):
     def __init__(self):
@@ -94,6 +101,7 @@ class OFC_Reversal_Config(Base_Config):
         self.condition = experimental_conditions.OFC_REVERSAL
         self.include_water = False
         self.start_at_training = False
+        self.m_threshold = 0.03
 
 class OFC_Context_Config(Base_Config):
     def __init__(self):
@@ -193,6 +201,9 @@ def analyze_data(res, condition_config, m_threshold=None):
         ssig_list = []
         msig_list = []
         sig_list = []
+        onset_list = []
+        amplitude_list = []
+        duration_list = []
         odor = res['odor'][i]
         for p, dff in zip(p_list, dff_list):
             ssig = np.array(p) < condition_config.p_threshold
@@ -217,12 +228,31 @@ def analyze_data(res, condition_config, m_threshold=None):
             else:
                 mag_significance = False
 
+            if statistical_significance and mag_significance:
+                onset = np.where(reached_ssig[s:e])[0][0]
+                onset_list.append(onset)
+
+                duration = np.sum(reached_msig[s:e])
+                duration_list.append(duration)
+
+                amplitude = np.max(dff[s:e])
+                amplitude_list.append(amplitude)
+            else:
+                onset_list.append(-1)
+                duration_list.append(-1)
+                amplitude_list.append(-1)
+
+
             ssig_list.append(statistical_significance)
             msig_list.append(mag_significance)
             sig_list.append(statistical_significance and mag_significance)
         res['ssig'].append(np.array(ssig_list).astype(int))
         res['msig'].append(np.array(msig_list).astype(int))
         res['sig'].append(np.array(sig_list).astype(int))
+
+        res['onset'].append(np.array(onset_list).astype(int))
+        res['duration'].append(np.array(duration_list).astype(int))
+        res['amplitude'].append(np.array(amplitude_list))
     for key, val in res.items():
         res[key] = np.array(val)
 
@@ -234,7 +264,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = PIR_Config()
+    condition_config = OFC_Reversal_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -246,8 +276,8 @@ if __name__ == '__main__':
     analysis.add_time(res)
     odor_res = convert(res, condition_config)
     analysis.add_odor_value(odor_res, condition_config.condition)
+    parse_data(odor_res)
 
-    # parse_data(odor_res)
-    odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict.pkl'))
-    analyze_data(odor_res, condition_config)
+    # odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict.pkl'))
+    # analyze_data(odor_res, condition_config)
 

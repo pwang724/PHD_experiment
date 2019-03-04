@@ -53,7 +53,14 @@ class PIR_NAIVE:
         ['2pe', 'ben', 'msy', 'oct'],
         ['2pe', 'ben', 'msy', 'oct']
     ]
+    csp = [
+        ['2pe', 'ben'],
+        ['2pe', 'ben'],
+        ['2pe', 'ben'],
+        ['2pe', 'ben'],
+           ]
     timing_override = [True, True, True, True]
+    training_start_day = [0, 0, 0, 0]
     min_neurons = 46
 
 

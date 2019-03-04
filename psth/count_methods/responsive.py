@@ -4,9 +4,9 @@ import filter
 import plot
 import reduce
 from analysis import add_naive_learned
-from psth.plot_formatting import *
+from psth.format import *
 
-def plot_summary_odor(res, start_days, end_days, figure_path):
+def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path = None):
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
     get_responsive_cells(res)
@@ -17,7 +17,10 @@ def plot_summary_odor(res, start_days, end_days, figure_path):
     filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
 
     odor_list = ['CS+1', 'CS+2','CS-1', 'CS-2']
-    colors = ['Green','Green','Red','Red']
+    if use_colors:
+        colors = ['Green','Green','Red','Red']
+    else:
+        colors = ['Black'] * 4
     ax_args_copy = ax_args_copy.copy()
     ax_args_copy.update({'xlim':[-1, 8]})
     for i, odor in enumerate(odor_list):

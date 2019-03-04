@@ -9,7 +9,7 @@ import filter
 import plot
 import reduce
 from analysis import add_naive_learned
-from psth.plot_formatting import *
+from psth.format import *
 
 def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, figure_path = None):
     ax_args_copy = overlap_ax_args.copy()
@@ -21,11 +21,11 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
     start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['mouse', 'day', 'condition'],
                                                  reduce_key='Overlap')
     add_naive_learned(start_end_day_res, start_days, end_days)
+
+    filter.assign_composite(start_end_day_res, loop_keys=['condition', 'training_day'])
     odor_list = ['+:+', '-:-','+:-']
     colors = ['Green','Red','Gray']
     ax_args_copy.update({'xlim': [-1, 6]})
-    filter.assign_composite(start_end_day_res, loop_keys=['condition', 'training_day'])
-
     for i, odor in enumerate(odor_list):
         save_arg = False
         reuse_arg = True
@@ -41,6 +41,20 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           save=save_arg, reuse=reuse_arg,
                           fig_size=(2, 1.5), legend=False)
+
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
+    add_naive_learned(start_end_day_res, start_days, end_days, str1='0', str2='1')
+    start_end_day_res.pop('Overlap_sem',None)
+    summary_res = reduce.new_filter_reduce(start_end_day_res, filter_keys='training_day', reduce_key='Overlap')
+
+    ax_args_copy.update({'xlim': [-1, 2], 'ylim':[0, .5], 'yticks':[0, .1, .2, .3, .4, .5]})
+    plot.plot_results(summary_res, x_key= 'training_day', y_key='Overlap',
+                      path= figure_path, plot_args= bar_args, ax_args=ax_args_copy, plot_function=plt.bar,
+                      fig_size=(2, 1.5), legend=False,
+                      reuse=False, save=False)
+    plot.plot_results(summary_res, x_key='training_day', y_key='Overlap', error_key='Overlap_sem',
+                      path=figure_path,
+                      plot_function= plt.errorbar, plot_args= error_args, ax_args = ax_args, save=True, reuse=True)
 
 
 def plot_overlap_water(res, start_days, end_days, figure_path):

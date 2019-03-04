@@ -55,7 +55,7 @@ class OFC_Config(Base_Config):
         super(OFC_Config, self).__init__()
         self.condition = experimental_conditions.OFC
         self.mouse = 1
-        self.days = [0, 4]
+        self.days = [0, 5]
         self.sort_day_ix = 1
 
 class BLA_Config(Base_Config):
@@ -187,7 +187,7 @@ class BLA_BIG_Config(Base_Config):
         self.plot_big_naive = False
 
 config = PSTHConfig()
-condition_config = OFC_BIG_Config()
+condition_config = OFC_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -283,7 +283,7 @@ def helper(res, mouse, days, condition_config):
         odor_on_times.append(odor_on)
         water_on_times.append(water_on)
         list_of_odor_names.append(odors_copy)
-        return images, odor_on_times, water_on_times, list_of_odor_names, sorted_list_of_psths
+    return images, odor_on_times, water_on_times, list_of_odor_names, sorted_list_of_psths
 
 
 res = analysis.load_data(data_path)
