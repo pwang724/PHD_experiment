@@ -42,6 +42,7 @@ class OFC_LONGTERM_Config(Base_Config):
         self.condition = experimental_conditions.OFC_LONGTERM
         self.include_water = False
         self.start_at_training = False
+        self.m_threshold = 0.03
 
 class OFC_COMPOSITE_Config(Base_Config):
     def __init__(self):
@@ -264,7 +265,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = OFC_Reversal_Config()
+    condition_config = OFC_LONGTERM_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

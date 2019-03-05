@@ -19,10 +19,10 @@ class OFC_Config(object):
     def __init__(self):
         self.condition = experimental_conditions.OFC
         self.mouse = 0
-        self.days = [[1,4]]
+        self.days = [[1,2,3,4,5]]
         self.cells = [31]
         self.vlim = .7
-        self.title = ['Naive','Learned']
+        self.title = ['Naive','Learning','Learning','Learned','Learned']
 
 class BLA_Config(object):
     def __init__(self):
@@ -38,12 +38,12 @@ class PIR_Config(object):
         self.condition = experimental_conditions.PIR
         self.mouse = 1
         self.days = [[0, 1, 2]]
-        self.cells = [0, 22, 45, 18]
-        self.cells = [22]
+        self.cells = [0, 22, 45, 18] #0, 22, 45, 18
+        self.cells = [18]
         self.vlim = .5
         self.title = ['Naive', 'Learning', 'Learned']
 
-condition_config = PIR_Config()
+condition_config = OFC_Config()
 
 
 config = PSTHConfig()

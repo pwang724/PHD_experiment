@@ -155,11 +155,16 @@ class OFC_BIG_Config(Base_Config):
         super(OFC_BIG_Config, self).__init__()
         self.condition = experimental_conditions.OFC
         self.plot_big = True
-        self.plot_big_days = [4,4,3,3,3]
         self.threshold = 0.04
         self.vlim = .25
-        self.plot_big_naive = False
+        self.plot_big_days = [4,4,3,3,3]
         self.sort_day_ix = 0
+        self.plot_big_naive = False
+        self.include_water = True
+
+        self.plot_big_days = [0,0,-1,0,0]
+        self.plot_big_naive = True
+        self.include_water = False
 
 class MPFC_BIG_Config(Base_Config):
     def __init__(self):
@@ -187,7 +192,7 @@ class BLA_BIG_Config(Base_Config):
         self.plot_big_naive = False
 
 config = PSTHConfig()
-condition_config = OFC_Config()
+condition_config = OFC_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -299,9 +304,10 @@ if condition_config.plot_big:
     days = [int(not condition_config.plot_big_naive)]
     for i, day in enumerate(list_of_days_per_mouse):
         mouse = mice[i]
-        images, odor_on_times, water_on_times, list_of_odor_names, list_of_psth = helper(res, mouse, [day], condition_config)
-        list_of_list_of_psths.append(list_of_psth)
-        list_of_images.append(images[0])
+        if day != -1:
+            images, odor_on_times, water_on_times, list_of_odor_names, list_of_psth = helper(res, mouse, [day], condition_config)
+            list_of_list_of_psths.append(list_of_psth)
+            list_of_images.append(images[0])
 
     list_of_psths = np.concatenate(list_of_list_of_psths, axis=1)
     image = np.concatenate(list_of_images, axis=0)
@@ -336,6 +342,10 @@ else:
         else:
             list_of_odor_names = [np.array(list_of_odor_names).flatten()]
 
+black = False
+if black:
+    plt.style.use('dark_background')
+
 frames_per_trial = 75
 for i, image in enumerate(images):
     odor_on = odor_on_times[i]
@@ -348,7 +358,34 @@ for i, image in enumerate(images):
     rect = [.1, .1, fig_width, .7]
     rect_cb = [fig_width + .1 + .02, 0.1, 0.02, .7]
     ax = fig.add_axes(rect)
-    plt.imshow(image, vmin=-condition_config.vlim, vmax=condition_config.vlim, cmap='bwr')
+
+    if black:
+        from matplotlib.colors import LinearSegmentedColormap
+        cdict1 = {'red': ((0.0, 0.0, 0.0),
+                          (0.5, 0.0, 0.1),
+                          (1.0, 1.0, 1.0)),
+
+                  'green': ((0.0, 0.0, 0.0),
+                            (1.0, 0.0, 0.0)),
+
+                  'blue': ((0.0, 0.0, 0.55),
+                           (0.5, 0.1, 0.0),
+                           (1.0, 0.0, 0.0))
+                  }
+        cmap = LinearSegmentedColormap('BlueRed1', cdict1)
+        cmap = LinearSegmentedColormap.from_list("", ["turquoise", "black", "red"])
+
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        ax.spines['bottom'].set_visible(False)
+        ax.spines['left'].set_visible(False)
+        ax.tick_params(axis=u'both', which=u'both', length=0)
+    else:
+        cmap = 'bwr'
+        plt.tick_params(direction='out', length=2, width=.5, grid_alpha=0.5)
+
+
+    plt.imshow(image, vmin=-condition_config.vlim, vmax=condition_config.vlim, cmap=cmap)
     plt.axis('tight')
 
     ax.xaxis.set_ticks_position('bottom')
@@ -374,7 +411,6 @@ for i, image in enumerate(images):
 
     plt.xticks(xticks, '')
     plt.yticks([])
-    plt.tick_params(direction='out', length=2, width=.5, grid_alpha=0.5)
 
     for line in condition_lines:
         plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.5)
@@ -384,8 +420,14 @@ for i, image in enumerate(images):
 
     ax = fig.add_axes(rect_cb)
     cb = plt.colorbar(cax=ax, ticks=[-condition_config.vlim, condition_config.vlim])
-    cb.outline.set_linewidth(0.5)
-    cb.set_label(r'$\Delta$ F/F', fontsize=7, labelpad=-10)
+
+    if black:
+        cb.outline.set_visible(False)
+        cb.set_ticks([])
+    else:
+        cb.outline.set_linewidth(0.5)
+        cb.set_label(r'$\Delta$ F/F', fontsize=7, labelpad=-10)
+
     plt.tick_params(axis='both', which='major', labelsize=7)
 
     name = 'mouse_' + str(mouse) +'_day_' + str(days[i])

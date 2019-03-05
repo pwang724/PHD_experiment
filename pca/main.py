@@ -28,7 +28,7 @@ experiments = [
     'shuffle',
 ]
 
-condition = experimental_conditions.PIR
+condition = experimental_conditions.OFC_LONGTERM
 config = PCAConfig()
 config.style = 'csp'
 config.n_principal_components = 5
@@ -102,14 +102,14 @@ if 'shuffle' in experiments:
                 list_of_lick_res = [lick_res]
 
             # plot.plot_results(summary_res, x_key='day', y_key='PCA Distance',
-            #                   select_dict={'mouse':mouse, 'shuffle': 1, 'odor_valence':odor_valence},
-            #                   colors=['gray']*5,
+            #                   select_dict={'mouse': mouse, 'shuffle': 1, 'odor_valence': odor_valence},
+            #                   colors='grey',
             #                   ax_args=ax_args, plot_args=line_args,
-            #                   path=figure_path, reuse=True, save=False)
+            #                   path=figure_path, reuse=False, save=False)
             #
             # plot.plot_results(summary_res, x_key='day', y_key='PCA Distance', error_key='PCA Distance_sem',
-            #                   select_dict={'mouse':mouse, 'shuffle': 1, 'odor_valence':odor_valence},
-            #                   colors=['gray']*5, plot_function=plt.fill_between,
+            #                   select_dict={'mouse': mouse, 'shuffle': 1, 'odor_valence': odor_valence},
+            #                   colors='gray', plot_function=plt.fill_between,
             #                   ax_args=ax_args, plot_args=fill_args,
             #                   path=figure_path, reuse=True, save=False)
             for i, res in enumerate(list_of_res):
@@ -150,6 +150,7 @@ if 'shuffle' in experiments:
 
         if condition.name == 'OFC_LONGTERM':
             dt_learned_day, dt_last_day = get_days_per_mouse(data_path, condition)
+            dt_learned_day = [3, 2, 2, 3]
             filtered_res = filter.filter_days_per_mouse(summary_res, list(zip(dt_learned_day, dt_last_day)))
             analysis.add_naive_learned(filtered_res, dt_learned_day, dt_last_day, 'Learned', 'Over-trained')
             mean_std_res = reduce.new_filter_reduce(filtered_res, reduce_key='PCA Distance',

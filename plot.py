@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
-mpl.rcParams['font.size'] = 7
+mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
 def nice_names(key):

@@ -6,6 +6,48 @@ import reduce
 from analysis import add_naive_learned
 from psth.format import *
 
+def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None):
+    ax_args_copy = ax_args.copy()
+    res = copy.copy(res)
+    get_responsive_cells(res)
+    list_of_days = list(zip(odor_start_days, end_days))
+    mice = np.unique(res['mouse'])
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+    add_naive_learned(start_end_day_res, odor_start_days, end_days)
+    filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
+
+    odor_list = ['CS+1', 'CS+2','CS-1', 'CS-2']
+    if use_colors:
+        colors = ['Green','Green','Red','Red']
+    else:
+        colors = ['Black'] * 4
+    ax_args_copy = ax_args_copy.copy()
+    ax_args_copy.update({'xlim':[-1, 10]})
+    for i, odor in enumerate(odor_list):
+        reuse_arg = True
+        if i == 0:
+            reuse_arg = False
+        plot.plot_results(start_end_day_res,
+                          select_dict= {'odor_standard':odor},
+                          x_key='odor_standard_training_day', y_key='Fraction Responsive', loop_keys='mouse',
+                          colors= [colors[i]]*len(mice),
+                          path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
+                          save= False, reuse=reuse_arg,
+                          fig_size=(2.5, 1.5), legend=False, name_str = ','.join([str(x) for x in odor_start_days]))
+
+    list_of_days = list(zip(water_start_days, end_days))
+    mice = np.unique(res['mouse'])
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+    add_naive_learned(start_end_day_res, water_start_days, end_days)
+    plot.plot_results(start_end_day_res, select_dict={'odor_standard': 'US'},
+                      x_key='training_day', y_key='Fraction Responsive', loop_keys='mouse',
+                      colors= ['Turquoise']*len(mice),
+                      path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
+                      fig_size=(1.6, 1.5), legend=False,
+                      reuse=True, save=True)
+
+
+
 def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path = None):
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
@@ -113,6 +155,9 @@ def plot_individual(res, lick_res, figure_path):
     get_responsive_cells(res)
     summary_res = reduce.new_filter_reduce(res, reduce_key= 'Fraction Responsive',
                                            filter_keys=['odor_valence', 'mouse','day'])
+
+    summary_res = filter.filter(summary_res, {'odor_valence':'CS+'})
+    lick_res = filter.filter(lick_res, {'odor_valence':'CS+'})
     for mouse in np.unique(summary_res['mouse']):
         select_dict = {'mouse':mouse}
 
