@@ -9,3 +9,4 @@ scatter_args = {'marker':'o', 's':5, 'facecolors': 'none', 'alpha': .5}
 error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .8}
 fill_args = {'zorder': 0, 'lw': 0, 'alpha': 0.3}
 behavior_line_args = {'alpha': .5, 'linewidth': 1, 'marker': '.', 'markersize': 0, 'linestyle': '--'}
+swarm_args = {'marker':'.', 'size':5, 'facecolors': 'none', 'alpha': .5}
