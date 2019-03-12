@@ -23,7 +23,7 @@ def _regularize_length(res, key):
         for key, val in res.items():
             res[key] = np.array(val)
 
-def _regularize_length1(res, key):
+def _regularize_length_cristian_data(res, key):
     data = res[key]
     if type(data[0]) == np.ndarray or type(data[0]) == list:
         length = np.max([x.shape for x in data])
@@ -84,7 +84,7 @@ def new_filter_reduce(res, filter_keys, reduce_key, regularize = 'min'):
                 if regularize == 'min':
                     _regularize_length(cur_res, reduce_key)
                 elif regularize == 'max':
-                    _regularize_length1(cur_res, reduce_key)
+                    _regularize_length_cristian_data(cur_res, reduce_key)
                 else:
                     raise ValueError('did not recognize regularize keyword')
             except:
