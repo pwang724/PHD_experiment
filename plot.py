@@ -1,11 +1,12 @@
 import filter
-from tools import plot_utils
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import os
 from collections import OrderedDict
+import seaborn as sns
 
+plt.style.use('default')
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.size'] = 5
@@ -44,6 +45,19 @@ def nice_names(key):
     else:
         out = key
     return out
+
+def significance_str(x, y, val):
+    if val < .05 and val >= .01:
+        str = 'P < .05'
+    elif val < .01 and val > .001:
+        str = 'P < .01'
+    elif val < .001:
+        str = 'P < .001'
+    else:
+        str = 'P = {:.2f}'.format(val)
+    plt.text(x, y, str)
+    return str
+
 
 def _easy_save(path, name, dpi=300, pdf=True):
     '''
@@ -178,6 +192,9 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         elif plot_function == plt.fill_between:
             error_plot = res[error_key][plot_ix]
             _plot_fill(plot_function, x_plot, y_plot, error_plot, color=color, label=label, plot_args=plot_args)
+        elif plot_function == sns.swarmplot:
+            sns.swarmplot(x = x_key, y = y_key, hue=loop_keys[0], data=res, **plot_args)
+            ax.get_legend().remove()
         else:
             _plot(plot_function, x_plot, y_plot, color=color, label=label, plot_args=plot_args)
 
@@ -205,8 +222,13 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         handles, labels = ax.get_legend_handles_labels()
         by_label = OrderedDict(zip(labels, handles))
         l = ax.legend(by_label.values(), by_label.keys(), ncol = 2, fontsize = 4, frameon=False)
-        l.set_title(nice_loop_str)
-        plt.setp(l.get_title(), fontsize=4)
+        try:
+            for handle in l.legendHandles:
+                handle.set_sizes([5])
+        except:
+            pass
+        # l.set_title(nice_loop_str)
+        # plt.setp(l.get_title(), fontsize=4)
 
     if select_dict is None:
         name = 'figure'

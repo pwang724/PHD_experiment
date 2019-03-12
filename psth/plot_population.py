@@ -16,6 +16,7 @@ mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.family'] = 'arial'
 mpl.rcParams['axes.linewidth'] = 0.5
+black = True
 
 class Base_Config(object):
     def __init__(self):
@@ -57,6 +58,7 @@ class OFC_Config(Base_Config):
         self.mouse = 1
         self.days = [0, 5]
         self.sort_day_ix = 1
+        self.independent_sort = True
 
 class BLA_Config(Base_Config):
     def __init__(self):
@@ -73,10 +75,10 @@ class OFC_LONGTERM_Config(Base_Config):
         super(OFC_LONGTERM_Config, self).__init__()
         self.condition = experimental_conditions.OFC_LONGTERM
         self.mouse = 0
-        self.days = [3,6]
+        self.days = [3,5,6,7,8]
         self.sort_day_ix = 0
-        self.vlim = .2
-        self.threshold = .02
+        self.vlim = .25
+        self.threshold = .03
         self.independent_sort = True
         self.include_water = False
 
@@ -84,24 +86,24 @@ class OFC_COMPOSITE_PT_Config(Base_Config):
     def __init__(self):
         super(OFC_COMPOSITE_PT_Config, self).__init__()
         self.condition = experimental_conditions.OFC_COMPOSITE
-        self.mouse = 0
-        self.days = [1,3]
+        self.mouse = 1
+        self.days = [1,4]
         self.sort_day_ix = 0
         self.vlim = .2
-        self.threshold = .02
+        self.threshold = .03
         self.independent_sort = True
         self.include_water = False
         self.period = 'pt'
 
         self.across_days = True
-        self.across_days_titles = ['Naive', 'Learned']
+        self.across_days_titles = ['Naive', 'Learned','c','d']
 
 class OFC_COMPOSITE_DT_Config(Base_Config):
     def __init__(self):
         super(OFC_COMPOSITE_DT_Config, self).__init__()
         self.condition = experimental_conditions.OFC_COMPOSITE
-        self.mouse = 0
-        self.days = [9]
+        self.mouse = 1
+        self.days = [0, 4, 5, 6, 7, 8, 9]
         self.sort_day_ix = 0
         self.vlim = .2
         self.threshold = .02
@@ -192,7 +194,7 @@ class BLA_BIG_Config(Base_Config):
         self.plot_big_naive = False
 
 config = PSTHConfig()
-condition_config = OFC_BIG_Config()
+condition_config = MPFC_COMPOSITE_PT_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -342,7 +344,6 @@ else:
         else:
             list_of_odor_names = [np.array(list_of_odor_names).flatten()]
 
-black = False
 if black:
     plt.style.use('dark_background')
 
@@ -430,7 +431,8 @@ for i, image in enumerate(images):
 
     plt.tick_params(axis='both', which='major', labelsize=7)
 
-    name = 'mouse_' + str(mouse) +'_day_' + str(days[i])
+    name_black = '_black' if black else ''
+    name = 'mouse_' + str(mouse) +'_day_' + str(days[i]) + name_black
     if condition_config.plot_big:
         name += '_big'
     plot._easy_save(save_path, name)

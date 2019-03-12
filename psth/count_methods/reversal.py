@@ -6,9 +6,8 @@ from matplotlib import pyplot as plt
 
 import filter
 import plot
-import psth.junk
 import reduce
-from psth.format import *
+from format import *
 
 def plot_reversal(res, start_days, end_days, figure_path):
     ax_args_copy = ax_args.copy()

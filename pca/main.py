@@ -28,9 +28,9 @@ experiments = [
     'shuffle',
 ]
 
-condition = experimental_conditions.OFC_LONGTERM
+condition = experimental_conditions.MPFC_COMPOSITE
 config = PCAConfig()
-config.style = 'csp'
+config.style = 'csm'
 config.n_principal_components = 5
 config.shuffle_iterations = 50
 config.average = False
@@ -124,18 +124,18 @@ if 'shuffle' in experiments:
                                   select_dict={'mouse': mouse, 'odor_valence': odor_valence},
                                   colors=behavior_colors,
                                   ax_args=ax_args, plot_args=behavior_line_args,
-                                  path=figure_path, save=False, sort=True, reuse=reuse)
+                                  path=figure_path, save=False, sort=False, reuse=reuse)
                 plot.plot_results(res, x_key='day', y_key='PCA Distance', loop_keys='odor_valence',
                                   select_dict={'mouse':mouse, 'shuffle':0, 'odor_valence':odor_valence},
                                   colors=colors,
                                   ax_args=ax_args, plot_args=line_args,
-                                  path=figure_path, reuse=True, save=save)
+                                  path=figure_path, reuse=True, sort=False, save=save)
 
 
         mice = np.unique(res['mouse'])
         colors_dict = {'CS+':'green', 'CS-':'red','PT CS+':'orange'}
-        for i, mouse in enumerate(mice):
-            _helper(lick_res, summary_res, mouse, odor_valence=['CS+', 'PT CS+'])
+        # for i, mouse in enumerate(mice):
+        #     _helper(lick_res, summary_res, mouse, odor_valence=['CS+', 'PT CS+'])
 
         plot_cs = False
         summary_ax_args = copy.copy(ax_args)
@@ -207,43 +207,8 @@ if 'shuffle' in experiments:
                               path=figure_path, reuse=True, save=True)
 
         if condition.name == 'MPFC_COMPOSITE' or condition.name == 'OFC_COMPOSITE':
-            pt_start_day = np.array(condition.training_start_day)
-            dt_start_day = np.array(condition.naive_dt_day)
-            pt_learned_day, pt_last_day = get_days_per_mouse(data_path, condition, odor_valence='PT CS+')
-            dt_learned_day, dt_last_day = get_days_per_mouse(data_path, condition, odor_valence='CS+')
 
-            # if condition.name == 'MPFC_COMPOSITE':
-                # dt_learned_day[1] = 5
-
-            if condition.name == 'OFC_COMPOSITE':
-                pass
-
-            print(dt_start_day)
-            print(pt_last_day)
-            print(dt_learned_day)
-            print(dt_last_day)
-
-            day_pt_start = filter.filter_days_per_mouse(summary_res, pt_start_day)
-            day_pt_start = filter.filter(day_pt_start, {'odor_valence': 'PT CS+'})
-            day_pt_start['title'] = np.array(['PT_Start'] * len(day_pt_start['mouse']))
-
-            day_pt_learned = filter.filter_days_per_mouse(summary_res, pt_last_day)
-            day_pt_learned = filter.filter(day_pt_learned, {'odor_valence': 'PT CS+'})
-            day_pt_learned['title'] = np.array(['PT_Learned'] * len(day_pt_learned['mouse']))
-
-            day_dt_start = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_start_day)
-            day_dt_start = filter.filter(day_dt_start, {'odor_valence': 'CS+'})
-            day_dt_start['title'] = np.array(['DT_Start'] * len(day_dt_start['mouse']))
-
-            day_dt_learned = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_learned_day)
-            day_dt_learned = filter.filter(day_dt_learned, {'odor_valence': 'CS+'})
-            day_dt_learned['title'] = np.array(['DT_Learned'] * len(day_dt_learned['mouse']))
-
-            day_dt_last = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_last_day)
-            day_dt_last = filter.filter(day_dt_last, {'odor_valence': 'CS+'})
-            day_dt_last['title'] = np.array(['DT_End'] * len(day_dt_last['mouse']))
-
-            def _helper(plot_res):
+            def _helper(plot_res, color = 'green'):
                 mean_std_res = reduce.new_filter_reduce(plot_res, reduce_key='PCA Distance',
                                                         filter_keys='title')
                 titles = np.unique(plot_res['title'])
@@ -252,31 +217,79 @@ if 'shuffle' in experiments:
 
                 plot.plot_results(plot_res, x_key='title', y_key='PCA Distance', loop_keys='mouse',
                                   select_dict= {'title': titles},
-                                  colors=['Green'] * mice.size,
+                                  colors=[color] * mice.size,
                                   ax_args=summary_ax_args_, plot_function=plt.plot, plot_args= summary_line_args,
                                   path=figure_path, save=False)
                 plot.plot_results(mean_std_res, x_key='title', y_key='PCA Distance',
                                   select_dict={'title': titles},
-                                  colors=['Green'], plot_function=plt.plot,
+                                  colors=color, plot_function=plt.plot,
                                   ax_args=ax_args, plot_args=line_args,
                                   path=figure_path, reuse=True, save=False)
 
                 plot.plot_results(mean_std_res, x_key='title', y_key='PCA Distance',
                                   select_dict={'title': titles},
                                   error_key='PCA Distance_sem',
-                                  colors=['Green'], plot_function=plt.errorbar,
-                                  ax_args=summary_ax_args_, plot_args=error_args,
+                                  colors=color, plot_function=plt.errorbar,
+                                  ax_args=summary_ax_args_, plot_args=error_args, legend=False,
                                   path=figure_path, reuse=True, save=True)
 
-            plot_res = reduce.chain_defaultdicts(day_pt_learned, day_dt_learned, copy_dict=True)
-            _helper(plot_res)
-            plot_res = reduce.chain_defaultdicts(day_dt_start, day_dt_learned, copy_dict=True)
-            _helper(plot_res)
-            plot_res = reduce.chain_defaultdicts(day_dt_learned, day_dt_last, copy_dict=True)
-            _helper(plot_res)
+            pt_start_day = np.array(condition.training_start_day)
+            dt_naive_day = np.array(condition.naive_dt_day)
+            dt_start_day = np.array(condition.first_dt_day)
+            pt_learned_day, pt_last_day = get_days_per_mouse(data_path, condition, odor_valence='PT CS+')
+            dt_learned_day, dt_last_day = get_days_per_mouse(data_path, condition, odor_valence='CS+')
 
-            plot_res = reduce.chain_defaultdicts(day_pt_start, day_pt_learned, copy_dict=True)
-            plot_res = reduce.chain_defaultdicts(plot_res, day_dt_start, copy_dict=True)
-            plot_res = reduce.chain_defaultdicts(plot_res, day_dt_learned, copy_dict=True)
-            plot_res = reduce.chain_defaultdicts(plot_res, day_dt_last, copy_dict=True)
-            _helper(plot_res)
+            valence = 'CS-' if config.style == 'CS-' else 'CS+'
+            if valence == 'CS+':
+                day_dt_naive = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_naive_day)
+                day_dt_naive = filter.filter(day_dt_naive, {'odor_valence': 'CS+'})
+                day_dt_naive['title'] = np.array(['Z'] * len(day_dt_naive['mouse']))
+
+                day_pt_start = filter.filter_days_per_mouse(summary_res, pt_start_day)
+                day_pt_start = filter.filter(day_pt_start, {'odor_valence': 'PT CS+'})
+                day_pt_start['title'] = np.array(['PT_Start'] * len(day_pt_start['mouse']))
+
+                day_pt_learned = filter.filter_days_per_mouse(summary_res, pt_last_day)
+                day_pt_learned = filter.filter(day_pt_learned, {'odor_valence': 'PT CS+'})
+                day_pt_learned['title'] = np.array(['PT_Learned'] * len(day_pt_learned['mouse']))
+
+                day_dt_start = filter.filter_days_per_mouse(summary_res, dt_start_day)
+                day_dt_start = filter.filter(day_dt_start, {'odor_valence': 'CS+'})
+                day_dt_start['title'] = np.array(['DT_Start'] * len(day_dt_start['mouse']))
+
+                day_dt_learned = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_learned_day)
+                day_dt_learned = filter.filter(day_dt_learned, {'odor_valence': 'CS+'})
+                day_dt_learned['title'] = np.array(['DT_Learned'] * len(day_dt_learned['mouse']))
+
+                day_dt_last = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_last_day)
+                day_dt_last = filter.filter(day_dt_last, {'odor_valence': 'CS+'})
+                day_dt_last['title'] = np.array(['DT_End'] * len(day_dt_last['mouse']))
+
+                plot_res = reduce.chain_defaultdicts(day_dt_naive, day_pt_start, copy_dict=True)
+                plot_res = reduce.chain_defaultdicts(plot_res, day_pt_learned, copy_dict=True)
+                plot_res = reduce.chain_defaultdicts(plot_res, day_dt_start, copy_dict=True)
+                plot_res = reduce.chain_defaultdicts(plot_res, day_dt_learned, copy_dict=True)
+                plot_res = reduce.chain_defaultdicts(plot_res, day_dt_last, copy_dict=True)
+                _helper(plot_res)
+
+            if valence == 'CS-':
+                day_dt_naive = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_naive_day)
+                day_dt_naive = filter.filter(day_dt_naive, {'odor_valence': valence})
+                day_dt_naive['title'] = np.array(['Z'] * len(day_dt_naive['mouse']))
+
+                day_dt_start = filter.filter_days_per_mouse(summary_res, dt_start_day)
+                day_dt_start = filter.filter(day_dt_start, {'odor_valence': valence})
+                day_dt_start['title'] = np.array(['DT_Start'] * len(day_dt_start['mouse']))
+
+                day_dt_learned = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_learned_day)
+                day_dt_learned = filter.filter(day_dt_learned, {'odor_valence': valence})
+                day_dt_learned['title'] = np.array(['DT_Learned'] * len(day_dt_learned['mouse']))
+
+                day_dt_last = filter.filter_days_per_mouse(summary_res, days_per_mouse=dt_last_day)
+                day_dt_last = filter.filter(day_dt_last, {'odor_valence': valence})
+                day_dt_last['title'] = np.array(['DT_End'] * len(day_dt_last['mouse']))
+
+                plot_res = reduce.chain_defaultdicts(day_dt_naive, day_dt_start, copy_dict=True)
+                plot_res = reduce.chain_defaultdicts(plot_res, day_dt_learned, copy_dict=True)
+                plot_res = reduce.chain_defaultdicts(plot_res, day_dt_last, copy_dict=True)
+                _helper(plot_res)

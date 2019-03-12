@@ -18,7 +18,7 @@ import psth.count_methods.reversal as reversal
 import psth.count_methods.power as power
 import psth.count_methods.compare as compare
 
-condition_config = psth.count_analyze.OFC_State_Config()
+condition_config = psth.count_analyze.OFC_Context_Config()
 
 config = psth.psth_helper.PSTHConfig()
 condition = condition_config.condition
@@ -78,8 +78,8 @@ if condition.name == 'PIR_NAIVE':
 if condition.name == 'OFC' or condition.name == 'BLA':
     psth.count_analyze.analyze_data(res, condition_config, m_threshold=0.03)
     # responsive.plot_individual(res, lick_res, figure_path=figure_path)
-    responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, learned_day_per_mouse,
-                                           figure_path=figure_path)
+    # responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, learned_day_per_mouse,
+    #                                        figure_path=figure_path)
     # overlap.plot_overlap_odor(res, start_days_per_mouse, learned_day_per_mouse, figure_path = figure_path)
     # overlap.plot_overlap_water(res, training_start_day_per_mouse, learned_day_per_mouse, figure_path = figure_path)
     # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='onset', figure_path=figure_path)
@@ -88,6 +88,8 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='onset', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='duration', figure_path=figure_path)
+    compare.plot_compare_dff(res, start_days_per_mouse, learned_day_per_mouse,
+                             arg='all', valence='CS+', more_stats=False, figure_path=figure_path)
 
 if condition.name == 'OFC_REVERSAL':
     psth.count_analyze.analyze_data(res, condition_config, m_threshold=.03)
@@ -99,14 +101,14 @@ if condition.name == 'OFC_REVERSAL':
                                                 arg='last', valence='CS-', more_stats=False, figure_path= figure_path)
 
 if condition.name == 'OFC_STATE':
-    psth.count_analyze.analyze_data(res, condition_config, m_threshold=.03)
+    psth.count_analyze.analyze_data(res, condition_config, m_threshold=.05)
     # responsive.plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path)
     power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path)
     compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
                                                 arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
 
 if condition.name == 'OFC_CONTEXT':
-    psth.count_analyze.analyze_data(res, condition_config, m_threshold=.03)
+    psth.count_analyze.analyze_data(res, condition_config, m_threshold=.05)
     # responsive.plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path)
     power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path)
     compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
@@ -117,11 +119,11 @@ if condition.name == 'OFC_LONGTERM':
     psth.count_analyze.analyze_data(res, condition_config)
     learned_day_per_mouse = np.array([3, 2, 2, 3])
     last_day_per_mouse = np.array([8, 7, 5, 5])
-    responsive.plot_individual(res, lick_res, figure_path= figure_path)
+    # responsive.plot_individual(res, lick_res, figure_path= figure_path)
     # responsive.plot_summary_odor(res, learned_day_per_mouse, last_day_per_mouse, figure_path=figure_path)
-    # compare.plot_compare_dff(res, learned_day_per_mouse, last_day_per_mouse,
-    #                          arg = 'all', valence='CS+', more_stats=True, figure_path= figure_path,
-    #                          lim=[-.05, .6], ticks = [0, .5])
+    compare.plot_compare_dff(res, learned_day_per_mouse, last_day_per_mouse,
+                             arg = 'first', valence='CS+', more_stats=True, figure_path= figure_path,
+                             lim=[-.05, .6], ticks = [0, .5])
 
 
 if condition.name == 'BLA_LONGTERM':

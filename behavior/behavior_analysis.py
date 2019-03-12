@@ -47,14 +47,18 @@ def get_days_per_mouse(data_path, condition, odor_valence ='CS+'):
         learned_days_per_mouse = last_day_per_mouse
     return learned_days_per_mouse, last_day_per_mouse
 
-def get_licks_per_day(data_path, condition):
+def get_licks_per_day(data_path, condition, return_raw=False):
     res = analysis.load_all_cons(data_path)
     analysis.add_indices(res)
     analysis.add_time(res)
     lick_res = convert(res, condition)
     lick_res['lick_boolean'] = np.array([y > 0 for y in lick_res['lick']])
     out = reduce.new_filter_reduce(lick_res, ['odor','day','mouse'], 'lick_boolean')
-    return out
+    if return_raw:
+        add_odor_value(lick_res, condition)
+        return lick_res
+    else:
+        return out
 
 
 def analyze_behavior(data_path, condition):
@@ -189,6 +193,18 @@ def add_behavior_stats(res, arg ='normal'):
                 half_max = np.where(vec_binary == 1)[0][0]
             else:
                 half_max = len(vec_binary)
+        #
+        # average
+        # if np.all(vec_binary):
+        #     half_max = 0
+        # else:
+        #     diff = np.diff(np.array(vec_binary).astype(int)) > 0
+        #     if np.all(diff == 0):
+        #         half_max = 0
+        #     else:
+        #         transitions = np.where(diff)[0][0]
+        #         half_max = np.mean(transitions)
+
         return half_max
 
     def _half_max_down(vec, threshold):
@@ -205,12 +221,20 @@ def add_behavior_stats(res, arg ='normal'):
                 half_max = len(vec_binary)
         return half_max
 
+    def _filter(vec, smoothing_window):
+        if smoothing_window < len(vec):
+            out = savgol_filter(vec, smoothing_window, config.polynomial_degree)
+        else:
+            window = smoothing_window // 2
+            if window % 2 == 0:
+                window += 1
+            out = savgol_filter(vec, window, config.polynomial_degree)
+        return out
+
+
     config = behaviorConfig()
-    res['lick_smoothed'] = [savgol_filter(y, config.smoothing_window, config.polynomial_degree)
-                            for y in res['lick']]
-    res['boolean_smoothed'] = [
-        100 * savgol_filter(y > 0, config.smoothing_window_boolean, config.polynomial_degree)
-        for y in res['lick']]
+    res['lick_smoothed'] = [_filter(y, config.smoothing_window) for y in res['lick']]
+    res['boolean_smoothed'] = [100 * _filter(y > 0, config.smoothing_window_boolean) for y in res['lick']]
     for x in res['boolean_smoothed']:
         x[x>100] = 100
     res['false_negative'] = [100 - x for x in res['boolean_smoothed']]

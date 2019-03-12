@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import filter
 import plot
 from plot import _easy_save
-from psth.format import *
+from format import *
 
 
 def _compare_dff(res, loop_keys, arg):
@@ -57,8 +57,8 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
                      lim = (-.05, 1.2), ticks=(0, .5, 1)):
     list_of_days = list(zip(start_days,end_days))
     res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
+    res = filter.filter(res, {'odor_valence':valence})
     new = _compare_dff(res, loop_keys = ['mouse', 'odor'], arg = arg)
-    new = filter.filter(new, {'odor_valence':valence})
 
     #analysis
     xs, ys = new['day_0'], new['day_1']
@@ -72,7 +72,7 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
     ax_args_copy = ax_args.copy()
     ax_args_copy.update({'ylim':lim, 'yticks':ticks, 'xlim':lim, 'xticks':ticks})
     scatter_args_copy = scatter_args.copy()
-    scatter_args_copy.update({'marker':',', 's':1, 'alpha':.2})
+    scatter_args_copy.update({'marker':',', 's':1, 'alpha':.2, 'facecolors':'none'})
 
     colors = ['Black']
     # if valence == 'CS+':
@@ -103,5 +103,5 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
             b.append(np.sum(y > x))
             c.append(np.sum(y < 0.1))
         lost_fraction = np.sum(c) / (np.sum(a) + np.sum(b))
-        plt.text(0, lim[1]-.2, 'Of those, {:.1f}% are gone'.format(100 * lost_fraction))
+        plt.text(0, lim[1]-.2, 'Of those, {:.1f}% are unresponsive'.format(100 * lost_fraction))
     _easy_save(path, name, pdf=True)

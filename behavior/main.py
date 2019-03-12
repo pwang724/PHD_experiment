@@ -5,6 +5,7 @@ import filter
 from _CONSTANTS import conditions as experimental_conditions
 from _CONSTANTS.config import Config
 from behavior.behavior_analysis import analyze_behavior
+import behavior.behavior_analysis
 from reduce import filter_reduce, chain_defaultdicts
 import plot
 import matplotlib.pyplot as plt
@@ -13,7 +14,9 @@ import reduce
 import analysis
 
 experiments = [
-    'individual',
+    # 'individual',
+    # 'summary',
+    'lick_per_day'
     # 'individual_half_max',
     # 'basic_3'
 ]
@@ -43,6 +46,26 @@ for i, condition in enumerate(conditions):
     res = analyze_behavior(data_path, condition)
     list_of_res.append(res)
 
+if 'lick_per_day' in experiments:
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'linestyle':'--', 'linewidth':.5,'markersize':1.5, 'alpha':.3})
+    ax_args_cur = ax_args.copy()
+    ax_args_cur.update({'xticks':[0, 2, 4, 6, 8], 'xlim':[0, 8]})
+    for condition in conditions:
+        data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
+        res = behavior.behavior_analysis.get_licks_per_day(data_path, condition, return_raw=True)
+        save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
+        res_ = reduce.new_filter_reduce(res, ['odor_valence', 'day', 'mouse'], 'lick')
+
+        colors = {'CS+':'green', 'CS-':'red','PT CS+':'orange'}
+        for valence in np.unique(res_['odor_valence']):
+            plot.plot_results(res_, x_key='day', y_key='lick', loop_keys='mouse',
+                              select_dict={'odor_valence': valence},
+                              colors= [colors[valence]] * 10, plot_args=line_args_copy, ax_args=ax_args_cur,
+                              fig_size=[2, 1.5],
+                              path=save_path, reuse=False, save=True)
+
+
 if 'individual' in experiments:
     for res, condition in zip(list_of_res, conditions):
         if condition.name == 'BEHAVIOR_OFC_JAWS_MUSH':
@@ -70,6 +93,8 @@ if 'individual' in experiments:
                               select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=line_args,
                               path=save_path)
 
+if 'summary' in experiments:
+    for res, condition in zip(list_of_res, conditions):
         summary_res = reduce.new_filter_reduce(res, filter_keys=['mouse', 'odor_valence'], reduce_key= 'lick_smoothed')
         plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
                           colors= ['green','red'], ax_args=ax_args, plot_args=line_args,

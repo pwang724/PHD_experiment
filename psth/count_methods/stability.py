@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import filter
 import plot
 import reduce
-from psth.format import *
+from format import *
 
 def plot_stability_across_days(res, start_days_per_mouse, learned_days_per_mouse, figure_path):
     absolute_threshold = .2

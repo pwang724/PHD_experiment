@@ -9,7 +9,7 @@ import filter
 import plot
 import reduce
 from analysis import add_naive_learned
-from psth.format import *
+from format import *
 
 def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, figure_path = None):
     ax_args_copy = overlap_ax_args.copy()

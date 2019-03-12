@@ -1,9 +1,7 @@
 import copy
 import itertools
-
 import numpy as np
 import plot
-
 
 def filter_days_per_mouse(res, days_per_mouse):
     '''
@@ -52,6 +50,19 @@ def filter(res, filter_dict):
         membership = np.isin(res[key], vals)
         list_of_ixs.append(membership)
     select_ixs = np.all(list_of_ixs, axis=0)
+    for key, value in res.items():
+        out[key] = value[select_ixs]
+    return out
+
+def exclude(res, exclude_dict):
+    out = copy.copy(res)
+    list_of_ixs = []
+    for key, vals in exclude_dict.items():
+        membership = np.isin(res[key], vals)
+        list_of_ixs.append(membership)
+    exclude_ixs = np.all(list_of_ixs, axis=0)
+    select_ixs = np.invert(exclude_ixs)
+
     for key, value in res.items():
         out[key] = value[select_ixs]
     return out

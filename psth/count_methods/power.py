@@ -7,7 +7,7 @@ import filter
 import plot
 import reduce
 from analysis import add_naive_learned
-from psth.format import *
+from format import *
 
 
 def plot_power(res, start_days, end_days, figure_path):

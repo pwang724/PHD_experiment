@@ -38,9 +38,9 @@ class Analysis_Config():
     def __init__(self):
         indices = Indices()
         self.anticipatory_bins = [indices.bin_ant_2, indices.bin_ant_3]
-        self.filter_window = 19
+        self.filter_window = 29
         self.filter_order = 0
-        self.criterion_filter_window = 49
+        self.criterion_filter_window = 41
         self.criterion_threshold = .8
         self.half_max_threshold = .5
 
@@ -142,12 +142,14 @@ def analyze(res):
             mask[:last_zero] = 0
 
         if np.any(mask):
+            # ixs = np.where(np.diff(mask) == 1)[0]
+            # ix = np.mean(ixs)
+
             ix = np.where(mask)[0][0]
         else:
             ix = len(mask)
         res[keyword].append(ix)
         return ix
-
 
     def _trials_per_day(data):
         trials_per_mouse = []
@@ -157,6 +159,16 @@ def analyze(res):
             trials_per_day = np.sum(data == i)
             trials_per_mouse.append(trials_per_day)
         return days, np.array(trials_per_mouse)
+
+    def _performance_per_day(data, vector):
+        out = []
+        max_day = int(np.max(data))
+        days = np.arange(1, max_day+1)
+        for i in days:
+            ix = data == i
+            val = np.mean(vector[ix])
+            out.append(val)
+        return out
 
 
     indices = Indices()
@@ -197,10 +209,13 @@ def analyze(res):
                 _pass_half_max(vector_criterion, analysis_config.half_max_threshold, valence, key + '_trials_to_half_max')
 
     data = res['session']
-    for d in data:
+    for i, d in enumerate(data):
         days, trials_per_day = _trials_per_day(d)
         res['trials_per_day'].append(trials_per_day)
         res['days'].append(days)
+
+        frac = _performance_per_day(d, res['bin_ant_23'][i] > 0)
+        res['performance'].append(frac)
 
     for k, v in res.items():
         res[k] = np.array(v)

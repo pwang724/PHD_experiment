@@ -4,7 +4,7 @@ import filter
 import plot
 import reduce
 from analysis import add_naive_learned
-from psth.format import *
+from format import *
 
 def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None):
     ax_args_copy = ax_args.copy()

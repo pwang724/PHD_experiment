@@ -10,16 +10,39 @@ import copy
 def _regularize_length(res, key):
     data = res[key]
     if type(data[0]) == np.ndarray or type(data[0]) == list:
-        min_length = np.min([x.shape for x in data])
+        length = np.min([x.shape for x in data])
         for k, v in res.items():
             if type(v[0]) == np.ndarray or type(v[0]) == list:
                 new_array = []
                 for i, x in enumerate(v):
-                    if len(x) > min_length:
-                        new_array.append(x[:min_length])
+                    if len(x) > length:
+                        new_array.append(x[:length])
                     else:
                         new_array.append(x)
                 res[k] = new_array
+        for key, val in res.items():
+            res[key] = np.array(val)
+
+def _regularize_length1(res, key):
+    data = res[key]
+    if type(data[0]) == np.ndarray or type(data[0]) == list:
+        length = np.max([x.shape for x in data])
+        for k, v in res.items():
+            if 'session' not in k:
+                if type(v[0]) == np.ndarray or type(v[0]) == list:
+                    new_array = []
+                    for i, x in enumerate(v):
+                        if len(x) < length:
+                            temp = np.zeros(length)
+                            temp[:len(x)] = x
+                            temp[len(x):] = x[-1]
+
+                            if k == 'days':
+                                temp = np.arange(1, length+1)
+                            new_array.append(temp)
+                        else:
+                            new_array.append(x)
+                    res[k] = new_array
         for key, val in res.items():
             res[key] = np.array(val)
 
@@ -47,7 +70,7 @@ def filter_reduce(res, filter_keys, reduce_key):
         out[key] = np.array(val)
     return out
 
-def new_filter_reduce(res, filter_keys, reduce_key):
+def new_filter_reduce(res, filter_keys, reduce_key, regularize = 'min'):
     out = defaultdict(list)
     if isinstance(filter_keys, str):
         filter_keys = [filter_keys]
@@ -58,7 +81,12 @@ def new_filter_reduce(res, filter_keys, reduce_key):
 
         if len(cur_res[reduce_key]):
             try:
-                _regularize_length(cur_res, reduce_key)
+                if regularize == 'min':
+                    _regularize_length(cur_res, reduce_key)
+                elif regularize == 'max':
+                    _regularize_length1(cur_res, reduce_key)
+                else:
+                    raise ValueError('did not recognize regularize keyword')
             except:
                 print('cannot regularize the length of {}'.format(reduce_key))
             temp_res = reduce_by_mean(cur_res, reduce_key)
