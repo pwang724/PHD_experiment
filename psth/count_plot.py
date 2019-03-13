@@ -18,7 +18,7 @@ import psth.count_methods.reversal as reversal
 import psth.count_methods.power as power
 import psth.count_methods.compare as compare
 
-condition_config = psth.count_analyze.OFC_Context_Config()
+condition_config = psth.count_analyze.OFC_COMPOSITE_Config()
 
 config = psth.psth_helper.PSTHConfig()
 condition = condition_config.condition
@@ -125,18 +125,22 @@ if condition.name == 'OFC_LONGTERM':
                              arg = 'first', valence='CS+', more_stats=True, figure_path= figure_path,
                              lim=[-.05, .6], ticks = [0, .5])
 
+if condition.name == 'OFC_COMPOSITE':
+    psth.count_analyze.analyze_data(res, condition_config, m_threshold = 0.03)
+    pt_learned = [3, 3, 4, 3]
+    pt_start = condition.naive_pt_day
+    dt_naive = [0, 0, 0, 0]
+    dt_start = [4, 4, 6, 4]
+    dt_learned = [6, 7, 9, 5]
+    responsive.plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=True, figure_path = figure_path, save=False)
+    responsive.plot_summary_odor(res, dt_naive, dt_learned, figure_path=figure_path, reuse=True)
+
 
 if condition.name == 'BLA_LONGTERM':
     psth.count_analyze.analyze_data(res, condition_config)
     plot_individual(res, lick_res, figure_path)
     plot_summary_odor(res, start_days_per_mouse, learned_day_per_mouse, figure_path)
     plot_overlap_odor(res, start_days_per_mouse, learned_day_per_mouse, figure_path)
-
-if condition.name == 'OFC_COMPOSITE':
-    psth.count_analyze.analyze_data(res, condition_config, m_threshold = 0.03)
-    pt_learned = [3, 3, 4, 3]
-    pt_start = condition.naive_pt_day
-    plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=True, figure_path = figure_path)
 
     dt_start = [x+1 for x in condition.last_pt_day]
     dt_end = [x+1 for x in learned_day_per_mouse]

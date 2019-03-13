@@ -48,7 +48,7 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
 
 
 
-def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path = None):
+def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path = None, reuse = False):
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
     get_responsive_cells(res)
@@ -68,7 +68,7 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
     for i, odor in enumerate(odor_list):
         save_arg = False
         reuse_arg = True
-        if i == 0:
+        if i == 0 and not reuse:
             reuse_arg = False
         if i == len(odor_list) -1:
             save_arg = True
@@ -82,7 +82,7 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
                           fig_size=(2.5, 1.5),legend=False, name_str = ','.join([str(x) for x in start_days]))
 
 
-def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_path):
+def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_path, save):
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
     get_responsive_cells(res)
@@ -103,13 +103,14 @@ def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_p
     odor_list = ['PT CS+']
     colors = ['Orange']
     ax_args_copy = ax_args_copy.copy()
-    ax_args_copy.update({'xlim':[-1, 2]})
+    ax_args_copy.update({'xlim':[-1, 10]})
     for i, odor in enumerate(odor_list):
         save_arg = False
         reuse_arg = True
         if i == 0:
             reuse_arg = False
-        if i == len(odor_list) -1:
+
+        if save and i == len(odor_list) -1:
             save_arg = True
 
         plot.plot_results(start_end_day_res,
@@ -118,7 +119,7 @@ def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_p
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           save=save_arg, reuse=reuse_arg,
-                          fig_size=(1.5, 1.5),legend=False)
+                          fig_size=(2.5, 1.5),legend=False)
 
 
 def plot_summary_water(res, start_days, end_days, figure_path):
