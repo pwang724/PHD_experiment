@@ -54,8 +54,9 @@ class OFC_Config(Base_Config):
     def __init__(self):
         super(OFC_Config, self).__init__()
         self.condition = experimental_conditions.OFC
-        self.mouse = 4
+        self.mouse = 0
         self.days = [0, 5]
+        self.vlim = .3
         self.sort_day_ix = 1
         self.independent_sort = True
 

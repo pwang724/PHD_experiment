@@ -21,17 +21,17 @@ from reduce import chain_defaultdicts
 #
 experiments = [
     # 'vary_neuron_odor',
-    'vary_decoding_style_odor',
-    # 'test_odor_across_days'
+    # 'vary_decoding_style_odor',
+    'test_odor_across_days'
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
 ]
-EXPERIMENT = True
+EXPERIMENT = False
 ANALYZE = True
 argTest = True
 
 #inputs
-condition = experimental_conditions.OFC
+condition = experimental_conditions.OFC_LONGTERM
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -81,8 +81,8 @@ if 'test_odor_across_days' in experiments:
 
         for style in np.unique(summary_res['decode_style']):
             temp = filter.filter(summary_res, {'decode_style': style})
-            x_key = 'Test Day'
-            y_key = 'Training Day'
+            y_key = 'Test Day'
+            x_key = 'Training Day'
             val_key = 'top_score'
             title = 'Decoding ' + style +  ' Across Days'
             vmax = 1

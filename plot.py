@@ -9,7 +9,7 @@ import seaborn as sns
 plt.style.use('default')
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'arial'
 
 def nice_names(key):
@@ -262,8 +262,8 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, sav
     rect_cb = [0.82, 0.15, 0.02, 0.65]
     fig = plt.figure(figsize=(2.2, 2.2))
     ax = fig.add_axes(rect)
-    im = plt.pcolor(w_plot, cmap='jet', vmin=vmin, vmax=vmax)
-    # im = plt.pcolor(w_plot, cmap='jet', vmin=vmin, vmax=vmax, interpolation='none', origin='lower')
+    im = plt.pcolor(np.flipud(w_plot), cmap='jet', vmin=vmin, vmax=vmax)
+    # im = plt.imshow(w_plot, cmap='jet', vmin=vmin, vmax=vmax, origin='upper')
 
     def _show_values(pc, fmt="%.2f", **kw):
         pc.update_scalarmappable()
@@ -273,7 +273,7 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, sav
                 color = (0.0, 0.0, 0.0)
             else:
                 color = (1.0, 1.0, 1.0)
-            ax.text(x, y, fmt % value, ha="center", va="center", color=color, **kw)
+            ax.text(x, y, fmt % value, ha="center", va="center", color=color, fontsize=5, **kw)
 
     _show_values(im)
 
@@ -292,7 +292,7 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, sav
     xticks = np.arange(0, w_plot.shape[1]) + .5
     yticks = np.arange(0, w_plot.shape[0]) + .5
     ax.set_xticks(xticks)
-    ax.set_yticks(yticks)
+    ax.set_yticks(yticks[::-1])
     ax.set_xticklabels((xticks + .5).astype(int), fontsize = 7)
     ax.set_yticklabels((yticks + .5).astype(int), fontsize = 7)
     plt.axis('tight')
