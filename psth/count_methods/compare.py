@@ -86,15 +86,15 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
                                    path=figure_path, plot_args=scatter_args_copy, ax_args=ax_args_copy,
                                    plot_function=plt.scatter,
                                    colors = colors, legend=False,
-                                   fig_size=(2, 1.5), save=False)
+                                   fig_size=(2, 1.5), rect=(.25, .25, .6, .6), save=False)
     plt.xlim(lim)
     plt.ylim(lim)
     plt.plot(lim, lim, '--', color='red', alpha=.5, linewidth=1)
     plt.title(valence)
     if valence == 'CS+':
-        plt.text(0, lim[1]-.1, '{:.1f}% diminished'.format(fraction * 100))
+        plt.text(0, lim[1]-.1, '{:.1f}% diminished'.format(fraction * 100), fontsize=5)
     if valence == 'CS-':
-        plt.text(0, lim[1]-.1, '{:.1f}% increased'.format(100 - fraction * 100))
+        plt.text(0, lim[1]-.1, '{:.1f}% increased'.format(100 - fraction * 100), fontsize=5)
 
     if more_stats:
         new = _compare_dff(res, loop_keys=['mouse', 'odor'], arg='first')
@@ -106,5 +106,5 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
             b.append(np.sum(y > x))
             c.append(np.sum(y < 0.1))
         lost_fraction = np.sum(c) / (np.sum(a) + np.sum(b))
-        plt.text(0, lim[1]-.2, 'Of those, {:.1f}% are unresponsive'.format(100 * lost_fraction))
+        plt.text(0, lim[1]-.2, 'Of those, {:.1f}% are unresponsive'.format(100 * lost_fraction), fontsize=5)
     _easy_save(path, name, pdf=True)

@@ -20,7 +20,7 @@ import psth.count_methods.compare as compare
 import psth.count_methods.histogram as histogram
 import psth.count_methods.valence_responsive as valence_responsive
 
-condition_config = psth.count_analyze.MPFC_COMPOSITE_Config()
+condition_config = psth.count_analyze.OFC_Reversal_Config()
 
 config = psth.psth_helper.PSTHConfig()
 condition = condition_config.condition
@@ -114,15 +114,35 @@ if condition.name == 'OFC_STATE':
     psth.count_analyze.analyze_data(res, condition_config, m_threshold=.05)
     # responsive.plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path)
     power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path)
-    compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
-                                                arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
+    # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
+    #                                             arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
+    start = [0,0,0,0,0]
+    end = [1,1,1,1,1]
+    # valence_responsive.plot_responsive_difference_odor_and_water(res, start, end,
+    #                                                              figure_path=figure_path, normalize=False, ylim=.4)
+    # power.plot_max_dff_days(res, [start, end], ['CS+', 'CS+'], save=False, reuse=False, day_pad= 0, figure_path = figure_path, ylim=.2)
+    # power.plot_max_dff_days(res, [start, end], ['CS-','CS-'],save=False, reuse=True, day_pad= 0, figure_path = figure_path, ylim=.2)
+    # power.plot_bar(res, [start, end], ['CS-', 'CS-'], color='darkred',
+    #                day_pad=0, save=False, reuse=True, figure_path=figure_path)
+    # power.plot_bar(res, [start, end], ['CS+', 'CS+'], color='darkgreen',
+    #                day_pad=0, save=True, reuse=True, figure_path=figure_path)
 
 if condition.name == 'OFC_CONTEXT':
     psth.count_analyze.analyze_data(res, condition_config, m_threshold=.05)
     # responsive.plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path)
     power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path)
-    compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
-                                                arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
+    # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
+    #                                             arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
+    start = [0,0,0,0]
+    end = [1,1,1,1]
+    # valence_responsive.plot_responsive_difference_odor_and_water(res, [0,0,0,0], [1,1,1,1],
+    #                                                              figure_path=figure_path, normalize=False, ylim=.65)
+    # power.plot_max_dff_days(res, [start, end], ['CS+', 'CS+'], save=False, reuse=False, day_pad= 0, figure_path = figure_path, ylim=.2)
+    # power.plot_max_dff_days(res, [start, end], ['CS-','CS-'],save=False, reuse=True, day_pad= 0, figure_path = figure_path, ylim=.2)
+    # power.plot_bar(res, [start, end], ['CS-', 'CS-'], color='darkred',
+    #                day_pad=0, save=False, reuse=True, figure_path=figure_path)
+    # power.plot_bar(res, [start, end], ['CS+', 'CS+'], color='darkgreen',
+    #                day_pad=0, save=True, reuse=True, figure_path=figure_path)
 
 if condition.name == 'OFC_LONGTERM':
     #fully learned thres 70%

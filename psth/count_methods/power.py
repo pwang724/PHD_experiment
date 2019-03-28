@@ -14,7 +14,7 @@ from collections import defaultdict
 def plot_power(res, start_days, end_days, figure_path):
     res = copy.copy(res)
     _normalize_across_days(res)
-    _get_power(res, normalize_across_days=False)
+    _get_power_1(res)
 
     list_of_days = list(zip(start_days, end_days))
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
@@ -24,7 +24,7 @@ def plot_power(res, start_days, end_days, figure_path):
 
     ax_args_copy = trace_ax_args.copy()
     ax_args_copy.update({'xticks':[res['DAQ_O_ON_F'][0], res['DAQ_W_ON_F'][0]], 'xticklabels':['ON', 'US'],
-                         'ylim':[0, .2]})
+                         'ylim':[0, .1]})
     colors = ['Green','Gray']
     plot.plot_results(start_end_day_res, select_dict={'odor_valence':'CS+'},
                       x_key='Time', y_key='Power', loop_keys= 'day', error_key='Power_sem',
@@ -80,18 +80,19 @@ def _normalize_across_days(res):
             ndff = (dff - min) / (max - min)
             res['ndff'][ix] = ndff
 
-def _mean_dff(res):
+def _get_power_1(res):
     list_of_dff = res['dff']
-    # list_of_sig = res['sig']
+    list_odor_on = res['DAQ_O_ON_F']
+    list_water_on = res['DAQ_W_ON_F']
     for i, dff in enumerate(list_of_dff):
-        # sig = list_of_sig[i]
-        # ix = sig > 0
-        # y = np.mean(np.abs(dff[ix,:]), axis=0)
-        y = np.mean(np.abs(dff), axis=0)
+        s, e = list_odor_on[i], list_water_on[i]
+        y_ = np.mean(dff[:, s:e], axis=1)
+        ix = y_>0.0
+        y = np.mean(np.abs(dff[ix,:]), axis=0)
         x = np.arange(0, len(y))
-        res['mean_dff'].append(y)
+        res['Power'].append(y)
         res['Time'].append(x)
-    res['mean_dff'] = np.array(res['mean_dff'])
+    res['Power'] = np.array(res['Power'])
     res['Time'] = np.array(res['Time'])
 
 def _max_dff(res):
@@ -99,12 +100,7 @@ def _max_dff(res):
     list_odor_on = res['DAQ_O_ON_F']
     list_water_on = res['DAQ_W_ON_F']
 
-    list_of_sig = res['ssig']
-
     for i, dff in enumerate(list_of_dff):
-        sig = list_of_sig[i]
-        ix = sig > 0
-
         s, e = list_odor_on[i], list_water_on[i]
         y = np.max(dff[:,s:e], axis=1)
         y_ = np.mean(dff[:,s:e], axis=1)
@@ -118,7 +114,7 @@ def plot_mean_dff(res, start_days, end_days, figure_path):
     list_of_days = end_days
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
     start_end_day_res = filter.filter(start_end_day_res, {'odor_valence': ['CS+','CS-']})
-    _mean_dff(start_end_day_res)
+    _get_power_1(start_end_day_res)
     start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['odor_valence','mouse'],
                                                  reduce_key='mean_dff')
     add_naive_learned(start_end_day_res, start_days, end_days)
@@ -179,7 +175,7 @@ def plot_max_dff_days(res, days_per_mouse, odor_valence, save, reuse, day_pad, y
     dict = {'CS+': 'Green', 'CS-': 'Red', 'US': 'Turquoise', 'PT CS+': 'Orange'}
     n_mice = len(np.unique(res['mouse']))
     ax_args_copy = ax_args.copy()
-    ax_args_copy.update({'ylim':[0, ylim], 'yticks':np.arange(0,.2, .04), 'xticks':list(range(20))})
+    ax_args_copy.update({'ylim':[0, ylim], 'yticks':np.arange(0,.5, .05), 'xticks':list(range(20))})
     line_args_copy = line_args.copy()
     line_args_copy.update({'marker':'.', 'linestyle':'--', 'linewidth':.5, 'alpha': .5, 'markersize':2})
     if colors is None:
@@ -191,7 +187,7 @@ def plot_max_dff_days(res, days_per_mouse, odor_valence, save, reuse, day_pad, y
                       colors= colors * n_mice, legend=False, plot_args=line_args_copy, ax_args=ax_args_copy,
                       fig_size=(2, 2), save=save, reuse=reuse)
 
-def plot_bar(res, days_per_mouse, odor_valence, day_pad, save, reuse, figure_path):
+def plot_bar(res, days_per_mouse, odor_valence, day_pad, save, reuse, figure_path, color ='black'):
     res = copy.copy(res)
     res['day_'] = np.zeros_like(res['day'])
 
@@ -212,9 +208,11 @@ def plot_bar(res, days_per_mouse, odor_valence, day_pad, save, reuse, figure_pat
     #                   colors='black', legend=False, plot_args=error_args, plot_function= plt.errorbar,
     #                   fig_size=(2, 1.5), save=False, reuse=reuse)
 
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'alpha':.75, 'linewidth':1})
     plot.plot_results(summary, x_key='day_', y_key='max_dff',
                       path=figure_path,
-                      colors='black', legend=False, plot_args=line_args,
+                      colors=color, legend=False, plot_args=line_args_copy,
                       fig_size=(2, 1.5), save=save, reuse=reuse, name_str=odor_valence[-1])
 
 

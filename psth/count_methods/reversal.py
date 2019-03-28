@@ -24,7 +24,7 @@ def plot_reversal(res, start_days, end_days, figure_path):
                       path=figure_path,
                       plot_function=plt.errorbar, plot_args=error_args, ax_args=ax_args_copy,
                       fig_size=(2, 1.5), save=False)
-
+    plt.plot([1.5, 1.5], plt.ylim(), '--', color='gray', linewidth=2)
     plot.plot_results(reversal_res,
                       x_key='day_odor_valence', y_key='Fraction', loop_keys= 'day_odor_valence',
                       path=figure_path,

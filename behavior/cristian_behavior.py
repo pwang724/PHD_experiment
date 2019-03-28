@@ -54,7 +54,7 @@ constants = analysis.Constants()
 config = Config()
 
 experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
-collapse_arg = 'MPFC_PT'
+collapse_arg = 'OFC_DT'
 plotting = [
     # 'individual_separate',
     # 'individual_together',
@@ -214,8 +214,8 @@ if 'summary' in plotting:
     ax_args_bool_cur = bool_ax_args_copy.copy()
     for phase in phase_odor_valence:
         if 'Pretraining' in phase:
-            ax_args_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000,1500]})
-            ax_args_bool_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000,1500]})
+            ax_args_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
+            ax_args_bool_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
         else:
             ax_args_cur.update({'xlim': [-10, 410], 'xticks': [0, 200, 400]})
             ax_args_bool_cur.update({'xlim': [-10, 410], 'xticks': [0, 200, 400]})
