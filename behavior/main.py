@@ -12,28 +12,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 import reduce
 import analysis
+from format import *
 
 experiments = [
     # 'individual',
     # 'summary',
-    'lick_per_day'
+    # 'summary_all_conditions',
+    # 'lick_per_day'
     # 'individual_half_max',
     # 'basic_3'
 ]
 conditions = [
-    # experimental_conditions.PIR,
-    # experimental_conditions.OFC,
-    # experimental_conditions.BLA,
-    # experimental_conditions.OFC_LONGTERM,
+    experimental_conditions.PIR,
+    experimental_conditions.OFC,
+    experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    # experimental_conditions.BLA,
     # experimental_conditions.BLA_JAWS,
     # experimental_conditions.OFC_REVERSAL,
     # experimental_conditions.OFC_STATE
 ]
 
 colors = ['green', 'lime', 'red', 'maroon']
-line_args = {'marker': 'o', 'markersize': 0, 'alpha': .7, 'linewidth': 1}
 ax_args = {'yticks': [0, 10, 20], 'ylim': [-1, 21], 'xticks': [0, 25, 50, 75],
            'xlim': [0, 75]}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 25, 50, 75],
@@ -44,6 +45,7 @@ list_of_res = []
 for i, condition in enumerate(conditions):
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
     res = analyze_behavior(data_path, condition)
+    res['condition'] = np.array([condition.name] * len(res['mouse']))
     list_of_res.append(res)
 
 if 'lick_per_day' in experiments:
@@ -94,16 +96,41 @@ if 'individual' in experiments:
                               path=save_path)
 
 if 'summary' in experiments:
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'marker': None, 'linewidth':1})
+
     for res, condition in zip(list_of_res, conditions):
+        save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
         summary_res = reduce.new_filter_reduce(res, filter_keys=['mouse', 'odor_valence'], reduce_key= 'lick_smoothed')
         plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
-                          colors= ['green','red'], ax_args=ax_args, plot_args=line_args,
+                          colors= ['green','red'], ax_args=ax_args, plot_args=line_args_copy,
                           path=save_path)
 
         summary_res = reduce.new_filter_reduce(res, filter_keys=['mouse', 'odor_valence'], reduce_key= 'boolean_smoothed')
         plot.plot_results(summary_res, x_key='trial', y_key='boolean_smoothed', loop_keys= 'odor_valence',
-                          colors= ['green','red'], ax_args=bool_ax_args, plot_args=line_args,
+                          colors= ['green','red'], ax_args=bool_ax_args, plot_args=line_args_copy,
                           path=save_path)
+
+if 'summary_all_conditions' in experiments:
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'marker': None, 'linewidth':1})
+
+    summary = defaultdict(list)
+    for res, condition in zip(list_of_res, conditions):
+        reduce.chain_defaultdicts(summary, res)
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR',
+                             ','.join([x for x in np.unique(summary['condition'])]))
+
+    summary_res = reduce.new_filter_reduce(summary, filter_keys=['condition','mouse', 'odor_valence'], reduce_key='lick_smoothed')
+    plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_valence',
+                      colors=['green', 'red'], ax_args=ax_args, plot_args=line_args_copy,
+                      path=save_path)
+
+    summary_res = reduce.new_filter_reduce(summary, filter_keys=['condition','mouse', 'odor_valence'], reduce_key='boolean_smoothed')
+    plot.plot_results(summary_res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor_valence',
+                      colors=['green', 'red'], ax_args=bool_ax_args, plot_args=line_args_copy,
+                      path=save_path)
+
 
 
 if 'individual_half_max' in experiments:

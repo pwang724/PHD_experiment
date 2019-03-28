@@ -30,7 +30,7 @@ experiments = [
 
 condition = experimental_conditions.MPFC_COMPOSITE
 config = PCAConfig()
-config.style = 'csm'
+config.style = 'csp'
 config.n_principal_components = 5
 config.shuffle_iterations = 50
 config.average = False
@@ -279,7 +279,7 @@ if 'shuffle' in experiments:
                 if condition.name == 'MPFC_COMPOSITE':
                     naive = [0,0,0,0]
                     start = [1,1,1,1]
-                    learned = [2,2,2,2]
+                    learned = [2,2,1,2]
                     last = [6, 6, 2, 5]
                 if condition.name == 'OFC_COMPOSITE':
                     naive = [0,0,0,0]

@@ -35,11 +35,12 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
             save_arg = True
 
         temp = filter.filter(start_end_day_res, {'condition':odor})
+        name = ','.join([str(x) for x in start_days]) + '_' + ','.join([str(x) for x in end_days])
         plot.plot_results(temp,
                           x_key='condition_training_day', y_key='Overlap', loop_keys='mouse',
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
-                          save=save_arg, reuse=reuse_arg,
+                          save=save_arg, reuse=reuse_arg, name_str=name,
                           fig_size=(2, 1.5), legend=False)
 
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
@@ -78,6 +79,8 @@ def plot_overlap_water(res, start_days, end_days, figure_path):
     summary_res = filter.filter(summary_res, {'odor_valence':'CS+'})
     mean_std_res = reduce.new_filter_reduce(summary_res, filter_keys='Type', reduce_key='Overlap')
     types = np.unique(summary_res['Type'])
+    scatter_args_copy = scatter_args.copy()
+    scatter_args_copy.update({'s':8})
     for i, type in enumerate(types):
         reuse_arg = True
         if i == 0:
@@ -87,9 +90,9 @@ def plot_overlap_water(res, start_days, end_days, figure_path):
                           x_key='Type', y_key='Overlap', loop_keys='mouse',
                           colors=['Black'] * len(mice),
                           plot_function= plt.scatter,
-                          path=figure_path, plot_args=scatter_args, ax_args=ax_args_copy,
+                          path=figure_path, plot_args=scatter_args_copy, ax_args=ax_args_copy,
                           save=False, reuse=reuse_arg,
-                          fig_size=(1.5, 1.5), legend = False)
+                          fig_size=(1.5, 1.5), rect = (.25, .25, .6, .6), legend = False)
 
     plot.plot_results(mean_std_res,
                       x_key='Type', y_key='Overlap', error_key='Overlap_sem',

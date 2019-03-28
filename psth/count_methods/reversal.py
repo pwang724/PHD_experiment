@@ -11,6 +11,7 @@ from format import *
 
 def plot_reversal(res, start_days, end_days, figure_path):
     ax_args_copy = ax_args.copy()
+    ax_args_copy.update({'ylim':[0, .6]})
     res = copy.copy(res)
     list_of_days = list(zip(start_days, end_days))
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
@@ -60,13 +61,14 @@ def plot_reversal(res, start_days, end_days, figure_path):
 
 
 def get_reversal_sig(res):
+    key = 'ssig'
     def _helper(res):
         assert res['odor_valence'][0] == 'CS+', 'wrong odor'
         assert res['odor_valence'][1] == 'CS-', 'wrong odor'
         on = res['DAQ_O_ON_F'][0]
         off = res['DAQ_W_ON_F'][0]
-        sig_p = res['sig'][0]
-        sig_m = res['sig'][1]
+        sig_p = res[key][0]
+        sig_m = res[key][1]
         dff_p = res['dff'][0]
         dff_m = res['dff'][1]
         sig_p_mask = sig_p == 1
@@ -79,7 +81,7 @@ def get_reversal_sig(res):
 
     mice = np.unique(res['mouse'])
     res = filter.filter(res, filter_dict={'odor_valence':['CS+','CS-']})
-    sig_res = reduce.new_filter_reduce(res, reduce_key='sig', filter_keys=['mouse','day','odor_valence'])
+    sig_res = reduce.new_filter_reduce(res, reduce_key=key, filter_keys=['mouse','day','odor_valence'])
     dff_res = reduce.new_filter_reduce(res, reduce_key='dff', filter_keys=['mouse','day','odor_valence'])
     sig_res['dff'] = dff_res['dff']
 
@@ -99,14 +101,14 @@ def get_reversal_sig(res):
             reversal_res['day'].append(day_strs[i])
             reversal_res['odor_valence'].append('CS+')
             reversal_res['odor_valence'].append('CS-')
-            reversal_res['sig'].append(p)
-            reversal_res['sig'].append(m)
+            reversal_res[key].append(p)
+            reversal_res[key].append(m)
             reversal_res['Fraction'].append(np.mean(p))
             reversal_res['Fraction'].append(np.mean(m))
             p_list.append(p)
             m_list.append(m)
-    for key, val in reversal_res.items():
-        reversal_res[key] = np.array(val)
+    for k, val in reversal_res.items():
+        reversal_res[k] = np.array(val)
 
     stats_res = defaultdict(list)
     for mouse in mice:
@@ -123,11 +125,11 @@ def get_reversal_sig(res):
         assert combinations[2][0] == day_strs[1]
         assert combinations[3][0] == day_strs[1]
 
-        p_before = mouse_res['sig'][0]
-        m_before = mouse_res['sig'][1]
+        p_before = mouse_res[key][0]
+        m_before = mouse_res[key][1]
         n_before = np.invert([a or b for a, b in zip(p_before, m_before)])
-        p_after = mouse_res['sig'][2]
-        m_after = mouse_res['sig'][3]
+        p_after = mouse_res[key][2]
+        m_after = mouse_res[key][3]
         n_after = np.invert([a or b for a, b in zip(p_after, m_after)])
 
         list_before = [p_before, m_before, n_before]

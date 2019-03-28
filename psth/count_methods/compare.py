@@ -5,7 +5,8 @@ import filter
 import plot
 from plot import _easy_save
 from format import *
-
+import copy
+import reduce
 
 def _compare_dff(res, loop_keys, arg):
     new = defaultdict(list)
@@ -69,8 +70,8 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
 
     fraction = np.sum(a) / (np.sum(a) + np.sum(b))
 
-    ax_args_copy = ax_args.copy()
-    ax_args_copy.update({'ylim':lim, 'yticks':ticks, 'xlim':lim, 'xticks':ticks})
+    ax_args_copy = {}
+    ax_args_copy.update({'ylim':lim, 'xlim':lim, 'yticks':ticks, 'xticks':ticks})
     scatter_args_copy = scatter_args.copy()
     scatter_args_copy.update({'marker':',', 's':1, 'alpha':.2, 'facecolors':'none'})
 
@@ -86,6 +87,8 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
                                    plot_function=plt.scatter,
                                    colors = colors, legend=False,
                                    fig_size=(2, 1.5), save=False)
+    plt.xlim(lim)
+    plt.ylim(lim)
     plt.plot(lim, lim, '--', color='red', alpha=.5, linewidth=1)
     plt.title(valence)
     if valence == 'CS+':

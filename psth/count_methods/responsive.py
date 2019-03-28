@@ -5,40 +5,60 @@ import plot
 import reduce
 from analysis import add_naive_learned
 from format import *
+import matplotlib.pyplot as plt
+from collections import defaultdict
 
-def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None):
+def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True,
+                                arg = 'odor_standard', figure_path = None):
+    include_water = True
+
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
     get_responsive_cells(res)
-    list_of_days = list(zip(odor_start_days, end_days))
     mice = np.unique(res['mouse'])
-    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
-    add_naive_learned(start_end_day_res, odor_start_days, end_days)
-    filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
 
-    odor_list = ['CS+1', 'CS+2','CS-1', 'CS-2']
-    if use_colors:
-        colors = ['Green','Green','Red','Red']
-    else:
-        colors = ['Black'] * 4
+    list_of_days = list(zip(odor_start_days, end_days))
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+    start_end_day_res = filter.exclude(start_end_day_res, {'odor_valence':'US'})
+    add_naive_learned(start_end_day_res, odor_start_days, end_days, 'a','b')
+
+    if include_water:
+        list_of_days = list(zip(water_start_days, end_days))
+        start_end_day_res_water = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+        start_end_day_res_water = filter.filter(start_end_day_res_water, {'odor_valence':'US'})
+        add_naive_learned(start_end_day_res_water, water_start_days, end_days, 'a', 'b')
+        reduce.chain_defaultdicts(start_end_day_res, start_end_day_res_water)
+
+    filter.assign_composite(start_end_day_res, loop_keys=[arg, 'training_day'])
+
     ax_args_copy = ax_args_copy.copy()
-    ax_args_copy.update({'xlim':[-1, 10]})
+    if arg == 'odor_valence':
+        start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['training_day','mouse','odor_valence'],
+                                                 reduce_key='Fraction Responsive')
+        odor_list = ['CS+', 'CS-']
+        ax_args_copy.update({'xlim': [-1, 6], 'ylim': [0, .4], 'yticks': [0, .1, .2, .3, .4]})
+        colors = ['Green', 'Red']
+    else:
+        odor_list = ['CS+1', 'CS+2','CS-1', 'CS-2']
+        colors = ['Green', 'Green', 'Red', 'Red']
+        ax_args_copy.update({'xlim':[-1, 10], 'ylim':[0, .4], 'yticks':[0, .1, .2, .3, .4]})
+
+    if not use_colors:
+        colors = ['Black'] * 4
+
     for i, odor in enumerate(odor_list):
         reuse_arg = True
         if i == 0:
             reuse_arg = False
         plot.plot_results(start_end_day_res,
-                          select_dict= {'odor_standard':odor},
-                          x_key='odor_standard_training_day', y_key='Fraction Responsive', loop_keys='mouse',
+                          select_dict= {arg:odor},
+                          x_key=arg + '_training_day', y_key='Fraction Responsive', loop_keys='mouse',
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           save= False, reuse=reuse_arg,
                           fig_size=(2.5, 1.5), legend=False, name_str = ','.join([str(x) for x in odor_start_days]))
 
-    list_of_days = list(zip(water_start_days, end_days))
-    mice = np.unique(res['mouse'])
-    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
-    add_naive_learned(start_end_day_res, water_start_days, end_days)
+
     plot.plot_results(start_end_day_res, select_dict={'odor_standard': 'US'},
                       x_key='training_day', y_key='Fraction Responsive', loop_keys='mouse',
                       colors= ['Turquoise']*len(mice),
@@ -46,6 +66,110 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
                       fig_size=(1.6, 1.5), legend=False,
                       reuse=True, save=True)
 
+def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None,
+                                              include_water = True, normalize = False, pt_start = None, pt_learned = None,
+                                              average = True,
+                                              ylim = .22):
+    key = 'Change in Fraction Responsive'
+    if normalize:
+        key = 'Norm. Fraction Responsive'
+
+    def _helper(start_end_day_res):
+        combs, list_of_ixs = filter.retrieve_unique_entries(start_end_day_res, ['mouse','odor_standard'])
+        for i, comb in enumerate(combs):
+            ixs = list_of_ixs[i]
+            assert len(ixs) == 2
+
+            if start_end_day_res['training_day'][0] == 'Naive':
+                ref = ixs[0]
+                test = ixs[1]
+            elif start_end_day_res['training_day'][0] == 'Learned':
+                ref = ixs[1]
+                test = ixs[0]
+            else:
+                raise ValueError('cannot find ref day')
+
+            if normalize:
+                start_end_day_res[key][test] = start_end_day_res['Fraction Responsive'][test] / \
+                                               start_end_day_res['Fraction Responsive'][ref]
+                start_end_day_res[key][ref] = 1
+            else:
+
+                start_end_day_res[key][test] = start_end_day_res['Fraction Responsive'][test] - \
+                                               start_end_day_res['Fraction Responsive'][ref]
+                start_end_day_res[key][ref] = 0
+
+    ax_args_copy = ax_args.copy()
+    res = copy.copy(res)
+    get_responsive_cells(res)
+    list_of_days = list(zip(odor_start_days, end_days))
+    mice = np.unique(res['mouse'])
+    res[key] = np.zeros_like(res['Fraction Responsive'])
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+    start_end_day_res = filter.filter(start_end_day_res, {'odor_valence': ['CS+','CS-']})
+    add_naive_learned(start_end_day_res, odor_start_days, end_days)
+
+    odors = ['CS+', 'CS-']
+    if 'PT CS+' in np.unique(res['odor_valence']):
+        odors = ['PT CS+'] + odors
+        list_of_days = list(zip(pt_start, pt_learned))
+        start_end_day_res_pt = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+        start_end_day_res_pt = filter.filter(start_end_day_res_pt, {'odor_valence':'PT CS+'})
+        add_naive_learned(start_end_day_res_pt, pt_start, pt_learned)
+        reduce.chain_defaultdicts(start_end_day_res, start_end_day_res_pt)
+
+    if include_water:
+        odors += ['US']
+        list_of_days = list(zip(water_start_days, end_days))
+        start_end_day_res_water = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+        start_end_day_res_water = filter.filter(start_end_day_res_water, {'odor_valence':'US'})
+        add_naive_learned(start_end_day_res_water, water_start_days, end_days)
+        reduce.chain_defaultdicts(start_end_day_res, start_end_day_res_water)
+
+    filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
+    if average:
+        start_end_day_res = reduce.new_filter_reduce(start_end_day_res,
+                                                     filter_keys=['odor_valence', 'mouse', 'training_day'], reduce_key=key)
+        start_end_day_res.pop(key + '_sem')
+    _helper(start_end_day_res)
+    start_end_day_res = filter.filter(start_end_day_res, {'training_day':'Learned'})
+    summary_res = reduce.new_filter_reduce(start_end_day_res, filter_keys='odor_valence', reduce_key= key)
+
+    dict = {'CS+':'Green', 'CS-':'Red','US':'Turquoise', 'PT CS+':'Orange'}
+    if use_colors:
+        colors = [dict[key] for key in np.unique(start_end_day_res['odor_valence'])]
+    else:
+        colors = ['Black'] * 6
+
+    ax_args_copy = ax_args_copy.copy()
+    n_valence = len(np.unique(summary_res['odor_valence']))
+    ax_args_copy.update({'xlim':[-1, n_valence], 'ylim':[-ylim, ylim], 'yticks':[-.3, -.2, -.1, 0, .1, .2, .3]})
+    if normalize:
+        ax_args_copy.update({'xlim': [-1, n_valence], 'ylim': [-.1, 1.5], 'yticks':[0, .5, 1, 1.5]})
+    error_args_ = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .75}
+    scatter_args_copy = scatter_args.copy()
+    scatter_args_copy.update({'s':3})
+
+    for i, odor in enumerate(odors):
+        reuse = True
+        if i == 0:
+            reuse=False
+        plot.plot_results(start_end_day_res, loop_keys='odor_valence', select_dict={'odor_valence':odor},
+                          x_key='odor_valence', y_key=key,
+                          colors= [dict[odor]] * len(mice),
+                          path =figure_path, plot_args=scatter_args_copy, plot_function=plt.scatter, ax_args= ax_args_copy,
+                          save= False, reuse=reuse,
+                          fig_size=(2, 1.5), legend=False, name_str = ','.join([str(x) for x in odor_start_days]))
+
+    if not normalize:
+        plt.plot(plt.xlim(), [0, 0], '--', color = 'gray', linewidth = 1, alpha = .5)
+
+    plot.plot_results(summary_res,
+                      x_key='odor_valence', y_key=key, error_key = key + '_sem',
+                      colors= 'black',
+                      path =figure_path, plot_args=error_args_, plot_function=plt.errorbar, ax_args= ax_args_copy,
+                      save= True, reuse=True,
+                      fig_size=(2, 1.5), legend=False)
 
 
 def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path = None, reuse = False):
@@ -64,7 +188,7 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
     else:
         colors = ['Black'] * 4
     ax_args_copy = ax_args_copy.copy()
-    ax_args_copy.update({'xlim':[-1, 8]})
+    ax_args_copy.update({'xlim':[-1, 8], 'ylim':[0, .4], 'yticks':[0, .1, .2, .3, .4]})
     for i, odor in enumerate(odor_list):
         save_arg = False
         reuse_arg = True
@@ -85,17 +209,20 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
 def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_path, save):
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
-    get_responsive_cells(res)
     list_of_days = list(zip(start_days, end_days))
     mice = np.unique(res['mouse'])
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
+    get_responsive_cells(start_end_day_res)
 
     if arg_naive:
         day_start = filter.filter(start_end_day_res, {'odor_standard': 'PT Naive'})
         day_start['odor_standard'] = np.array(['PT CS+'] * len(day_start['odor_standard']))
-        day_end = filter.filter_days_per_mouse(res, days_per_mouse= end_days)
+        day_end = filter.filter_days_per_mouse(start_end_day_res, days_per_mouse= end_days)
+        day_end = filter.filter(day_end, {'odor_standard': 'PT CS+'})
         reduce.chain_defaultdicts(day_start, day_end)
         start_end_day_res = day_start
+    else:
+        start_end_day_res = filter.exclude(start_end_day_res, {'odor_standard': 'PT Naive'})
 
     add_naive_learned(start_end_day_res, start_days, end_days)
     filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
@@ -103,7 +230,7 @@ def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_p
     odor_list = ['PT CS+']
     colors = ['Orange']
     ax_args_copy = ax_args_copy.copy()
-    ax_args_copy.update({'xlim':[-1, 10]})
+    ax_args_copy.update({'xlim':[-1, 10], 'ylim':[0, .4], 'yticks':[0, .1, .2, .3, .4]})
     for i, odor in enumerate(odor_list):
         save_arg = False
         reuse_arg = True
@@ -139,7 +266,6 @@ def plot_summary_water(res, start_days, end_days, figure_path):
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           fig_size=(1.6, 1.5), legend=False)
-
 
 def get_responsive_cells(res):
     list_of_data = res['sig']

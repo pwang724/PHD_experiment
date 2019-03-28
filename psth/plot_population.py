@@ -16,7 +16,6 @@ mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.family'] = 'arial'
 mpl.rcParams['axes.linewidth'] = 0.5
-black = True
 
 class Base_Config(object):
     def __init__(self):
@@ -55,7 +54,7 @@ class OFC_Config(Base_Config):
     def __init__(self):
         super(OFC_Config, self).__init__()
         self.condition = experimental_conditions.OFC
-        self.mouse = 1
+        self.mouse = 4
         self.days = [0, 5]
         self.sort_day_ix = 1
         self.independent_sort = True
@@ -193,8 +192,9 @@ class BLA_BIG_Config(Base_Config):
         self.plot_big_days = [5, 4, 6, 6]
         self.plot_big_naive = False
 
+black = False
 config = PSTHConfig()
-condition_config = MPFC_COMPOSITE_PT_Config()
+condition_config = OFC_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

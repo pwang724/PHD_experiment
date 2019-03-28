@@ -138,6 +138,8 @@ def add_odor_value(res, condition):
                 valence_dict[pt_naive[0]] = 'PT Naive'
             standard_dict[pt_csp[0]] = 'PT CS+'
             valence_dict[pt_csp[0]] = 'PT CS+'
+            standard_dict['water'] = 'US'
+            valence_dict['water'] = 'US'
             j += 1
 
         mouse_ix = ix == i

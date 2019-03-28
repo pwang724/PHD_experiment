@@ -30,12 +30,12 @@ experiments = [
 ]
 conditions = [
     experimental_conditions.BEHAVIOR_OFC_YFP,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     experimental_conditions.OFC_COMPOSITE,
     experimental_conditions.MPFC_COMPOSITE
 ]
-collapse_arg = 'condition_pretraining'
+collapse_arg = 'condition_discrimination'
 def _collapse_conditions(res, experimental_condition, str):
     conditions = res['condition'].copy()
     control_ix = conditions != experimental_condition
@@ -228,27 +228,27 @@ if 'summary' in experiments:
                           path=save_path)
 
 
-        # if valence == 'PT CS+':
-        #     ax_args = ax_args_pt.copy()
-        #     ax_args.update({'xlim': [-10, 170], 'xticks': [0, 50, 100, 150]})
-        #     bool_ax_args = bool_ax_args_pt
-        #     bool_ax_args.update({'xlim': [-10, 170], 'xticks': [0, 50, 100, 150]})
-        # else:
-        #     ax_args = ax_args_dt.copy()
-        #     ax_args.update({'xlim': [-5, 55], 'xticks': [0, 25, 50]})
-        #     bool_ax_args = bool_ax_args_dt
-        #     bool_ax_args.update({'xlim': [-5, 55], 'xticks': [0, 25, 50]})
-        # plot.plot_results(all_res_lick, x_key='trial', y_key='lick_smoothed', loop_keys=collapse_arg,
-        #                   select_dict={'odor_valence': valence},
-        #                   colors=['red','black'],
-        #                   ax_args=ax_args, plot_args=line_args_copy,
-        #                   path=save_path)
-        #
-        # plot.plot_results(all_res_bool, x_key='trial', y_key='boolean_smoothed', loop_keys=collapse_arg,
-        #                   select_dict={'odor_valence': valence},
-        #                   colors=['red','black'],
-        #                   ax_args=bool_ax_args, plot_args=line_args_copy,
-        #                   path=save_path)
+        if valence == 'PT CS+':
+            ax_args = ax_args_pt.copy()
+            ax_args.update({'xlim': [-10, 170], 'xticks': [0, 50, 100, 150]})
+            bool_ax_args = bool_ax_args_pt
+            bool_ax_args.update({'xlim': [-10, 170], 'xticks': [0, 50, 100, 150]})
+        else:
+            ax_args = ax_args_dt.copy()
+            ax_args.update({'xlim': [-5, 55], 'xticks': [0, 25, 50]})
+            bool_ax_args = bool_ax_args_dt
+            bool_ax_args.update({'xlim': [-5, 55], 'xticks': [0, 25, 50]})
+        plot.plot_results(all_res_lick, x_key='trial', y_key='lick_smoothed', loop_keys=collapse_arg,
+                          select_dict={'odor_valence': valence},
+                          colors=['red','black'],
+                          ax_args=ax_args, plot_args=line_args_copy,
+                          path=save_path)
+
+        plot.plot_results(all_res_bool, x_key='trial', y_key='boolean_smoothed', loop_keys=collapse_arg,
+                          select_dict={'odor_valence': valence},
+                          colors=['red','black'],
+                          ax_args=bool_ax_args, plot_args=line_args_copy,
+                          path=save_path)
 
 if 'trials_to_criterion' in experiments:
 

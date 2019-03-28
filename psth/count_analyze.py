@@ -55,7 +55,7 @@ class MPFC_COMPOSITE_Config(Base_Config):
     def __init__(self):
         super(MPFC_COMPOSITE_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
-        self.include_water = False
+        self.include_water = True
         self.start_at_training = True
 
 class BLA_Config(Base_Config):
@@ -210,9 +210,10 @@ def analyze_data(res, condition_config, m_threshold=None):
             ssig = np.array(p) < condition_config.p_threshold
             reached_ssig = [np.all(x) for x in _rolling_window(ssig, condition_config.p_window)]
             if odor == 'water':
-                s, e = list_water_on[i], list_water_on[i] + 4
+                s, e = list_water_on[i], list_water_on[i] + 10
             else:
                 s, e = list_odor_on[i], list_water_on[i]
+
             if np.any(reached_ssig[s:e]):
                 statistical_significance = True
             else:
@@ -265,7 +266,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = OFC_LONGTERM_Config()
+    condition_config = MPFC_COMPOSITE_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
