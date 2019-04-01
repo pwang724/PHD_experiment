@@ -20,7 +20,7 @@ import psth.count_methods.compare as compare
 import psth.count_methods.histogram as histogram
 import psth.count_methods.valence_responsive as valence_responsive
 
-condition_config = psth.count_analyze.OFC_Reversal_Config()
+condition_config = psth.count_analyze.OFC_LONGTERM_Config()
 
 config = psth.psth_helper.PSTHConfig()
 condition = condition_config.condition
@@ -152,11 +152,13 @@ if condition.name == 'OFC_LONGTERM':
     # responsive.plot_individual(res, lick_res, figure_path= figure_path)
     # responsive.plot_summary_odor_and_water(res, learned_day_per_mouse, learned_day_per_mouse, last_day_per_mouse,
     #                                        figure_path=figure_path, arg='odor_valence')
-    responsive.plot_responsive_difference_odor_and_water(res, learned_day_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
-                                           figure_path=figure_path, normalize=True)
-    valence_responsive.plot_compare_responsive(res, figure_path)
-    valence_responsive.plot_responsive_difference_odor_and_water(res, learned_day_per_mouse, last_day_per_mouse,
-                                                                 figure_path=figure_path, normalize=True, ylim=.5)
+    # responsive.plot_responsive_difference_odor_and_water(res, learned_day_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
+    #                                        figure_path=figure_path, normalize=True)
+    # valence_responsive.plot_compare_responsive(res, figure_path)
+    # valence_responsive.plot_responsive_difference_odor_and_water(res, learned_day_per_mouse, last_day_per_mouse,
+    #                                                              figure_path=figure_path, normalize=True, ylim=.5)
+    power.plot_max_dff_days(res, [learned_day_per_mouse, last_day_per_mouse], ['CS+', 'CS+'], save=True, reuse=False, day_pad=0,
+                            ylim=.17, figure_path=figure_path)
 
 if condition.name == 'OFC_COMPOSITE':
     psth.count_analyze.analyze_data(res, condition_config, m_threshold = 0.05)

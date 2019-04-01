@@ -4,17 +4,6 @@ from scipy.stats import sem
 from format import ax_args
 from plot import _easy_save
 
-def _raster_convert(mat, raster_bin):
-    a = []
-    for i in range(mat.shape[0]):
-        b = []
-        for j in range(mat.shape[1]):
-            temp = np.convolve(mat[i, j, :], np.ones(raster_bin), 'same')
-            out = temp[::raster_bin] > 0
-            b.append(out)
-        a.append(b)
-    return a
-
 def _plot_summary(data, ylim, yticks, figure_path, name):
     fig_size = (2, 1.5)
     fig = plt.figure(figsize=fig_size)
