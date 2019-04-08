@@ -31,7 +31,11 @@ def filter_days_per_mouse(res, days_per_mouse):
 
     select_ixs = np.any(list_of_ixs, axis=0)
     for key, value in res.items():
-        out[key] = value[select_ixs]
+        try:
+            out[key] = value[select_ixs]
+        except:
+            print(key)
+            raise ValueError('{} had issues'.format(key))
     return out
 
 
@@ -51,7 +55,11 @@ def filter(res, filter_dict):
         list_of_ixs.append(membership)
     select_ixs = np.all(list_of_ixs, axis=0)
     for key, value in res.items():
-        out[key] = value[select_ixs]
+        try:
+            out[key] = value[select_ixs]
+        except:
+            print(key)
+            raise ValueError('{} had issues'.format(key))
     return out
 
 def exclude(res, exclude_dict):

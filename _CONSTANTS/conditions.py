@@ -232,6 +232,29 @@ class BEHAVIOR_OFC_JAWS_MUSH:
     timing_override = [True, True, True, True]
     training_start_day = [0, 0, 0, 0]
 
+class BEHAVIOR_OFC_YFP_MUSH:
+    name = 'BEHAVIOR_OFC_YFP_MUSH'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\PN06',
+        'I:\IMPORTANT DATA\DATA_2P\PN08',
+        'I:\IMPORTANT DATA\DATA_2P\PN09',
+        'I:\IMPORTANT DATA\DATA_2P\PN10',
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+           ]
+    timing_override = [True, True, True, True]
+    training_start_day = [0, 0, 0, 0]
+
 class OFC_COMPOSITE:
     name = 'OFC_COMPOSITE'
     paths = [

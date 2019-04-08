@@ -13,7 +13,6 @@ from collections import defaultdict
 
 def plot_power(res, start_days, end_days, figure_path):
     res = copy.copy(res)
-    _normalize_across_days(res)
     _get_power_1(res)
 
     list_of_days = list(zip(start_days, end_days))
@@ -40,11 +39,8 @@ def plot_power(res, start_days, end_days, figure_path):
                       fig_size=(2, 1.5), reuse=True)
 
 
-def _get_power(res, normalize_across_days=True):
-    if normalize_across_days:
-        key = 'ndff'
-    else:
-        key = 'dff'
+def _get_power(res):
+    key = 'dff'
     res['Power'] = np.copy(res['sig'])
     res['Time'] = np.copy(res['sig'])
     combinations, list_of_ixs = filter.retrieve_unique_entries(res, loop_keys=['mouse', 'odor'])
@@ -63,22 +59,6 @@ def _get_power(res, normalize_across_days=True):
             res['Time'][ix] = np.arange(0, len(power))
     res['Power'] = np.array(res['Power'])
     res['Time'] = np.array(res['Time'])
-
-def _normalize_across_days(res):
-    combinations, list_of_ixs = filter.retrieve_unique_entries(res, loop_keys=['mouse', 'odor'])
-    res['ndff'] = np.copy(res['dff'])
-    for ixs in list_of_ixs:
-        assert res['day'][ixs[0]] == 0, 'not the first day as reference'
-        first_dff = res['dff'][ixs[0]]
-        nF = first_dff[0].size
-        max = np.max(first_dff, axis=1)
-        min = np.min(first_dff, axis=1)
-        max = np.repeat(max[:, np.newaxis], nF, axis=1)
-        min = np.repeat(min[:, np.newaxis], nF, axis=1)
-        for ix in ixs:
-            dff = res['dff'][ix]
-            ndff = (dff - min) / (max - min)
-            res['ndff'][ix] = ndff
 
 def _get_power_1(res):
     list_of_dff = res['dff']
@@ -103,8 +83,10 @@ def _max_dff(res):
     for i, dff in enumerate(list_of_dff):
         s, e = list_odor_on[i], list_water_on[i]
         y = np.max(dff[:,s:e], axis=1)
+        y_base = np.max(dff[:,:s], axis=1)
+        # y = y-y_base
         y_ = np.mean(dff[:,s:e], axis=1)
-        y = y[y_>0.0]
+        y = y[y_>0.0] - y_base[y_>0.0]
         res['max_dff'].append(np.mean(y))
     res['max_dff'] = np.array(res['max_dff'])
 
@@ -158,7 +140,19 @@ def plot_max_dff_valence(res, start_days, end_days, figure_path):
                       colors = ['gray']*10, legend=False,
                       fig_size=(2, 1.5))
 
-def plot_max_dff_days(res, days_per_mouse, odor_valence, save, reuse, day_pad, ylim = .115, colors=None, figure_path=None):
+def _normalize_across_days(res):
+    combinations, list_of_ixs = filter.retrieve_unique_entries(res, loop_keys=['mouse', 'odor'])
+    for ixs in list_of_ixs:
+        assert res['day'][ixs[0]] < res['day'][ixs[1]], 'not the first day as reference'
+        first_dff = res['max_dff'][ixs[0]]
+        second_dff = res['max_dff'][ixs[1]]
+        second_dff = second_dff/ first_dff
+        res['max_dff'][ixs[0]] = 1.0
+        res['max_dff'][ixs[1]] = second_dff
+
+def plot_max_dff_days(res, days_per_mouse, odor_valence, save, reuse, day_pad, ylim = .115, colors=None,
+                      normalize=False, figure_path=None):
+
     res = copy.copy(res)
     res['day_'] = np.zeros_like(res['day'])
 
@@ -171,11 +165,16 @@ def plot_max_dff_days(res, days_per_mouse, odor_valence, save, reuse, day_pad, y
 
     _max_dff(res_)
     res_ = reduce.new_filter_reduce(res_, filter_keys=['odor_valence','mouse','day_'], reduce_key='max_dff')
+    if normalize:
+        _normalize_across_days(res_)
+        yticks = [0, 1, 2, 3, 4, 5, 6]
+    else:
+        yticks = np.arange(0, ylim, .05)
 
     dict = {'CS+': 'Green', 'CS-': 'Red', 'US': 'Turquoise', 'PT CS+': 'Orange'}
     n_mice = len(np.unique(res['mouse']))
     ax_args_copy = ax_args.copy()
-    ax_args_copy.update({'ylim':[0, ylim], 'yticks':np.arange(0,.5, .05), 'xticks':list(range(20))})
+    ax_args_copy.update({'ylim':[0, ylim], 'yticks': yticks, 'xticks':list(range(20))})
     line_args_copy = line_args.copy()
     line_args_copy.update({'marker':'.', 'linestyle':'--', 'linewidth':.5, 'alpha': .5, 'markersize':2})
     if colors is None:
@@ -187,7 +186,9 @@ def plot_max_dff_days(res, days_per_mouse, odor_valence, save, reuse, day_pad, y
                       colors= colors * n_mice, legend=False, plot_args=line_args_copy, ax_args=ax_args_copy,
                       fig_size=(2, 2), save=save, reuse=reuse)
 
-def plot_bar(res, days_per_mouse, odor_valence, day_pad, save, reuse, figure_path, color ='black'):
+
+
+def plot_bar(res, days_per_mouse, odor_valence, day_pad, save, reuse, figure_path, color ='black', normalize=False):
     res = copy.copy(res)
     res['day_'] = np.zeros_like(res['day'])
 
@@ -202,6 +203,9 @@ def plot_bar(res, days_per_mouse, odor_valence, day_pad, save, reuse, figure_pat
     res_ = reduce.new_filter_reduce(res_, filter_keys=['odor_valence', 'mouse', 'day_'], reduce_key='max_dff')
     res_.pop('max_dff_sem')
     summary = reduce.new_filter_reduce(res_, filter_keys=['day_', 'odor_valence'], reduce_key='max_dff')
+
+    if normalize:
+        _normalize_across_days(summary)
 
     # plot.plot_results(summary, x_key='day_', y_key='max_dff', error_key='max_dff_sem',
     #                   path=figure_path,

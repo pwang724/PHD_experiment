@@ -15,19 +15,20 @@ import analysis
 from format import *
 
 experiments = [
-    # 'individual',
-    # 'summary',
+    'individual',
+    'summary',
     # 'summary_all_conditions',
     # 'lick_per_day'
     # 'individual_half_max',
     # 'basic_3'
 ]
 conditions = [
-    experimental_conditions.PIR,
-    experimental_conditions.OFC,
-    experimental_conditions.OFC_LONGTERM,
+    # experimental_conditions.PIR,
+    # experimental_conditions.OFC,
+    # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    experimental_conditions.BEHAVIOR_OFC_YFP_MUSH
     # experimental_conditions.BLA,
     # experimental_conditions.BLA_JAWS,
     # experimental_conditions.OFC_REVERSAL,

@@ -19,8 +19,9 @@ import psth.count_methods.power as power
 import psth.count_methods.compare as compare
 import psth.count_methods.histogram as histogram
 import psth.count_methods.valence_responsive as valence_responsive
+import psth.count_methods.correlation as correlation
 
-condition_config = psth.count_analyze.OFC_LONGTERM_Config()
+condition_config = psth.count_analyze.PIR_Config()
 
 config = psth.psth_helper.PSTHConfig()
 condition = condition_config.condition
@@ -40,21 +41,24 @@ else:
     start_days_per_mouse = [0] * len(np.unique(res['mouse']))
 training_start_day_per_mouse = condition.training_start_day
 
-print(start_days_per_mouse)
-print(last_day_per_mouse)
-
 lick_res = behavior.behavior_analysis.get_licks_per_day(data_path, condition)
 analysis.add_odor_value(lick_res, condition)
 lick_res = filter.filter(lick_res, {'odor_valence': ['CS+', 'CS-', 'PT CS+']})
 lick_res = reduce.new_filter_reduce(lick_res, ['odor_valence', 'day', 'mouse'], reduce_key='lick_boolean')
 
 if condition.name == 'PIR':
+    naive_config = psth.count_analyze.PIR_NAIVE_Config()
+    data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
+    save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
+    res_naive = fio.load_pickle(os.path.join(save_path_, 'dict.pkl'))
+    learned_day_per_mouse_, last_day_per_mouse_ = get_days_per_mouse(data_path_, naive_config.condition)
+
     psth.count_analyze.analyze_data(res, condition_config)
+    psth.count_analyze.analyze_data(res_naive, naive_config)
+    res_naive['odor_valence'] = np.array(['Naive'] * len(res_naive['day']))
     # responsive.plot_individual(res, lick_res, figure_path = figure_path)
-    responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, learned_day_per_mouse,
-                                           figure_path=figure_path)
-    responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
-                                           figure_path=figure_path, average=False)
+    # responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, learned_day_per_mouse,
+    #                                        figure_path=figure_path)
     # overlap.plot_overlap_odor(res, start_days_per_mouse, learned_day_per_mouse,
     #                                              delete_non_selective=True, figure_path= figure_path)
     # stability.plot_stability_across_days(res, start_days_per_mouse, learned_day_per_mouse, figure_path = figure_path)
@@ -62,13 +66,36 @@ if condition.name == 'PIR':
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='duration', figure_path=figure_path)
 
+    # responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
+    #                                        figure_path=figure_path, average=False, reuse_arg=False, save_arg=False)
+    #
+    # responsive.plot_responsive_difference_odor_and_water(res_, [0,0,0,0], [0,0,0,0], last_day_per_mouse_, use_colors=False,
+    #                                                      include_water=False, normalize=False,
+    #                                                      figure_path=figure_path, average=False, reuse_arg=True, save_arg=True)
+
+    # correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    # correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    # correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=True, figure_path = figure_path)
+    # correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=True, figure_path = figure_path)
+    print(last_day_per_mouse)
+    shuffle = False
+    days = [[[0]*6,[1]*6],[[1]*6,[2]*6],[[2]*6,[3]*6]]
+    out1 = correlation.plot_correlation_across_days(res, days, loop_keys=['mouse', 'odor'], shuffle=shuffle, figure_path = figure_path,
+                                                    reuse=False, save=False, analyze=True, plot_bool=False)
+    days_naive = [[[0]*4,[1]*4],[[1]*4,[2]*4],[[2]*4,[3]*4]]
+    out2 = correlation.plot_correlation_across_days(res_naive, days_naive, loop_keys=['mouse', 'odor'], shuffle=shuffle, figure_path = figure_path,
+                                                    reuse=True, save=True, analyze=True, plot_bool=False)
+    out = reduce.chain_defaultdicts(out1, out2, copy_dict=True)
+    correlation.plot_correlation_across_days(out, days, loop_keys=['mouse', 'odor'], shuffle=shuffle, figure_path = figure_path,
+                                                    reuse=False, save=True, analyze=False, plot_bool=True)
+
 
 if condition.name == 'PIR_NAIVE':
     days = [3, 3, 2, 2]
     psth.count_analyze.analyze_data(res, condition_config)
-    responsive.plot_summary_odor(res, start_days_per_mouse, days, use_colors=False, figure_path = figure_path)
-    responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
-                                           figure_path=figure_path, average=False)
+    correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    # responsive.plot_summary_odor(res, start_days_per_mouse, days, use_colors=False, figure_path = figure_path)
     # overlap.plot_overlap_odor(res, start_days_per_mouse, days,
     #                                              delete_non_selective=True, figure_path= figure_path)
     # stability.plot_stability_across_days(res, start_days_per_mouse, learned_day_per_mouse, figure_path = figure_path)
@@ -98,8 +125,23 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
     #                                        figure_path=figure_path)
     # valence_responsive.plot_compare_responsive(res, figure_path)
-    valence_responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, last_day_per_mouse,
-                                                                 figure_path=figure_path, normalize=False, ylim=.65)
+    # valence_responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, last_day_per_mouse,
+    #                                                              figure_path=figure_path, normalize=False, ylim=.65)
+
+    # correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], figure_path = figure_path)
+    # correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], figure_path = figure_path)
+    power.plot_max_dff_days(res, [start_days_per_mouse, last_day_per_mouse], ['CS+', 'CS+'], normalize= True,
+                            save=False, reuse=False, day_pad= 0, figure_path = figure_path,
+                            colors = ['green'], ylim=6)
+    power.plot_max_dff_days(res, [start_days_per_mouse, last_day_per_mouse], ['CS-', 'CS-'], normalize= True,
+                            save=False, reuse=True, day_pad= 0, figure_path = figure_path,
+                            colors = ['red'])
+    power.plot_bar(res, [start_days_per_mouse, last_day_per_mouse],
+                   ['CS+', 'CS+'], normalize = True,
+                   day_pad=0, save=False, reuse=True, figure_path=figure_path)
+    power.plot_bar(res, [start_days_per_mouse, last_day_per_mouse],
+                   ['CS-', 'CS-'], normalize = True,
+                   day_pad=0, save=True, reuse=True, figure_path=figure_path)
 
 if condition.name == 'OFC_REVERSAL':
     psth.count_analyze.analyze_data(res, condition_config, m_threshold= 0.05)

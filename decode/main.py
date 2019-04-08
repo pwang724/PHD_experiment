@@ -92,7 +92,7 @@ if 'test_odor_across_days' in experiments:
                 vmin = .25
             else:
                 vmin = 0
-            plot.plot_weight(temp, x_key, y_key, val_key, title, vmin, vmax, text= True,
+            plot.plot_weight(temp, x_key, y_key, val_key, title, vmin, vmax, label= True,
                              save_path=os.path.join(save_path, temp['decode_style'][0]))
 
 if 'vary_decoding_style_odor' in experiments:

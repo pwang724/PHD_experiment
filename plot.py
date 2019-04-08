@@ -103,10 +103,16 @@ def _plot_error(plot_function, x, y, err, color, label, plot_args):
         for i in range(x.shape[0]):
             plot_function(x[i], y[i], err[i], color=color, label=label, **plot_args)
     else:
-        x = np.squeeze(x)
-        y = np.squeeze(y)
-        err = np.squeeze(err)
-        plot_function(x, y, err, color=color, label=label, **plot_args)
+        x_ = np.squeeze(x)
+        y_ = np.squeeze(y)
+        err_ = np.squeeze(err)
+
+        if y_.size == 1:
+            x_ = x
+            y_ = y
+            err_ = err
+
+        plot_function(x_, y_, err_, color=color, label=label, **plot_args)
 
 def _plot_fill(plot_function, x, y, err, color, label, plot_args):
     if x.dtype == 'O' and y.dtype == 'O':
@@ -185,6 +191,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         if type(x_plot[0]) != np.ndarray:
             x_plot = np.array([nice_names(x) for x in list(x_plot)])
         y_plot = res[y_key][plot_ix]
+
         if plot_function == plt.errorbar:
             error_plot = res[error_key][plot_ix]
             _plot_error(plot_function, x_plot, y_plot, error_plot, color=color, label=label, plot_args=plot_args)
@@ -248,7 +255,9 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         return save_path, name
 
 
-def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, save_path):
+def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
+                xticklabel =None, yticklabel=None,
+                label ='Accuracy', save_path = None, text=None, mask=False):
     x_len = len(np.unique(summary_res[x_key]))
     y_len = len(np.unique(summary_res[y_key]))
 
@@ -258,10 +267,17 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, sav
     w_plot = np.zeros((x_len, y_len))
     w_plot[y, x] = z
 
-    rect = [0.15, 0.15, 0.65, 0.65]
-    rect_cb = [0.82, 0.15, 0.02, 0.65]
+    rect = [0.2, 0.2, 0.6, 0.6]
+    rect_cb = [0.82, 0.2, 0.02, 0.65]
     fig = plt.figure(figsize=(2.2, 2.2))
     ax = fig.add_axes(rect)
+
+    if mask:
+        m = np.tri(w_plot.shape[0], k=0).astype(bool)
+        w_plot = np.ma.array(w_plot, mask=np.invert(m))  # mask out the lower triangle
+        cmap = plt.get_cmap()
+        cmap.set_bad('w')  # default value is 'k'
+
     im = plt.pcolor(np.flipud(w_plot), cmap='jet', vmin=vmin, vmax=vmax)
     # im = plt.imshow(w_plot, cmap='jet', vmin=vmin, vmax=vmax, origin='upper')
 
@@ -293,17 +309,22 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax, text, sav
     yticks = np.arange(0, w_plot.shape[0]) + .5
     ax.set_xticks(xticks)
     ax.set_yticks(yticks[::-1])
-    ax.set_xticklabels((xticks + .5).astype(int), fontsize = 7)
-    ax.set_yticklabels((yticks + .5).astype(int), fontsize = 7)
+
+    if xticklabel == None:
+        ax.set_xticklabels((xticks + .5).astype(int), fontsize = 7)
+        ax.set_yticklabels((yticks + .5).astype(int), fontsize = 7)
+    else:
+        ax.set_xticklabels(xticklabel, fontsize = 7)
+        ax.set_yticklabels(yticklabel, fontsize = 7)
     plt.axis('tight')
 
     ax = fig.add_axes(rect_cb)
     cb = plt.colorbar(cax=ax, ticks=[vmin, vmax])
     cb.outline.set_linewidth(0.5)
-    cb.set_label('Accuracy', fontsize=7, labelpad=-5)
+    cb.set_label(label, fontsize=7, labelpad=-5)
     plt.tick_params(axis='both', which='major', labelsize=7)
     plt.axis('tight')
 
-    folder_name = x_key + '_and_' + y_key + '_vs_' + val_key
+    folder_name = x_key + '_and_' + y_key + '_vs_' + val_key + '_' + text
     p = os.path.join(save_path, folder_name)
     _easy_save(p, 'figure', dpi=300, pdf=True)

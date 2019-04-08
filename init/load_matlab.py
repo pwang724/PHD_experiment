@@ -71,7 +71,7 @@ def load_timepoint_from_matlab(path, name, timing_override = False):
         Config.save_cons_f(save_path, save_name, data=cons)
 
 def load_behavior_folders_from_matlab(path, name, timing_override = False):
-    date_dirs = [os.path.join(path,x) for x in os.listdir(path)]
+    date_dirs = [os.path.join(path,x) for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
     for date_dir in date_dirs:
         start_time = time.time()
         dirs = [os.path.join(date_dir, x) for x in os.listdir(date_dir) if 'cycle' not in x]
@@ -115,6 +115,6 @@ if __name__ == '__main__':
     # condition = conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
     # load_condition(condition, arg = 'behavior')
 
-    condition = conditions.OFC_JAWS
-    condition.paths = [condition.paths[-1]]
+    condition = conditions.BEHAVIOR_OFC_YFP_MUSH
+    # condition.paths = [condition.paths[-1]]
     load_condition(condition, arg = 'behavior')

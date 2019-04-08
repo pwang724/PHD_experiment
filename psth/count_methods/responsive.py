@@ -68,8 +68,8 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
 
 def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None,
                                               include_water = True, normalize = False, pt_start = None, pt_learned = None,
-                                              average = True,
-                                              ylim = .22):
+                                              average = True, ylim = .22,
+                                              reuse_arg = False, save_arg = True):
     key = 'Change in Fraction Responsive'
     if normalize:
         key = 'Norm. Fraction Responsive'
@@ -106,10 +106,10 @@ def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_
     mice = np.unique(res['mouse'])
     res[key] = np.zeros_like(res['Fraction Responsive'])
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
-    start_end_day_res = filter.filter(start_end_day_res, {'odor_valence': ['CS+','CS-']})
+    start_end_day_res = filter.filter(start_end_day_res, {'odor_valence': ['CS+','CS-','Naive']})
     add_naive_learned(start_end_day_res, odor_start_days, end_days)
 
-    odors = ['CS+', 'CS-']
+    odors = ['CS+', 'CS-', 'Naive']
     if 'PT CS+' in np.unique(res['odor_valence']):
         odors = ['PT CS+'] + odors
         list_of_days = list(zip(pt_start, pt_learned))
@@ -135,7 +135,7 @@ def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_
     start_end_day_res = filter.filter(start_end_day_res, {'training_day':'Learned'})
     summary_res = reduce.new_filter_reduce(start_end_day_res, filter_keys='odor_valence', reduce_key= key)
 
-    dict = {'CS+':'Green', 'CS-':'Red','US':'Turquoise', 'PT CS+':'Orange'}
+    dict = {'CS+':'Green', 'CS-':'Red','US':'Turquoise', 'PT CS+':'Orange', 'Naive':'Gray'}
     if use_colors:
         colors = [dict[key] for key in np.unique(start_end_day_res['odor_valence'])]
     else:
@@ -143,9 +143,9 @@ def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_
 
     ax_args_copy = ax_args_copy.copy()
     n_valence = len(np.unique(summary_res['odor_valence']))
-    ax_args_copy.update({'xlim':[-1, n_valence], 'ylim':[-ylim, ylim], 'yticks':[-.3, -.2, -.1, 0, .1, .2, .3]})
+    ax_args_copy.update({'xlim':[-.5, 3.5], 'ylim':[-ylim, ylim], 'yticks':[-.3, -.2, -.1, 0, .1, .2, .3]})
     if normalize:
-        ax_args_copy.update({'xlim': [-1, n_valence], 'ylim': [-.1, 1.5], 'yticks':[0, .5, 1, 1.5]})
+        ax_args_copy.update({'xlim': [-.5, 3.5], 'ylim': [-.1, 1.5], 'yticks':[0, .5, 1, 1.5]})
     error_args_ = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .75}
     scatter_args_copy = scatter_args.copy()
     scatter_args_copy.update({'s':3})
@@ -153,13 +153,13 @@ def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_
     for i, odor in enumerate(odors):
         reuse = True
         if i == 0:
-            reuse=False
+            reuse= reuse_arg
         plot.plot_results(start_end_day_res, loop_keys='odor_valence', select_dict={'odor_valence':odor},
                           x_key='odor_valence', y_key=key,
                           colors= [dict[odor]] * len(mice),
                           path =figure_path, plot_args=scatter_args_copy, plot_function=plt.scatter, ax_args= ax_args_copy,
                           save= False, reuse=reuse,
-                          fig_size=(2, 1.5), legend=False, name_str = ','.join([str(x) for x in odor_start_days]))
+                          fig_size=(2, 1.5), rect = (.25, .2, .6, .6), legend=False, name_str = ','.join([str(x) for x in odor_start_days]))
 
     if not normalize:
         plt.plot(plt.xlim(), [0, 0], '--', color = 'gray', linewidth = 1, alpha = .5)
@@ -168,7 +168,7 @@ def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_
                       x_key='odor_valence', y_key=key, error_key = key + '_sem',
                       colors= 'black',
                       path =figure_path, plot_args=error_args_, plot_function=plt.errorbar, ax_args= ax_args_copy,
-                      save= True, reuse=True,
+                      save= save_arg, reuse=True,
                       fig_size=(2, 1.5), legend=False)
 
 

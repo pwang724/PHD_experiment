@@ -19,7 +19,7 @@ def _look_at_timing(cons):
 
 # condition = experimental_conditions.OFC
 # data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
-condition = experimental_conditions.OFC_JAWS
+condition = experimental_conditions.BEHAVIOR_OFC_YFP_MUSH
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_BEHAVIOR_FOLDER, condition.name)
 #
 #load cons
@@ -42,6 +42,6 @@ config_pathnames = glob.glob(os.path.join(data_path, '*' + Config.cons_ext))
 
 for i, config_pn in enumerate(config_pathnames):
     cons = Config.load_cons_f(config_pn)
-    # _look_at_timing(cons)
+    _look_at_timing(cons)
     # print(cons.DIR + '__' + str(cons.TRIAL_FRAMES))
     # print(cons.DIR + '__' + str(cons.ODOR_TRIALS))

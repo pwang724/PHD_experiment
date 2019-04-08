@@ -75,8 +75,8 @@ class Cons(ConstantCons):
         self.ODOR_UNIQUE = None
         self.ODOR_TRIALIDX = None
 
-        self.DEFAULT_O_ON = 5.7
-        self.DEFAULT_O_OFF = 7.7
+        self.DEFAULT_O_ON = 7.4
+        self.DEFAULT_O_OFF = 9.4
 
         self.DAQ_W_ON = None
         self.DAQ_O_ON = None
@@ -141,12 +141,13 @@ class Cons(ConstantCons):
                     return period
 
         dirs = os.listdir(self.DIR)
-        xml_file = glob.glob(os.path.join(self.DIR, dirs[0], '*.xml'))[0]
 
         try:
+            xml_file = glob.glob(os.path.join(self.DIR, dirs[0], '*.xml'))[0]
             period = _getPeriod(xml_file)
         except:
-            raise ValueError("""cannot read the xml file: {}""".format(xml_file))
+            print("cannot read the xml file")
+            period = .23
 
         try:
             tifs = glob.glob(os.path.join(self.DIR_ORIG, '*.tif'))
@@ -197,9 +198,9 @@ class Cons(ConstantCons):
             W_t = 10.02
 
         self.DAQ_W_ON = W_t
-        self.DAQ_O_ON_F = int(np.round(self.DAQ_O_ON/self.TRIAL_PERIOD))
-        self.DAQ_O_OFF_F = int(np.round(self.DAQ_O_OFF/self.TRIAL_PERIOD))
-        self.DAQ_W_ON_F = int(np.round(self.DAQ_W_ON/self.TRIAL_PERIOD))
+        self.DAQ_O_ON_F = int(np.floor(self.DAQ_O_ON/self.TRIAL_PERIOD))
+        self.DAQ_O_OFF_F = int(np.floor(self.DAQ_O_OFF/self.TRIAL_PERIOD))
+        self.DAQ_W_ON_F = int(np.floor(self.DAQ_W_ON/self.TRIAL_PERIOD))
         self.DAQ_DATA = data
 
 if __name__ == '__main__':
