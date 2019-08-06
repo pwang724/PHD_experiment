@@ -115,6 +115,6 @@ if __name__ == '__main__':
     # condition = conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
     # load_condition(condition, arg = 'behavior')
 
-    condition = conditions.BEHAVIOR_OFC_YFP_MUSH
+    condition = conditions.BEHAVIOR_OFC_MUSH_HALO
     # condition.paths = [condition.paths[-1]]
     load_condition(condition, arg = 'behavior')

@@ -10,10 +10,11 @@ import reduce
 from format import *
 
 def plot_stability_across_days(res, start_days_per_mouse, learned_days_per_mouse, figure_path):
-    absolute_threshold = .2
     strengthen_starting_threshold = .1
-    strengthen_relative_threshold = 1.5
+    strengthen_absolute_threshold = .2
+    strengthen_relative_threshold = 2
     weaken_starting_threshold = .3
+    weaken_absolute_threshold = .15
     weaken_relative_threshold = .5
 
     res = copy.copy(res)
@@ -41,7 +42,7 @@ def plot_stability_across_days(res, start_days_per_mouse, learned_days_per_mouse
         data = np.array(data)
 
         strengthen_mask = data[0,:] > strengthen_starting_threshold
-        strengthen_overall_threshold = np.max((data[0,:] * strengthen_relative_threshold, data[0,:] + absolute_threshold), axis=0)
+        strengthen_overall_threshold = np.max((data[0,:] * strengthen_relative_threshold, data[0,:] + strengthen_absolute_threshold), axis=0)
         strengthen_passed_mask = strengthen_overall_threshold < data
         strengthen_any = np.any(strengthen_passed_mask[1:,:], axis=0)
         n_strengthen_passed = np.sum(strengthen_any * strengthen_mask)
@@ -52,7 +53,7 @@ def plot_stability_across_days(res, start_days_per_mouse, learned_days_per_mouse
         n_new_denom = np.sum(new_mask)
 
         weaken_mask = data[0,:] > weaken_starting_threshold
-        weaken_overall_threshold = np.min((data[0,:] * weaken_relative_threshold, data[0,:] - absolute_threshold), axis=0)
+        weaken_overall_threshold = np.min((data[0,:] * weaken_relative_threshold, data[0,:] - weaken_absolute_threshold), axis=0)
         weaken_passed_mask = weaken_overall_threshold > data
         weaken_any = np.any(weaken_passed_mask[1:,:], axis=0)
         n_weaken_passed = np.sum(weaken_any * weaken_mask)

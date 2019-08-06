@@ -31,7 +31,7 @@ ANALYZE = True
 argTest = True
 
 #inputs
-condition = experimental_conditions.OFC_LONGTERM
+condition = experimental_conditions.PIR
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -48,12 +48,13 @@ if 'test_odor_across_days' in experiments:
     save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_across_days', condition.name)
 
     style = ['identity', 'csp_identity', 'csm_identity','valence']
-    no_end_time = True
     if condition.name == 'PIR':
         neurons = 40
+        no_end_time = True
     elif condition.name == 'PIR_NAIVE':
         neurons = 40
-        style = ['identity']
+        no_end_time = True
+        style = ['identity', 'csp_identity','csm_identity']
     elif condition.name == 'OFC':
         neurons = 40
         no_end_time = False
@@ -71,7 +72,7 @@ if 'test_odor_across_days' in experiments:
         experiment_tools.perform(experiment=decode.organizer.organizer_test_odor_across_day,
                                  condition=condition,
                                  experiment_configs=experiment_configs.test_across_days(
-                                     argTest=argTest, neurons=neurons, style = style, no_end_time=no_end_time),
+                                argTest=argTest, neurons=neurons, style = style, no_end_time=no_end_time),
                                  data_path=data_path,
                                  save_path=experiment_path)
 
@@ -255,7 +256,7 @@ if 'vary_neuron_odor' in experiments:
         decode_styles = np.unique(res_final_day['decode_style'])
         summary_all = defaultdict(list)
         for j, decode_style in enumerate(decode_styles):
-            temp_res = filter.filter(res_final_day, filter_dict={'decode_style': decode_style})
+            temp_res = filter.filter(res_final_day, filter_dict={'decode_style': decode_style, 'neurons':[10,20,30,40]})
             summary_res = reduce.new_filter_reduce(temp_res, filter_keys=['neurons','shuffle'], reduce_key='max')
             chain_defaultdicts(summary_all, summary_res)
         plot.plot_results(summary_all, x_key='neurons', y_key='max', loop_keys='decode_style',

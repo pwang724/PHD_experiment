@@ -28,7 +28,7 @@ def plot_reversal(res, start_days, end_days, figure_path):
     plot.plot_results(reversal_res,
                       x_key='day_odor_valence', y_key='Fraction', loop_keys= 'day_odor_valence',
                       path=figure_path,
-                      colors = ['Green','Red','Red','Green'],
+                      colors = ['Green','Red','Green','Red'],
                       plot_function=plt.scatter, plot_args=scatter_args, ax_args=ax_args_copy,
                       fig_size=(2, 1.5), reuse=True, save=True,
                       legend=False)
@@ -58,6 +58,10 @@ def plot_reversal(res, start_days, end_days, figure_path):
                           plot_function=plt.scatter, plot_args=scatter_args, ax_args=ax_args_copy,
                           fig_size=(2, 1.5),
                           legend=False, save=True, reuse=True)
+
+        print(mean_stats['Fraction'])
+
+    print(mean_res['Fraction'])
 
 
 def get_reversal_sig(res):

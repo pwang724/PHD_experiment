@@ -43,6 +43,10 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
                           save=save_arg, reuse=reuse_arg, name_str=name,
                           fig_size=(2, 1.5), legend=False)
 
+        b = filter.filter(temp, {'training_day':'Learned'})
+        print(odor)
+        print(np.mean(b['Overlap']))
+
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
     add_naive_learned(start_end_day_res, start_days, end_days, str1='0', str2='1')
     start_end_day_res.pop('Overlap_sem',None)

@@ -257,7 +257,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
 def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
                 xticklabel =None, yticklabel=None,
-                label ='Accuracy', save_path = None, text=None, mask=False):
+                label ='Accuracy', save_path = None, text='', mask=False):
     x_len = len(np.unique(summary_res[x_key]))
     y_len = len(np.unique(summary_res[y_key]))
 

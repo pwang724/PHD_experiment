@@ -36,12 +36,12 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
         start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['training_day','mouse','odor_valence'],
                                                  reduce_key='Fraction Responsive')
         odor_list = ['CS+', 'CS-']
-        ax_args_copy.update({'xlim': [-1, 6], 'ylim': [0, .4], 'yticks': [0, .1, .2, .3, .4]})
+        ax_args_copy.update({'xlim': [-1, 6], 'ylim': [0, .6], 'yticks': [0, .1, .2, .3, .4, .5]})
         colors = ['Green', 'Red']
     else:
         odor_list = ['CS+1', 'CS+2','CS-1', 'CS-2']
         colors = ['Green', 'Green', 'Red', 'Red']
-        ax_args_copy.update({'xlim':[-1, 10], 'ylim':[0, .4], 'yticks':[0, .1, .2, .3, .4]})
+        ax_args_copy.update({'xlim':[-1, 10], 'ylim':[0, .6], 'yticks':[0, .1, .2, .3, .4, .5]})
 
     if not use_colors:
         colors = ['Black'] * 4
@@ -65,6 +65,24 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
                       path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                       fig_size=(1.6, 1.5), legend=False,
                       reuse=True, save=True)
+
+    before_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':['CS+','CS-']})
+    after_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':['CS+','CS-']})
+    before_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'CS+'})
+    after_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'CS+'})
+    before_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'CS-'})
+    after_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'CS-'})
+    before_water = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'US'})
+    after_water = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'US'})
+
+    print('Before Odor: {}'.format(np.mean(before_odor['Fraction Responsive'])))
+    print('After Odor: {}'.format(np.mean(after_odor['Fraction Responsive'])))
+    print('Before CS+: {}'.format(np.mean(before_csp['Fraction Responsive'])))
+    print('After CS+: {}'.format(np.mean(after_csp['Fraction Responsive'])))
+    print('Before CS-: {}'.format(np.mean(before_csm['Fraction Responsive'])))
+    print('After CS-: {}'.format(np.mean(after_csm['Fraction Responsive'])))
+    print('Before US: {}'.format(np.mean(before_water['Fraction Responsive'])))
+    print('After US: {}'.format(np.mean(after_water['Fraction Responsive'])))
 
 def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None,
                                               include_water = True, normalize = False, pt_start = None, pt_learned = None,
@@ -179,7 +197,7 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
     list_of_days = list(zip(start_days, end_days))
     mice = np.unique(res['mouse'])
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
-    add_naive_learned(start_end_day_res, start_days, end_days)
+    add_naive_learned(start_end_day_res, start_days, end_days,'a','b')
     filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
 
     odor_list = ['CS+1', 'CS+2','CS-1', 'CS-2']
@@ -203,8 +221,22 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           save=save_arg, reuse=reuse_arg,
-                          fig_size=(2.5, 1.5),legend=False, name_str = ','.join([str(x) for x in start_days]))
+                          fig_size=(2.5, 1.5),legend=False,
+                          name_str = ','.join([str(x) for x in start_days]))
 
+    before_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':['CS+','CS-']})
+    after_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':['CS+','CS-']})
+    before_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'CS+'})
+    after_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'CS+'})
+    before_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'CS-'})
+    after_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'CS-'})
+
+    print('Before Odor: {}'.format(np.mean(before_odor['Fraction Responsive'])))
+    print('After Odor: {}'.format(np.mean(after_odor['Fraction Responsive'])))
+    print('Before CS+: {}'.format(np.mean(before_csp['Fraction Responsive'])))
+    print('After CS+: {}'.format(np.mean(after_csp['Fraction Responsive'])))
+    print('Before CS-: {}'.format(np.mean(before_csm['Fraction Responsive'])))
+    print('After CS-: {}'.format(np.mean(after_csm['Fraction Responsive'])))
 
 def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_path, save):
     ax_args_copy = ax_args.copy()
@@ -224,7 +256,7 @@ def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_p
     else:
         start_end_day_res = filter.exclude(start_end_day_res, {'odor_standard': 'PT Naive'})
 
-    add_naive_learned(start_end_day_res, start_days, end_days)
+    add_naive_learned(start_end_day_res, start_days, end_days, 'a','b')
     filter.assign_composite(start_end_day_res, loop_keys=['odor_standard', 'training_day'])
 
     odor_list = ['PT CS+']
@@ -248,6 +280,13 @@ def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_p
                           save=save_arg, reuse=reuse_arg,
                           fig_size=(2.5, 1.5),legend=False)
 
+    before_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_standard':'PT CS+'})
+    after_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_standard':'PT CS+'})
+
+    print('Before PT CS+: {}'.format(np.mean(before_csm['Fraction Responsive'])))
+    print('After PT CS+: {}'.format(np.mean(after_csm['Fraction Responsive'])))
+    print(start_end_day_res['odor_standard_training_day'])
+    print(start_end_day_res['Fraction Responsive'])
 
 def plot_summary_water(res, start_days, end_days, figure_path):
     ax_args_copy = ax_args.copy()
@@ -256,7 +295,7 @@ def plot_summary_water(res, start_days, end_days, figure_path):
     list_of_days = list(zip(start_days, end_days))
     mice = np.unique(res['mouse'])
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse= list_of_days)
-    add_naive_learned(start_end_day_res, start_days, end_days)
+    add_naive_learned(start_end_day_res, start_days, end_days, 'a','b')
     odor_list = ['US']
     colors = ['Turquoise']
     ax_args_copy.update({'xlim':[-1, 2]})
@@ -266,6 +305,14 @@ def plot_summary_water(res, start_days, end_days, figure_path):
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           fig_size=(1.6, 1.5), legend=False)
+
+    before_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_standard':'US'})
+    after_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_standard':'US'})
+
+    print('Before US: {}'.format(np.mean(before_csm['Fraction Responsive'])))
+    print('After US: {}'.format(np.mean(after_csm['Fraction Responsive'])))
+    print(start_end_day_res['odor_standard'])
+    print(start_end_day_res['Fraction Responsive'])
 
 def get_responsive_cells(res):
     list_of_data = res['sig']

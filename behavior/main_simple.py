@@ -14,32 +14,45 @@ import reduce
 import analysis
 from format import *
 
-experiments = [
-    'individual',
-    'summary',
-    # 'summary_all_conditions',
-    # 'lick_per_day'
-    # 'individual_half_max',
-    # 'basic_3'
-]
 conditions = [
-    # experimental_conditions.PIR,
-    # experimental_conditions.OFC,
-    # experimental_conditions.OFC_LONGTERM,
+    experimental_conditions.PIR,
+    experimental_conditions.OFC,
+    experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
-    experimental_conditions.BEHAVIOR_OFC_YFP_MUSH
+    # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH_UNUSED,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.BLA,
     # experimental_conditions.BLA_JAWS,
     # experimental_conditions.OFC_REVERSAL,
     # experimental_conditions.OFC_STATE
 ]
+experiments = [
+    # 'individual',
+    # 'summary',
+    # 'summary_mean_sem',
+    'summary_all_conditions',
+    # 'lick_per_day'
+    # 'individual_half_max',
+    # 'basic_3'
+]
 
 colors = ['green', 'lime', 'red', 'maroon']
-ax_args = {'yticks': [0, 10, 20], 'ylim': [-1, 21], 'xticks': [0, 25, 50, 75],
-           'xlim': [0, 75]}
+ax_args = {'yticks': [0, 10], 'ylim': [-1, 11], 'xticks': [0, 25, 50, 75],
+           'xlim': [0, 80]}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 25, 50, 75],
-                'xlim': [0, 75]}
+                'xlim': [0, 80]}
+
+# ax_args = {'yticks': [0, 10], 'ylim': [-1, 11], 'xticks': [0, 22, 60],
+#            'xlim': [0, 65]}
+# bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 22, 60],
+#                 'xlim': [0, 65]}
+#
+# ax_args = {'yticks': [0, 10], 'ylim': [-1, 11], 'xticks': [0, 12, 25],
+#            'xlim': [0, 25]}
+# bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 12, 25],
+#                 'xlim': [0, 25]}
 
 
 list_of_res = []
@@ -71,7 +84,7 @@ if 'lick_per_day' in experiments:
 
 if 'individual' in experiments:
     for res, condition in zip(list_of_res, conditions):
-        if condition.name == 'BEHAVIOR_OFC_JAWS_MUSH':
+        if condition.name == 'BEHAVIOR_OFC_JAWS_MUSH' or condition.name == 'BEHAVIOR_OFC_MUSH_HALO':
             ax_args.update({'xticks':[0,50,100,150], 'xlim':[0, 150]})
             bool_ax_args.update({'xticks':[0,50,100,150], 'xlim':[0, 150]})
         elif condition.name == 'OFC_STATE':
@@ -83,17 +96,20 @@ if 'individual' in experiments:
 
         save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
 
+        line_args_copy = line_args.copy()
+        line_args_copy.update({'marker': None, 'linewidth': 1, 'alpha':.8})
+
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
             select_dict = {'mouse': mouse}
             plot.plot_results(res, x_key='trial', y_key='lick_smoothed', loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=line_args,
+                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=line_args_copy,
                               path=save_path)
             plot.plot_results(res, x_key='trial', y_key='lick', loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=line_args,
+                              select_dict=select_dict, colors=colors, ax_args=ax_args, plot_args=line_args_copy,
                               path=save_path)
             plot.plot_results(res, x_key='trial', y_key='boolean_smoothed', loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=line_args,
+                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args, plot_args=line_args_copy,
                               path=save_path)
 
 if 'summary' in experiments:
@@ -112,6 +128,37 @@ if 'summary' in experiments:
                           colors= ['green','red'], ax_args=bool_ax_args, plot_args=line_args_copy,
                           path=save_path)
 
+if 'summary_mean_sem' in experiments:
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'marker': None, 'linewidth':1})
+
+    for res, condition in zip(list_of_res, conditions):
+        save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['odor_valence'], reduce_key= 'lick_smoothed', regularize='max')
+
+        plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', loop_keys= 'odor_valence',
+                          colors= ['green','red'], ax_args=ax_args, plot_args=line_args_copy, save = False,
+                          path=save_path)
+
+        plot.plot_results(summary_res, x_key='trial', y_key='lick_smoothed', error_key='lick_smoothed_sem',
+                          loop_keys= 'odor_valence',
+                          colors= ['green','red'], ax_args=ax_args, plot_args= fill_args,
+                          save = True, reuse=True,
+                          plot_function= plt.fill_between,
+                          path=save_path)
+
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['odor_valence'], reduce_key= 'boolean_smoothed', regularize='max')
+        plot.plot_results(summary_res, x_key='trial', y_key='boolean_smoothed', loop_keys= 'odor_valence',
+                          colors= ['green','red'], ax_args=bool_ax_args, plot_args=line_args_copy, save = False,
+                          path=save_path)
+
+        plot.plot_results(summary_res, x_key='trial', y_key='boolean_smoothed', error_key='boolean_smoothed_sem',
+                          loop_keys= 'odor_valence',
+                          colors= ['green','red'], ax_args=ax_args, plot_args= fill_args,
+                          save = True, reuse=True,
+                          plot_function= plt.fill_between,
+                          path=save_path)
+
 if 'summary_all_conditions' in experiments:
     line_args_copy = line_args.copy()
     line_args_copy.update({'marker': None, 'linewidth':1})
@@ -119,6 +166,7 @@ if 'summary_all_conditions' in experiments:
     summary = defaultdict(list)
     for res, condition in zip(list_of_res, conditions):
         reduce.chain_defaultdicts(summary, res)
+
     save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR',
                              ','.join([x for x in np.unique(summary['condition'])]))
 

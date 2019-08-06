@@ -9,10 +9,10 @@ import numpy as np
 import analysis
 from matplotlib.colors import LinearSegmentedColormap
 
-condition = experimental_conditions.OFC_JAWS
-mouse = 0
+condition = experimental_conditions.BEHAVIOR_OFC_MUSH_HALO
+mouse = 2
 
-data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
+data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_BEHAVIOR_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'BEHAVIOR',  condition.name, 'RAW_LICKS')
 
 res = analysis.load_all_cons(data_path)
@@ -35,7 +35,6 @@ odor_names = mouse_res['odor'][odor_ix]
 for i, odor_standard in enumerate(odors_standard):
     odor_res = filter.filter(mouse_res, filter_dict={'odor_standard': odor_standard})
 
-
     #inputs
     odor_name = odor_names[i]
     odor_colors = ['green', 'red']
@@ -45,7 +44,7 @@ for i, odor_standard in enumerate(odors_standard):
     cm = LinearSegmentedColormap.from_list('black_and_white', [(1, 1, 1), (0, 0, 0)], N=2)
 
     #plotting
-    fig = plt.figure(figsize=(1.5, 2))
+    fig = plt.figure(figsize=(3, 4))
     rect = [.2, .25, .7, .65]
     plt.imshow(data, cmap = cm)
     plt.axis('tight')
@@ -79,4 +78,4 @@ for i, odor_standard in enumerate(odors_standard):
     ax.spines['left'].set_visible(False)
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-    plot._easy_save(save_path, odor_standard)
+    plot._easy_save(save_path, str(mouse) + '_' + odor_standard)

@@ -74,11 +74,11 @@ class OFC_LONGTERM_Config(Base_Config):
     def __init__(self):
         super(OFC_LONGTERM_Config, self).__init__()
         self.condition = experimental_conditions.OFC_LONGTERM
-        self.mouse = 0
-        self.days = [3,5,6,7,8]
+        self.mouse = 3
+        self.days = [2,3,4,5]
         self.sort_day_ix = 0
-        self.vlim = .25
-        self.threshold = .03
+        self.vlim = .15
+        self.threshold = .02
         self.independent_sort = True
         self.include_water = False
 
@@ -89,7 +89,7 @@ class OFC_COMPOSITE_PT_Config(Base_Config):
         self.mouse = 1
         self.days = [1,4]
         self.sort_day_ix = 0
-        self.vlim = .2
+        self.vlim = .3
         self.threshold = .03
         self.independent_sort = True
         self.include_water = False
@@ -105,8 +105,8 @@ class OFC_COMPOSITE_DT_Config(Base_Config):
         self.mouse = 1
         self.days = [0, 4, 5, 6, 7, 8, 9]
         self.sort_day_ix = 0
-        self.vlim = .2
-        self.threshold = .02
+        self.vlim = .3
+        self.threshold = .03
         self.independent_sort = True
         self.include_water = False
         self.period = 'dt'
@@ -131,8 +131,8 @@ class MPFC_COMPOSITE_DT_Config(Base_Config):
     def __init__(self):
         super(MPFC_COMPOSITE_DT_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
-        self.mouse = 0
-        self.days = [0, 4, 7]
+        self.mouse = 3
+        self.days = [0, 4, 5, 6, 7]
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .02
@@ -168,18 +168,46 @@ class OFC_BIG_Config(Base_Config):
         self.plot_big_naive = True
         self.include_water = False
 
-class MPFC_BIG_Config(Base_Config):
+class OFC_COMPOSITE_BIG_Config(Base_Config):
     def __init__(self):
-        super(MPFC_BIG_Config, self).__init__()
+        super(OFC_COMPOSITE_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_COMPOSITE
+        self.plot_big = True
+        self.threshold = 0.04
+        self.vlim = .25
+        self.sort_day_ix = 0
+
+        # self.plot_big_days = [1,1,1,1]
+        # self.plot_big_days = [4,4,5,5]
+        # self.plot_big_days = [4,4,6,4]
+        # self.plot_big_days = [5,5,9,5]
+        self.plot_big_days = [8,9,10,8]
+        self.plot_big_naive = True
+        self.include_water = False
+        self.period = 'dt'
+
+class MPFC_COMPOSITE_BIG_Config(Base_Config):
+    def __init__(self):
+        super(MPFC_COMPOSITE_BIG_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .03
-        self.period = 'dt'
         self.sort_method = 'plus_minus'
+        # self.sort_method = 'selectivity'
         self.plot_big = True
-        self.plot_big_days = [7, 6, 5, 7]
-        self.plot_big_naive = False
+
+        self.period = 'dt'
+        self.plot_big_days = [0,0,0,0]
+        self.plot_big_naive = True
+        self.include_water = False
+
+        # pt_start = [1, 1, 1, 1]
+        # pt_learned = [3, 3, 3, 3]
+        # dt_naive = [0, 0, 0, 0]
+        # dt_start = [3, 3, 4, 4]
+        # dt_learned = [4, 4, 5, 5]
+        # dt_end = [8, 8, 5, 8]
 
 class BLA_BIG_Config(Base_Config):
     def __init__(self):
@@ -195,7 +223,7 @@ class BLA_BIG_Config(Base_Config):
 
 black = False
 config = PSTHConfig()
-condition_config = OFC_Config()
+condition_config = OFC_COMPOSITE_DT_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -435,7 +463,7 @@ for i, image in enumerate(images):
     name_black = '_black' if black else ''
     name = 'mouse_' + str(mouse) +'_day_' + str(days[i]) + name_black
     if condition_config.plot_big:
-        name += '_big'
+        name += '_big' + ','.join([str(x) for x in condition_config.plot_big_days])
     plot._easy_save(save_path, name)
 
 

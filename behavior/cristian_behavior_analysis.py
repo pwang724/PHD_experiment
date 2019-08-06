@@ -38,11 +38,13 @@ class Analysis_Config():
     def __init__(self):
         indices = Indices()
         self.anticipatory_bins = [indices.bin_ant_2, indices.bin_ant_3]
-        self.filter_window = 41
+        self.filter_window = 21
         self.filter_order = 0
         self.criterion_filter_window = 41
         self.criterion_threshold = .8
         self.half_max_threshold = .5
+
+        #smoothing window = 21 (lick) /41 (criterion) for freely moving two-phase discrimination controls
 
 def parse(files, experiment, condition, phase):
     def _names(f, is_csp):

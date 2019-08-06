@@ -54,14 +54,17 @@ constants = analysis.Constants()
 config = Config()
 
 experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
+# experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
 collapse_arg = 'OFC_DT'
 plotting = [
     # 'individual_separate',
     # 'individual_together',
-    'trials_to_criterion',
+    # 'trials_to_criterion',
     # 'trials_per_day',
     'summary',
-    # 'fraction_licks_per_day'
+    # 'control',
+    # 'fraction_licks_per_day',
+    # 'release_of_inhibition'
 ]
 
 names = ','.join([x.name for x in experiments]) + '__' + collapse_arg
@@ -97,6 +100,75 @@ analysis.analyze(res)
 analysis.shift_discrimination_index(res)
 filter.assign_composite(res, ['phase', 'odor_valence'])
 res = filter.filter(res, {'phase_odor_valence': ['Pretraining_CS+', 'Discrimination_CS+', 'Discrimination_CS-']})
+
+if 'release_of_inhibition' in plotting:
+    trace_args_copy = trace_args.copy()
+    trace_args_copy.update({'alpha': .5, 'linewidth': .75})
+    line_args_copy = line_args.copy()
+    line_args.update({'marker':',','markersize':0, 'linewidth':.5})
+
+    y_key = 'bin_ant_23_smooth'
+    y_key_bool = 'bin_ant_23_boolean'
+
+    phase_odor_valence = np.unique(res['phase_odor_valence'])
+    conditions = np.unique(res['condition'])
+
+    ax_args_cur = ax_args_copy.copy()
+    ax_args_bool_cur = bool_ax_args_copy.copy()
+    for phase in phase_odor_valence:
+        if 'Pretraining' in phase:
+            ax_args_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
+            ax_args_bool_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
+        else:
+            ax_args_cur.update({'xlim': [-10, 410], 'xticks': [0, 200, 400]})
+            ax_args_bool_cur.update({'xlim': [-10, 410], 'xticks': [0, 200, 400]})
+
+        for condition in conditions:
+            if condition == 'H':
+                color = color_dict[phase]
+
+            fp = plot.plot_results(res, x_key='trials', y_key=y_key_bool,
+                              select_dict={'phase_odor_valence': phase, 'condition':'H'},
+                              ax_args=ax_args_bool_cur, plot_args=trace_args_copy,
+                              colors=color,
+                              save=False,
+                              path=save_path)
+
+
+            c = behavior.behavior_config.behaviorConfig()
+            y = c.fully_learned_threshold_up / 100.
+            plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+
+            plot._easy_save(fp[0],fp[1],pdf=True)
+
+
+            fp = plot.plot_results(res, x_key='trials', y_key=y_key,
+                              select_dict={'phase_odor_valence': phase, 'condition':'H'},
+                              ax_args=ax_args_cur, plot_args=trace_args_copy,
+                              colors=color,
+                              save=False,
+                              path=save_path)
+
+            c = behavior.behavior_config.behaviorConfig()
+            y = c.fully_learned_threshold_up / 100.
+            plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+
+            plot._easy_save(fp[0], fp[1], pdf=True)
+
+
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'linestyle':'--', 'linewidth':.5,'markersize':1.5})
+    ax_args_cur = ax_args.copy()
+    ax_args_cur.update({'ylim':[-25, 300], 'yticks':[0, 100, 200, 300], 'xticks':[1, 3, 5, 7, 9]})
+
+    phase_odor_valence = np.unique(res['phase_odor_valence'])
+    y_key = 'trials_per_day'
+    for phase in phase_odor_valence:
+        plot.plot_results(res, x_key='days', y_key=y_key,
+                          select_dict={'phase_odor_valence':phase, 'condition':'H'},
+                          colors= color_dict[phase], plot_args=line_args_copy, ax_args=ax_args_cur,
+                          fig_size=[2, 1.5],
+                          path=save_path, save=True)
 
 
 if 'trials_to_criterion' in plotting:
@@ -152,6 +224,10 @@ if 'trials_to_criterion' in plotting:
         ylim = plt.gca().get_ylim()
         sig_str = plot.significance_str(x=.4, y= .7 * (ylim[-1] - ylim[0]), val= rs)
         plot._easy_save(path, name, pdf=True)
+
+    print(summary_res[keyword])
+    print(summary_res['odor_valence_condition'])
+    print(summary_res['phase_odor_valence'])
 
 if 'trials_per_day' in plotting:
     line_args_copy = line_args.copy()
@@ -213,6 +289,7 @@ if 'summary' in plotting:
     ax_args_cur = ax_args_copy.copy()
     ax_args_bool_cur = bool_ax_args_copy.copy()
     for phase in phase_odor_valence:
+        print(phase)
         if 'Pretraining' in phase:
             ax_args_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
             ax_args_bool_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
@@ -286,6 +363,7 @@ if 'summary' in plotting:
                               colors=color,
                               save=False,
                               path=save_path)
+
             summary = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'], reduce_key=y_key,
                                                regularize='max')
             plot.plot_results(summary, x_key='trials', y_key=y_key,
@@ -301,6 +379,45 @@ if 'summary' in plotting:
                               colors= 'black', reuse=True,
                               path=save_path)
 
+#summary
+if 'control' in plotting:
+    trace_args_copy = trace_args.copy()
+    trace_args_copy.update({'alpha': .5, 'linewidth': .75})
+    line_args_copy = line_args.copy()
+    line_args.update({'marker':',','markersize':0, 'linewidth':.5})
+
+    y_key = 'bin_ant_23_smooth'
+    y_key_bool = 'bin_ant_23_boolean'
+
+    phase_odor_valence = np.unique(res['phase_odor_valence'])
+    conditions = np.unique(res['condition'])
+
+    ax_args_cur = ax_args_copy.copy()
+    ax_args_bool_cur = bool_ax_args_copy.copy()
+    for phase in phase_odor_valence:
+        if 'Pretraining' in phase:
+            ax_args_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
+            ax_args_bool_cur.update({'xlim': [-50, 1050], 'xticks': [0,500,1000]})
+        else:
+            ax_args_cur.update({'xlim': [-10, 410], 'xticks': [0, 200, 400]})
+            ax_args_bool_cur.update({'xlim': [-10, 410], 'xticks': [0, 200, 400]})
+
+        for condition in conditions:
+            if condition == 'H':
+                color = color_dict[phase]
+
+            #fill bool plot
+            plot.plot_results(res, x_key='trials', y_key=y_key_bool, loop_keys='condition',
+                              select_dict={'phase_odor_valence': phase, 'condition':'Y'},
+                              ax_args=ax_args_bool_cur, plot_args=trace_args_copy,
+                              colors=['black']*50,
+                              path=save_path)
+
+            plot.plot_results(res, x_key='trials', y_key=y_key, loop_keys='condition',
+                              select_dict={'phase_odor_valence': phase, 'condition':'Y'},
+                              ax_args=ax_args_cur, plot_args=trace_args_copy,
+                              colors=['black']*50,
+                              path=save_path)
 
 #individual
 def _add_session_lines(res_mouse):

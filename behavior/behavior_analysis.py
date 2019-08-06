@@ -115,14 +115,17 @@ def convert(res, condition, includeRaw = False):
                 start = int(res['DAQ_O_ON'][i] * res['DAQ_SAMP'][i])
                 start = int((res['DAQ_W_ON'][i]-1) * res['DAQ_SAMP'][i])
                 end = int(res['DAQ_W_ON'][i] * res['DAQ_SAMP'][i])
+                end_coll = int((res['DAQ_W_ON'][i] + 1) * res['DAQ_SAMP'][i])
                 lick_data = res_data[i][:,res['DAQ_L'][i],j]
 
                 if odor in csms:
                     end += int(config.extra_csm_time * res['DAQ_SAMP'][i])
                 n_licks = _parseLick(lick_data, start, end)
+                n_licks_coll = _parseLick(lick_data, end, end_coll)
 
                 new_res['odor'].append(odor)
                 new_res['lick'].append(n_licks)
+                new_res['lick_collection'].append(n_licks_coll)
                 new_res['ix'].append(j)
                 if includeRaw:
                     new_res['lick_raw_data'].append(lick_data)
@@ -145,12 +148,58 @@ def agglomerate_days(res, condition, first_day, last_day):
             filter_dict = {'mouse': mouse, 'day': np.arange(first_day[i], last_day[i]+1), 'odor': odor}
             filtered_res = filter.filter(res, filter_dict)
             temp_res = reduce_by_concat(filtered_res, 'lick', rank_keys=['day', 'ix'])
+            temp_res_ = reduce_by_concat(filtered_res, 'lick_collection', rank_keys=['day', 'ix'])
+            temp_res['lick_collection'] = temp_res_['lick_collection']
             temp_res['day'] = np.array(sorted(filtered_res['day']))
             temp_res['trial'] = np.arange(len(temp_res['lick']))
             append_defaultdicts(out, temp_res)
     for key, val in out.items():
         out[key] = np.array(val)
     return out
+
+def get_roc(res):
+    def _dprime(a, b):
+        u1, u2 = np.mean(a), np.mean(b)
+        s1, s2 = np.std(a), np.std(b)
+        return (u1 - u2) / np.sqrt(.5 * (np.square(s1) + np.square(s2)))
+
+    def _roc(a, b):
+        import sklearn.metrics
+        data = np.concatenate((a,b))
+        labels = np.concatenate((np.ones_like(a), np.zeros_like(b))).astype('bool')
+        roc = sklearn.metrics.roc_auc_score(labels, data)
+        return roc
+
+    def _rolling_window(a, window):
+        shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
+        strides = a.strides + (a.strides[-1],)
+        return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+
+    key = 'lick'
+    print_key = 'roc'
+    x_key = 'roc_trial'
+    window = 20
+    res[print_key] = np.copy(res[key])
+    res[x_key] = np.copy(res['trial'])
+
+    res = filter.exclude(res, {'odor_valence':'US'})
+    res_ = reduce.new_filter_reduce(res, filter_keys=['mouse','odor_valence'], reduce_key=key)
+    combinations, list_of_ixs = filter.retrieve_unique_entries(res_, ['mouse'])
+
+    for i, ixs in enumerate(list_of_ixs):
+        assert len(ixs) == 2
+        assert res_['odor_valence'][ixs[0]] == 'CS+'
+        assert res_['odor_valence'][ixs[1]] == 'CS-'
+
+        a = _rolling_window(res_[key][ixs[0]], window)
+        b = _rolling_window(res_[key][ixs[1]], window)
+        dprimes = np.array([_roc(x, y) for x, y in zip(a, b)])
+
+        res_[print_key][ixs[0]] = dprimes
+        res_[print_key][ixs[1]] = dprimes
+        res_[x_key][ixs[0]] = np.arange(len(dprimes))
+        res_[x_key][ixs[1]] = np.arange(len(dprimes))
+    return res_
 
 
 def add_behavior_stats(res, arg ='normal'):
@@ -175,6 +224,8 @@ def add_behavior_stats(res, arg ='normal'):
         if np.all(vec_binary):
             out = 0
         else:
+            last_ix_below_threshold = np.where(vec_binary == 0)[0][-1]
+            vec_binary[:last_ix_below_threshold] = 0
             if np.any(vec_binary):
                 out = np.where(vec_binary == 1)[0][0]
             else:
@@ -193,18 +244,6 @@ def add_behavior_stats(res, arg ='normal'):
                 half_max = np.where(vec_binary == 1)[0][0]
             else:
                 half_max = len(vec_binary)
-        #
-        # average
-        # if np.all(vec_binary):
-        #     half_max = 0
-        # else:
-        #     diff = np.diff(np.array(vec_binary).astype(int)) > 0
-        #     if np.all(diff == 0):
-        #         half_max = 0
-        #     else:
-        #         transitions = np.where(diff)[0][0]
-        #         half_max = np.mean(transitions)
-
         return half_max
 
     def _half_max_down(vec, threshold):
@@ -233,6 +272,9 @@ def add_behavior_stats(res, arg ='normal'):
 
 
     config = behaviorConfig()
+    res['lick_collection_smoothed'] = [_filter(y, config.smoothing_window) for y in res['lick_collection']]
+    res['boolean_collection_smoothed'] = [100 * _filter(y > 0, config.smoothing_window_boolean) for y in res['lick_collection']]
+
     res['lick_smoothed'] = [_filter(y, config.smoothing_window) for y in res['lick']]
     res['boolean_smoothed'] = [100 * _filter(y > 0, config.smoothing_window_boolean) for y in res['lick']]
     for x in res['boolean_smoothed']:
@@ -269,7 +311,6 @@ def add_behavior_stats(res, arg ='normal'):
                 res['criterion'].append(up_criterion[i])
         else:
             raise ValueError('Did not recognize keyword {} for determining half_max'.format(arg))
-
 
     for i, half_max in enumerate(res['half_max']):
         odor_valence = res['odor_valence'][i]

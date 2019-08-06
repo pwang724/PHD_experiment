@@ -186,7 +186,7 @@ def parse_data(res):
         print('analyzed mouse {}, day {}, odor {}, in {} seconds'.format(res['mouse'][i], res['day'][i], res['odor'][i], elapsed))
     for key, val in res.items():
         res[key] = np.array(val)
-    res.pop('data')
+    # res.pop('data')
     fio.save_pickle(save_path=save_path, save_name= 'dict', data= res)
 
 def analyze_data(res, condition_config, m_threshold=None):
@@ -266,7 +266,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = MPFC_COMPOSITE_Config()
+    condition_config = OFC_COMPOSITE_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

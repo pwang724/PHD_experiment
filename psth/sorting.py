@@ -27,8 +27,9 @@ def sort_by_selectivity(list_of_psths, odor_on, water_on, condition_config, dele
 
 def sort_by_onset(list_of_psths, odor_on, water_on, condition_config):
     list_of_argmax = []
+    cutoff = 3
     for psth in list_of_psths:
-        binary_psth = psth[:, odor_on:water_on] > condition_config.threshold
+        binary_psth = psth[:, odor_on:water_on+ cutoff] > condition_config.threshold
         responsive = np.any(binary_psth, axis=1)
         argmax = np.argmax(binary_psth == 1, axis=1)
         argmax[np.invert(responsive)] = 100
@@ -36,14 +37,14 @@ def sort_by_onset(list_of_psths, odor_on, water_on, condition_config):
 
     list_of_argmin = []
     for psth in list_of_psths:
-        binary_psth = psth[:, odor_on:water_on] < condition_config.negative_threshold
+        binary_psth = psth[:, odor_on:water_on+ cutoff] < condition_config.negative_threshold
         responsive = np.any(binary_psth, axis=1)
         argmax = np.argmax(binary_psth == 1, axis=1)
         argmax[np.invert(responsive)] = 100
         list_of_argmin.append(argmax)
 
     list_of_ixs = []
-    cutoff_ix = water_on - odor_on - 1
+    cutoff_ix = water_on - odor_on - 1 + cutoff
     if condition_config.sort_onset_style == 'individual':
         for argmax in list_of_argmax:
             ixs = np.argsort(argmax)

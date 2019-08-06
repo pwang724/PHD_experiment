@@ -21,7 +21,7 @@ def _correlation(res, loop_keys, shuffle):
     for i, dff in enumerate(res['dff']):
         s = res['DAQ_O_ON_F'][i]
         e = res['DAQ_W_ON_F'][i]
-        amplitude = np.mean(dff[:, s:e], axis=1)
+        amplitude = np.max(dff[:, s:e], axis=1)
         res['corr_amp'].append(amplitude)
     res['corr_amp'] = np.array(res['corr_amp'])
 
@@ -55,15 +55,16 @@ def _correlation(res, loop_keys, shuffle):
 def plot_correlation_matrix(res, days, loop_keys, shuffle, figure_path):
     res = filter.filter_days_per_mouse(res, days)
     res_ = _correlation(res, loop_keys, shuffle)
-    res_ = reduce.new_filter_reduce(res_, filter_keys= ['Odor_A', 'Odor_B'], reduce_key='corrcoef')
+    res = reduce.new_filter_reduce(res_, filter_keys= ['Odor_A', 'Odor_B'], reduce_key='corrcoef')
     if shuffle:
         s = '_shuffled'
     else:
         s = ''
-    plot.plot_weight(res_, x_key='Odor_A', y_key='Odor_B', val_key='corrcoef', title='Correlation', label='Correlation',
-                     vmin = 0, vmax = 1, mask=False,
+    plot.plot_weight(res, x_key='Odor_A', y_key='Odor_B', val_key='corrcoef', title='Correlation', label='Correlation',
+                     vmin = 0, vmax = 1, mask=True,
                      xticklabel= ['CS+1', 'CS+2', 'CS-1', 'CS-2'], yticklabel = ['CS+1', 'CS+2', 'CS-1', 'CS-2'],
                      save_path=figure_path, text= ','.join([str(x) for x in days]) + s)
+    return res_
 
 def plot_correlation_across_days(res, days, loop_keys, shuffle, figure_path, reuse, save, analyze, plot_bool):
     if analyze:
@@ -97,13 +98,14 @@ def plot_correlation_across_days(res, days, loop_keys, shuffle, figure_path, reu
                                reuse= reuse, save=False, sort=True, name_str= s)
 
         summary = reduce.new_filter_reduce(res_, filter_keys=['odor_valence'], reduce_key='corrcoef')
-        print(summary)
         plot.plot_results(summary,
                                x_key='odor_valence', y_key= 'corrcoef', error_key = 'corrcoef_sem',
                                colors= 'black',
                                path =figure_path, plot_args=error_args, plot_function=plt.errorbar,
                                save= save, reuse=True, legend=False, name_str=s)
 
+        from scipy.stats import ranksums
+        print(summary['corrcoef'])
 
 def plot_correlation_over_time(res, start_days, end_days, figure_path):
     pass

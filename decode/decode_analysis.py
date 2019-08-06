@@ -59,8 +59,6 @@ def load_results_train_test_scores(data_path):
     add_time(res)
 
     for i, _ in enumerate(res['scores']):
-        start =res['DAQ_O_ON_F'][i]
-        # res['top_score'].append(np.max(res['scores'][i][start:]))
         res['top_score'].append(np.max(res['scores'][i]))
     res['top_score'] = np.array(res['top_score'])
     return res

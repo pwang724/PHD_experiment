@@ -11,32 +11,60 @@ from format import *
 from collections import defaultdict
 
 
-def plot_power(res, start_days, end_days, figure_path):
+def plot_power(res, start_days, end_days, figure_path, odor_valence = ('CS+'), naive = False,
+               colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim = .1):
     res = copy.copy(res)
     _get_power_1(res)
 
     list_of_days = list(zip(start_days, end_days))
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
-    start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['day', 'odor_valence'],
-                                                 reduce_key='Power')
+
     add_naive_learned(start_end_day_res, start_days, end_days)
+    if naive:
+        start_end_day_res = filter.exclude(start_end_day_res, {'odor_standard': 'PT CS+','training_day':'Naive'})
+        ix = start_end_day_res['odor_valence'] == 'PT Naive'
+        start_end_day_res['odor_valence'][ix] = 'PT CS+'
+
+    start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['training_day', 'odor_valence'],
+                                                 reduce_key='Power')
 
     ax_args_copy = trace_ax_args.copy()
-    ax_args_copy.update({'xticks':[res['DAQ_O_ON_F'][0], res['DAQ_W_ON_F'][0]], 'xticklabels':['ON', 'US'],
-                         'ylim':[0, .1]})
-    colors = ['Green','Gray']
-    plot.plot_results(start_end_day_res, select_dict={'odor_valence':'CS+'},
-                      x_key='Time', y_key='Power', loop_keys= 'day', error_key='Power_sem',
+    ax_args_copy.update({'xticks':[res['DAQ_O_ON_F'][-1], res['DAQ_W_ON_F'][-1]], 'xticklabels':['ON', 'US'],
+                         'ylim':[0, ylim], 'yticks':np.arange(0, .2, .05)})
+
+    colors_b = [colors_before[x] for x in odor_valence]
+    colors = [colors_after[x] for x in odor_valence]
+
+    strr = ','.join([str(x) for x in start_days]) + '_' + ','.join([str(x) for x in end_days])
+    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
+                      x_key='Time', y_key='Power', loop_keys= 'odor_valence', error_key='Power_sem',
+                      path=figure_path,
+                      plot_function=plt.fill_between, plot_args=fill_args, ax_args=ax_args_copy,
+                      colors = colors_b,
+                      fig_size=(2, 1.5), save=False)
+
+    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
+                      x_key='Time', y_key='Power', loop_keys= 'odor_valence',
+                      path=figure_path, plot_args=trace_args, ax_args=ax_args_copy,
+                      colors = colors_b,
+                      fig_size=(2, 1.5), reuse=True, save=False)
+
+    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Learned'},
+                      x_key='Time', y_key='Power', loop_keys= 'odor_valence', error_key='Power_sem',
                       path=figure_path,
                       plot_function=plt.fill_between, plot_args=fill_args, ax_args=ax_args_copy,
                       colors = colors,
-                      fig_size=(2, 1.5), save=False)
+                      fig_size=(2, 1.5), reuse=True, save=False)
 
-    plot.plot_results(start_end_day_res, select_dict={'odor_valence':'CS+'},
-                      x_key='Time', y_key='Power', loop_keys= 'day',
+    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Learned'},
+                      x_key='Time', y_key='Power', loop_keys= 'odor_valence',
                       path=figure_path, plot_args=trace_args, ax_args=ax_args_copy,
                       colors = colors,
-                      fig_size=(2, 1.5), reuse=True)
+                      fig_size=(2, 1.5), reuse=True, name_str=strr)
+
+    print(start_end_day_res['odor_valence'])
+    print(start_end_day_res['training_day'])
+    print([np.max(x[res['DAQ_O_ON_F'][-1]:res['DAQ_W_ON_F'][-1]])-np.min(x) for x in start_end_day_res['Power']])
 
 
 def _get_power(res):

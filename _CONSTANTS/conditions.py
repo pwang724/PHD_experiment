@@ -189,28 +189,8 @@ class OFC_LONGTERM:
     training_start_day = [0, 0, 0, 0]
     min_neurons = 58
 
-class OFC_JAWS:
-    name = 'OFC_JAWS'
-    paths = [
-        'E:/IMPORTANT DATA/DATA_2P/M222_jawsofc_bla/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M226_jawsofc_bla/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M227_jawsofc_bla/training_LEARNING',
-    ]
-    odors = [
-        ['pin', 'msy', 'euy', 'lim'],
-        ['pin', 'msy', 'euy', 'lim'],
-        ['pin', 'msy', 'euy', 'lim'],
-    ]
-    csp = [
-        ['pin', 'msy'],
-        ['pin', 'msy'],
-        ['pin', 'msy'],
-           ]
-    timing_override = [True, True, True, True]
-    training_start_day = [0, 0, 0]
-
-class BEHAVIOR_OFC_JAWS_MUSH:
-    name = 'BEHAVIOR_OFC_JAWS_MUSH'
+class BEHAVIOR_OFC_MUSH_JAWS:
+    name = 'BEHAVIOR_OFC_MUSH_JAWS'
     paths = [
         'E:/IMPORTANT DATA/DATA_2P/M222_jawsofc_bla/training_LEARNING',
         'E:/IMPORTANT DATA/DATA_2P/M226_jawsofc_bla/training_LEARNING',
@@ -232,8 +212,8 @@ class BEHAVIOR_OFC_JAWS_MUSH:
     timing_override = [True, True, True, True]
     training_start_day = [0, 0, 0, 0]
 
-class BEHAVIOR_OFC_YFP_MUSH:
-    name = 'BEHAVIOR_OFC_YFP_MUSH'
+class BEHAVIOR_OFC_MUSH_YFP:
+    name = 'BEHAVIOR_OFC_MUSH_YFP'
     paths = [
         'I:\IMPORTANT DATA\DATA_2P\PN06',
         'I:\IMPORTANT DATA\DATA_2P\PN08',
@@ -254,6 +234,70 @@ class BEHAVIOR_OFC_YFP_MUSH:
            ]
     timing_override = [True, True, True, True]
     training_start_day = [0, 0, 0, 0]
+
+class BEHAVIOR_OFC_MUSH_JAWS_UNUSED:
+    name = 'BEHAVIOR_OFC_MUSH_JAWS_UNUSED'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\PN04',
+        'I:\IMPORTANT DATA\DATA_2P\PN05',
+        'I:\IMPORTANT DATA\DATA_2P\PN11',
+        'I:\IMPORTANT DATA\DATA_2P\PN12',
+        'I:\IMPORTANT DATA\DATA_2P\PN13',
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+           ]
+    timing_override = [True] * 5
+    training_start_day = [0, 0, 0, 0, 0]
+
+class BEHAVIOR_OFC_MUSH_HALO:
+    name = 'BEHAVIOR_OFC_MUSH_HALO'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\PN14',
+        'I:\IMPORTANT DATA\DATA_2P\PN15',
+        'I:\IMPORTANT DATA\DATA_2P\PN16',
+        'I:\IMPORTANT DATA\DATA_2P\PN17',
+        'I:\IMPORTANT DATA\DATA_2P\PN18',
+        'I:/IMPORTANT DATA/DATA_2P/M222_jawsofc_bla/training_LEARNING',
+        'I:/IMPORTANT DATA/DATA_2P/M226_jawsofc_bla/training_LEARNING',
+        'I:/IMPORTANT DATA/DATA_2P/M227_jawsofc_bla/training_LEARNING',
+        'I:/IMPORTANT DATA/DATA_2P/M221_jawsofc_bla',
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+    ]
+    timing_override = [True] * 9
+    training_start_day = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 class OFC_COMPOSITE:
     name = 'OFC_COMPOSITE'
