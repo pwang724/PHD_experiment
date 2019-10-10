@@ -32,21 +32,22 @@ experiments = [
     # 'basic_3'
     # 'roc',
 ]
+
 conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.OFC_COMPOSITE,
-    # experimental_conditions.MPFC_COMPOSITE,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
-    experimental_conditions.PIR,
-    experimental_conditions.OFC,
-    experimental_conditions.OFC_LONGTERM
+    experimental_conditions.MPFC_COMPOSITE,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    # experimental_conditions.PIR,
+    # experimental_conditions.OFC,
+    # experimental_conditions.OFC_LONGTERM
 ]
 # collapse_arg = 'condition_pretraining'
-# collapse_arg = 'condition_discrimination'
-collapse_arg = 'condition_mush'
+collapse_arg = 'condition_discrimination'
+# collapse_arg = 'condition_mush'
 def _collapse_conditions(res, experimental_condition, str):
     conditions = res['condition'].copy().astype('<U20')
     control_ix = conditions != experimental_condition
@@ -70,18 +71,16 @@ for i, condition in enumerate(conditions):
     list_of_res.append(res)
 
 color_dict = {'PT CS+': 'C1', 'CS+':'green', 'CS-':'red'}
-bool_ax_args = {'yticks': [0, 25, 50, 75, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
+bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
                 'xlim': [0, 200]}
 ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],
               # 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]
               }
-ax_args_dt = {'yticks': [0, 5, 10, 15], 'ylim': [-1, 17],
+ax_args_dt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],
               # 'xticks': [0, 50, 100],'xlim': [0, 100]
               }
-bool_ax_args_dt = {'yticks': [0, 25, 50, 75, 100], 'ylim': [-5, 105], 'xticks': [0, 100],
-                   'xlim': [0, 125]}
-bool_ax_args_pt = {'yticks': [0, 25, 50, 75, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
-                   'xlim': [0, 200]}
+bool_ax_args_dt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 75], 'xlim': [0, 125]}
+bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]}
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
@@ -208,18 +207,14 @@ if 'control' in experiments:
             bool_ax_args.update({'xlim': [-10, 170], 'xticks': [0, 50, 100, 150]})
         elif collapse_arg == 'condition_discrimination':
             ax_args = ax_args_dt.copy()
-            ax_args.update({'xlim': [-5, 55], 'xticks': [0, 25, 50]})
+            ax_args.update({'xlim': [-5, 85], 'xticks': [0, 25, 50]})
             bool_ax_args = bool_ax_args_dt
-            bool_ax_args.update({'xlim': [-5, 55], 'xticks': [0, 25, 50]})
+            bool_ax_args.update({'xlim': [-5, 85], 'xticks': [0, 25, 50]})
         else:
             ax_args = ax_args_dt.copy()
             ax_args.update({'xlim': [-5, 125], 'xticks': [0, 50, 100]})
             bool_ax_args = bool_ax_args_dt
             bool_ax_args.update({'xlim': [-5, 125], 'xticks': [0, 50, 100]})
-
-        summary = reduce.new_filter_reduce(all_res_bool_, filter_keys=['odor_valence', collapse_arg],
-                                           reduce_key=boolean_smoothed,
-                                           regularize='max')
 
         plot.plot_results(all_res_bool_, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_valence',
                           select_dict={collapse_arg: 'YFP_ALL', 'odor_valence': valence},
@@ -339,7 +334,7 @@ if 'summary' in experiments:
     if collapse_arg == 'condition_mush':
         valences = [['CS+','CS-'],['CS+'],['CS-']]
     else:
-        valences = [['PT CS+'],['CS+','CS-'],['CS+'],['CS-']]
+        valences = [['PT CS+'],['CS+'],['CS-']]
     for valence in valences:
         color = [color_dict[x] for x in valence]
         all_res_bool_ = all_res_bool.copy()
@@ -525,6 +520,7 @@ if 'trials_to_criterion' in experiments:
         valences = ['CS+','CS-']
     else:
         valences = ['PT CS+', 'CS+','CS-']
+        # valences = ['PT CS+']
 
     for valence in valences:
         if valence == 'PT CS+':

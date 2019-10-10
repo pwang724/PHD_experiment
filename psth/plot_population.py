@@ -44,7 +44,7 @@ class PIR_Config(Base_Config):
         super(PIR_Config, self).__init__()
         self.condition = experimental_conditions.PIR
         self.mouse = 1
-        self.days = [0]
+        self.days = [2]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -74,10 +74,10 @@ class OFC_LONGTERM_Config(Base_Config):
     def __init__(self):
         super(OFC_LONGTERM_Config, self).__init__()
         self.condition = experimental_conditions.OFC_LONGTERM
-        self.mouse = 3
-        self.days = [2,3,4,5]
+        self.mouse = 0
+        self.days = [3, 6]
         self.sort_day_ix = 0
-        self.vlim = .15
+        self.vlim = .25
         self.threshold = .02
         self.independent_sort = True
         self.include_water = False
@@ -131,7 +131,7 @@ class MPFC_COMPOSITE_DT_Config(Base_Config):
     def __init__(self):
         super(MPFC_COMPOSITE_DT_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
-        self.mouse = 3
+        self.mouse = 0
         self.days = [0, 4, 5, 6, 7]
         self.sort_day_ix = 0
         self.vlim = .25
@@ -168,21 +168,65 @@ class OFC_BIG_Config(Base_Config):
         self.plot_big_naive = True
         self.include_water = False
 
+class OFC_LT_BIG_Config(Base_Config):
+    def __init__(self):
+        super(OFC_LT_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_LONGTERM
+        self.plot_big = True
+        self.threshold = 0.03
+        self.vlim = .25
+        # self.plot_big_days = [8, 7, 5, -1]
+        self.plot_big_days = [3, 2, 2, -1]
+        self.sort_day_ix = 0
+        self.plot_big_naive = False
+        self.include_water = False
+
+        # self.plot_big_days = [0,0,0,-1]
+        # self.plot_big_naive = True
+        # self.include_water = False
+
+class OFC_REVERSAL_BIG_Config(Base_Config):
+    def __init__(self):
+        super(OFC_REVERSAL_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_REVERSAL
+        self.plot_big = True
+        self.threshold = 0.03
+        self.vlim = .25
+        self.plot_big_days = [3,3,3,3,3]
+        self.sort_day_ix = 0
+        self.plot_big_naive = False
+        self.include_water = True
+        self.sort_onset_style = 'CS-'
+
+class OFC_STATE_BIG_Config(Base_Config):
+    def __init__(self):
+        super(OFC_STATE_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_CONTEXT
+        self.plot_big = True
+        self.threshold = 0.03
+        self.vlim = .25
+        self.plot_big_days = [1,1,1,1]
+        self.sort_day_ix = 0
+        self.plot_big_naive = False
+        self.include_water = False
+        self.sort_onset_style = 'CS-'
+
 class OFC_COMPOSITE_BIG_Config(Base_Config):
     def __init__(self):
         super(OFC_COMPOSITE_BIG_Config, self).__init__()
         self.condition = experimental_conditions.OFC_COMPOSITE
         self.plot_big = True
         self.threshold = 0.04
-        self.vlim = .25
+        self.vlim = .3
         self.sort_day_ix = 0
 
+        # self.plot_big_days = [0, 0, 0, 0]
         # self.plot_big_days = [1,1,1,1]
-        # self.plot_big_days = [4,4,5,5]
+        # self.plot_big_days = [3,4,4,4]
         # self.plot_big_days = [4,4,6,4]
         # self.plot_big_days = [5,5,9,5]
         self.plot_big_days = [8,9,10,8]
-        self.plot_big_naive = True
+        self.plot_big_naive = False
         self.include_water = False
         self.period = 'dt'
 
@@ -198,8 +242,8 @@ class MPFC_COMPOSITE_BIG_Config(Base_Config):
         self.plot_big = True
 
         self.period = 'dt'
-        self.plot_big_days = [0,0,0,0]
-        self.plot_big_naive = True
+        self.plot_big_days = [8,8,5,8]
+        self.plot_big_naive = False
         self.include_water = False
 
         # pt_start = [1, 1, 1, 1]
@@ -221,9 +265,9 @@ class BLA_BIG_Config(Base_Config):
         self.plot_big_days = [5, 4, 6, 6]
         self.plot_big_naive = False
 
-black = False
+black = True
 config = PSTHConfig()
-condition_config = OFC_COMPOSITE_DT_Config()
+condition_config = OFC_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -251,6 +295,7 @@ def helper(res, mouse, days, condition_config):
         if days[i] >= condition.training_start_day[mouse] and condition_config.include_water:
             odors_copy.append('water')
         odor_on = res_mouse['DAQ_O_ON_F'][i]
+        odor_off = res_mouse['DAQ_O_OFF_F'][i]
         water_on = res_mouse['DAQ_W_ON_F'][i]
         odor_trials = res_mouse['ODOR_TRIALS'][i]
         frames_per_trial = res_mouse['TRIAL_FRAMES'][i]
@@ -279,6 +324,7 @@ def helper(res, mouse, days, condition_config):
     # plotting step
     images = []
     odor_on_times = []
+    odor_off_times = []
     water_on_times = []
     list_of_odor_names = []
     for i, _ in enumerate(days):
@@ -376,6 +422,8 @@ else:
 if black:
     plt.style.use('dark_background')
 
+print(image.shape)
+
 frames_per_trial = 75
 for i, image in enumerate(images):
     odor_on = odor_on_times[i]
@@ -435,9 +483,9 @@ for i, image in enumerate(images):
             odor_on_lines = odor_on_lines_raw
 
     if days[i] >= condition.training_start_day[mouse]:
-        xticks = np.append(odor_on_lines, water_on_lines)
+        xticks = np.concatenate((odor_on_lines, odor_on_lines + 8, water_on_lines))
     else:
-        xticks = odor_on_lines
+        xticks = np.concatenate((odor_on_lines, odor_on_lines + 8))
 
     plt.xticks(xticks, '')
     plt.yticks([])

@@ -61,6 +61,27 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
                       path=figure_path,
                       plot_function= plt.errorbar, plot_args= error_args, ax_args = ax_args, save=True, reuse=True)
 
+    before_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'0', 'condition':'+:+'})
+    after_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'1', 'condition':'+:+'})
+    before_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'0', 'condition':'+:-'})
+    after_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'1', 'condition':'+:-'})
+    before_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'0', 'condition':'-:-'})
+    after_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'1', 'condition':'-:-'})
+
+    from scipy.stats import ranksums, wilcoxon, kruskal
+
+    print('Before ++: {}'.format(np.mean(before_odor['Overlap'])))
+    print('After ++: {}'.format(np.mean(after_odor['Overlap'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_odor['Overlap'], after_odor['Overlap'])))
+
+    print('Before +-: {}'.format(np.mean(before_csp['Overlap'])))
+    print('After +-: {}'.format(np.mean(after_csp['Overlap'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_csp['Overlap'], after_csp['Overlap'])))
+
+    print('Before --: {}'.format(np.mean(before_csm['Overlap'])))
+    print('After --: {}'.format(np.mean(after_csm['Overlap'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_csm['Overlap'], after_csm['Overlap'])))
+
 
 def plot_overlap_water(res, start_days, end_days, figure_path):
     ax_args_copy = overlap_ax_args.copy()
@@ -103,6 +124,7 @@ def plot_overlap_water(res, start_days, end_days, figure_path):
                       path=figure_path, plot_function=plt.errorbar, plot_args=error_args, ax_args=ax_args,
                       save=True, reuse=True,
                       fig_size=(1.5, 1.5), legend=False)
+    print(mean_std_res)
 
 
 def _overlap(ix1, ix2, arg = 'max'):

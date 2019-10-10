@@ -91,8 +91,16 @@ def new_filter_reduce(res, filter_keys, reduce_key, regularize = 'min'):
                 print('cannot regularize the length of {}'.format(reduce_key))
             temp_res = reduce_by_mean(cur_res, reduce_key)
             append_defaultdicts(out, temp_res)
+
+    bad= []
     for key, val in out.items():
-        out[key] = np.array(val)
+        try:
+            out[key] = np.array(val)
+        except:
+            bad.append(key)
+            print('{} could not be reduced'.format(key))
+    for badkey in bad:
+        out.pop(badkey)
     return out
 
 

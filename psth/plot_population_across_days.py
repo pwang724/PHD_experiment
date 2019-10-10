@@ -8,7 +8,7 @@ import numpy as np
 import analysis
 import tools.utils as utils
 from psth.psth_helper import PSTHConfig, subtract_baseline
-from psth.sorting import sort_by_selectivity
+from psth.sorting import sort_by_selectivity, sort_by_onset
 import plot
 
 mpl.rcParams['pdf.fonttype'] = 42
@@ -24,13 +24,14 @@ class PIRConfig(object):
         self.vlim = .25
         self.threshold = .1
         self.negative_threshold = -0.05
+        self.sort_method = 'onset'
         self.title = 'odor'
 
 class OFC_COMPOSITE_Config(object):
     def __init__(self):
         self.condition = experimental_conditions.OFC_COMPOSITE
         self.mouse = 0
-        self.days = [1,2,3]
+        self.days = [1,3]
         self.sort_day_ix = 0
         self.vlim = .2
         self.threshold = .02
@@ -55,7 +56,7 @@ res = analysis.load_data(data_path)
 analysis.add_indices(res)
 analysis.add_time(res)
 res_mouse = filter.filter(res, filter_dict={'mouse': mouse, 'day':days})
-odors = condition.odors[mouse]
+odors = condition.pt_odors[mouse]
 
 for o in range(len(odors)):
     odor = odors[o]
@@ -63,6 +64,7 @@ for o in range(len(odors)):
 
     for i, day in enumerate(days):
         odor_on = res_mouse['DAQ_O_ON_F'][i]
+        odor_off = res_mouse['DAQ_O_OFF_F'][i]
         water_on = res_mouse['DAQ_W_ON_F'][i]
         odor_trials = res_mouse['ODOR_TRIALS'][i]
         time_odor_on = 0
@@ -80,7 +82,7 @@ for o in range(len(odors)):
         mean = np.mean(cur_data, axis=1)
         list_of_psths.append(mean)
 
-    ixs = sort_by_selectivity(list_of_psths[::-1], odor_on, water_on, condition_config)
+    ixs = sort_by_selectivity([list_of_psths[-1]], odor_on, water_on, condition_config)
     psth = np.concatenate(list_of_psths, axis=1)
     psth = psth[ixs,:]
 
@@ -100,11 +102,12 @@ for o in range(len(odors)):
 
     condition_lines = np.cumsum([frames_per_trial] * len(days))[:-1]
     odor_on_lines = np.arange(odor_on, frames_per_trial * len(days), frames_per_trial)
-    if odor in condition.csp[mouse]:
+    odor_off_lines = np.arange(odor_off, frames_per_trial * len(days), frames_per_trial)
+    if condition_config.period == 'pt' or odor in condition.csp[mouse]:
         water_on_lines = np.arange(water_on, frames_per_trial * len(days), frames_per_trial)
-        xticks = np.append(odor_on_lines, water_on_lines)
+        xticks = np.concatenate((odor_on_lines, odor_off_lines, water_on_lines))
     else:
-        xticks = odor_on_lines
+        xticks = np.concatenate((odor_on_lines, odor_off_lines))
 
     plt.xticks(xticks, '')
     plt.yticks([])

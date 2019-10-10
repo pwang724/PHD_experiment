@@ -276,6 +276,7 @@ def add_behavior_stats(res, arg ='normal'):
     res['boolean_collection_smoothed'] = [100 * _filter(y > 0, config.smoothing_window_boolean) for y in res['lick_collection']]
 
     res['lick_smoothed'] = [_filter(y, config.smoothing_window) for y in res['lick']]
+    res['boolean'] = [100 * y > 0 for y in res['lick']]
     res['boolean_smoothed'] = [100 * _filter(y > 0, config.smoothing_window_boolean) for y in res['lick']]
     for x in res['boolean_smoothed']:
         x[x>100] = 100

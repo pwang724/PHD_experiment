@@ -11,18 +11,17 @@ import plot
 import matplotlib.pyplot as plt
 import numpy as np
 import reduce
-import analysis
 from format import *
 
 conditions = [
-    experimental_conditions.PIR,
-    experimental_conditions.OFC,
-    experimental_conditions.OFC_LONGTERM,
+    # experimental_conditions.PIR,
+    # experimental_conditions.OFC,
+    # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
-    # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH_UNUSED,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.BLA,
     # experimental_conditions.BLA_JAWS,
     # experimental_conditions.OFC_REVERSAL,
@@ -158,6 +157,7 @@ if 'summary_mean_sem' in experiments:
                           save = True, reuse=True,
                           plot_function= plt.fill_between,
                           path=save_path)
+
 
 if 'summary_all_conditions' in experiments:
     line_args_copy = line_args.copy()

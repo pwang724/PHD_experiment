@@ -33,6 +33,7 @@ class OFC_Config(object):
         self.ylim = [-.1, 1]
         self.colors = ['lime', 'darkgreen', 'red', 'magenta']
         self.name = 'odor'
+        self.include_water = False
 
 class OFC_Context_Config(object):
     def __init__(self):
@@ -76,7 +77,7 @@ class BLA_Config(object):
         self.name = 'odor'
 
 config = PSTHConfig()
-condition_config = BLA_Config()
+condition_config = OFC_Config()
 condition = condition_config.condition
 mouse = condition_config.mouse
 days = condition_config.days

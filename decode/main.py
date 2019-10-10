@@ -28,10 +28,10 @@ experiments = [
 ]
 EXPERIMENT = False
 ANALYZE = True
-argTest = True
+argTest = False
 
 #inputs
-condition = experimental_conditions.PIR
+condition = experimental_conditions.PIR_NAIVE
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -54,7 +54,7 @@ if 'test_odor_across_days' in experiments:
     elif condition.name == 'PIR_NAIVE':
         neurons = 40
         no_end_time = True
-        style = ['identity', 'csp_identity','csm_identity']
+        style = ['identity']
     elif condition.name == 'OFC':
         neurons = 40
         no_end_time = False
@@ -95,6 +95,26 @@ if 'test_odor_across_days' in experiments:
                 vmin = 0
             plot.plot_weight(temp, x_key, y_key, val_key, title, vmin, vmax, label= True,
                              save_path=os.path.join(save_path, temp['decode_style'][0]))
+
+            analysis = filter.filter(res, {'decode_style': style})
+            analysis = reduce.new_filter_reduce(analysis, filter_keys=['decode_style', 'Test Day', 'Training Day','mouse'],
+                                                   reduce_key='top_score')
+            ixTest = analysis['Test Day']
+            ixTrain = analysis['Training Day']
+
+            ixBefore = np.logical_and(ixTest == 0, ixTrain == 0)
+            ixAfter = np.logical_and(ixTest == 3, ixTrain == 3)
+
+            scores_before = analysis['top_score'][ixBefore]
+            scores_after = analysis['top_score'][ixAfter]
+
+            from scipy.stats import ranksums, wilcoxon, kruskal
+            x = wilcoxon(scores_before, scores_after)
+            print(style)
+            print(x)
+            print(np.mean(scores_before))
+            print(np.mean(scores_after))
+
 
 if 'vary_decoding_style_odor' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING', 'vary_decoding_style', condition.name)

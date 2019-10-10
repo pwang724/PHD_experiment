@@ -40,7 +40,7 @@ class Analysis_Config():
         self.anticipatory_bins = [indices.bin_ant_2, indices.bin_ant_3]
         self.filter_window = 21
         self.filter_order = 0
-        self.criterion_filter_window = 41
+        self.criterion_filter_window = 21
         self.criterion_threshold = .8
         self.half_max_threshold = .5
 
@@ -198,7 +198,7 @@ def analyze(res):
 
                 #boolean
                 bool_vector = vector > 0
-                _smooth(bool_vector, analysis_config.filter_window, key + '_boolean')
+                _smooth(bool_vector * 100, analysis_config.filter_window, key + '_boolean')
 
                 #criterion
                 bool_vector = vector > 0

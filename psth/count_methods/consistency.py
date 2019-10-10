@@ -92,5 +92,20 @@ def plot_consistency_within_day(res, start, end, shuffle, pretraining, figure_pa
                       path =figure_path, plot_args=error_args, plot_function=plt.errorbar,
                       save= True, reuse=True, legend=False, name_str=s)
 
-    from scipy.stats import ranksums
     print(summary['consistency_corrcoef'])
+
+    ix_a = res_['training_day_odor_valence'] == '0_CS+'
+    ix_b = res_['training_day_odor_valence'] == '0_CS-'
+    ix_c = res_['training_day_odor_valence'] == '1_CS+'
+    ix_d = res_['training_day_odor_valence'] == '1_CS-'
+    a = res_['consistency_corrcoef'][ix_a]
+    b = res_['consistency_corrcoef'][ix_b]
+    c = res_['consistency_corrcoef'][ix_c]
+    d = res_['consistency_corrcoef'][ix_d]
+
+    from scipy.stats import ranksums, wilcoxon, kruskal
+    import scikit_posthocs
+
+    print(kruskal(a, b, c))
+    x =scikit_posthocs.posthoc_dunn(a = [a, b, c, d], p_adjust=None)
+    print(x)

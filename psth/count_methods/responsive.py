@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 
 def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True,
-                                arg = 'odor_standard', figure_path = None):
+                                arg = 'odor_valence', figure_path = None):
     include_water = True
 
     ax_args_copy = ax_args.copy()
@@ -75,14 +75,23 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
     before_water = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'US'})
     after_water = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'US'})
 
+    from scipy.stats import ranksums, wilcoxon, kruskal
+
     print('Before Odor: {}'.format(np.mean(before_odor['Fraction Responsive'])))
     print('After Odor: {}'.format(np.mean(after_odor['Fraction Responsive'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_odor['Fraction Responsive'], after_odor['Fraction Responsive'])))
+
     print('Before CS+: {}'.format(np.mean(before_csp['Fraction Responsive'])))
     print('After CS+: {}'.format(np.mean(after_csp['Fraction Responsive'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_csp['Fraction Responsive'], after_csp['Fraction Responsive'])))
+
     print('Before CS-: {}'.format(np.mean(before_csm['Fraction Responsive'])))
     print('After CS-: {}'.format(np.mean(after_csm['Fraction Responsive'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_csm['Fraction Responsive'], after_csm['Fraction Responsive'])))
+
     print('Before US: {}'.format(np.mean(before_water['Fraction Responsive'])))
     print('After US: {}'.format(np.mean(after_water['Fraction Responsive'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_water['Fraction Responsive'], after_water['Fraction Responsive'])))
 
 def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None,
                                               include_water = True, normalize = False, pt_start = None, pt_learned = None,

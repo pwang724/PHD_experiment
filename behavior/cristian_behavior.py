@@ -23,7 +23,7 @@ mpl.rcParams['font.family'] = 'arial'
 ax_args_copy = ax_args.copy()
 ax_args_copy.update({'ylim':[-5, 65], 'yticks':[0, 30, 60]})
 bool_ax_args_copy = ax_args.copy()
-bool_ax_args_copy.update({'ylim':[-0.05, 1.05], 'yticks':[0, .5, 1]})
+bool_ax_args_copy.update({'ylim':[-5, 105], 'yticks':[0, 50, 100]})
 
 class OFC_PT_Config():
     path = r'C:\Users\P\Desktop\MANUSCRIPT_DATA\Nikki Data\OFC Pretraining'
@@ -53,13 +53,15 @@ indices = analysis.Indices()
 constants = analysis.Constants()
 config = Config()
 
-experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
+# experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
+experiments = [MPFC_DT_Config]
+
 # experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
-collapse_arg = 'OFC_DT'
+collapse_arg = 'MPFC_DT'
 plotting = [
     # 'individual_separate',
     # 'individual_together',
-    # 'trials_to_criterion',
+    'trials_to_criterion',
     # 'trials_per_day',
     'summary',
     # 'control',
@@ -67,6 +69,7 @@ plotting = [
     # 'release_of_inhibition'
 ]
 
+# plt.style.use('dark_background')
 names = ','.join([x.name for x in experiments]) + '__' + collapse_arg
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR_CRISTIAN', names)
 directories = [constants.pretraining_directory, constants.discrimination_directory]
@@ -221,6 +224,7 @@ if 'trials_to_criterion' in plotting:
         x = test[keyword][ixs]
         y = test[keyword][np.invert(ixs)]
         rs = ranksums(x, y)[-1]
+        print(ranksums(x, y))
         ylim = plt.gca().get_ylim()
         sig_str = plot.significance_str(x=.4, y= .7 * (ylim[-1] - ylim[0]), val= rs)
         plot._easy_save(path, name, pdf=True)
@@ -244,20 +248,26 @@ if 'trials_per_day' in plotting:
                           fig_size=[2, 1.5],
                           path=save_path, reuse=False, save=False)
 
-        summary = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'], reduce_key=y_key,
-                                           regularize='max')
-        plot.plot_results(summary, x_key='days', y_key=y_key,
-                          select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
-                          ax_args=ax_args_copy,
-                          plot_args=line_args,
-                          colors='black', reuse=True, save=False,
-                          path=save_path)
-        plot.plot_results(summary, x_key='days', y_key=y_key, error_key=y_key + '_sem',
-                          select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
-                          ax_args=ax_args_copy,
-                          plot_function=plt.fill_between, plot_args=fill_args,
-                          colors='black', reuse=True, save=True,
-                          path=save_path)
+        plot.plot_results(res, x_key='days', y_key=y_key,
+                          select_dict={'phase_odor_valence':phase, 'condition':'Y'},
+                          colors= 'black', plot_args=line_args_copy, ax_args=ax_args_cur,
+                          fig_size=[2, 1.5],
+                          path=save_path, reuse=True, save=True)
+
+        # summary = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'], reduce_key=y_key,
+        #                                    regularize='max')
+        # plot.plot_results(summary, x_key='days', y_key=y_key,
+        #                   select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
+        #                   ax_args=ax_args_copy,
+        #                   plot_args=line_args,
+        #                   colors='black', reuse=True, save=False,
+        #                   path=save_path)
+        # plot.plot_results(summary, x_key='days', y_key=y_key, error_key=y_key + '_sem',
+        #                   select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
+        #                   ax_args=ax_args_copy,
+        #                   plot_function=plt.fill_between, plot_args=fill_args,
+        #                   colors='black', reuse=True, save=True,
+        #                   path=save_path)
 
 if 'fraction_licks_per_day' in plotting:
     line_args_copy = line_args.copy()
@@ -335,7 +345,7 @@ if 'summary' in plotting:
 
             if phase == 'Discrimination_CS+' or phase == 'Pretraining_CS+':
                 c = behavior.behavior_config.behaviorConfig()
-                y = c.fully_learned_threshold_up / 100.
+                y = c.fully_learned_threshold_up
                 plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
 
             if phase == 'Discrimination_CS-':

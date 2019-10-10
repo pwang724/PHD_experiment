@@ -32,6 +32,8 @@ def plot_reversal(res, start_days, end_days, figure_path):
                       plot_function=plt.scatter, plot_args=scatter_args, ax_args=ax_args_copy,
                       fig_size=(2, 1.5), reuse=True, save=True,
                       legend=False)
+    print(mean_res['day_odor_valence'])
+    print(mean_res['Fraction'])
 
 
     titles = ['','CS+', 'CS-', 'None']

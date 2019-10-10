@@ -65,6 +65,20 @@ def sort_by_onset(list_of_psths, odor_on, water_on, condition_config):
         ixs = np.argsort(argmin)[::-1]
         cutoff = np.argmin(argmin[ixs] > cutoff_ix)
         list_of_ixs.append((ixs[:cutoff]))
+    else:
+        if condition_config.period == 'pt':
+            number_of_odors = 1
+        else:
+            number_of_odors = 2
+        argmax = np.mean(list_of_argmax[2:4], axis=0)
+        ixs = np.argsort(argmax)
+        cutoff = np.argmax(argmax[ixs] > cutoff_ix)
+        list_of_ixs.append((ixs[:cutoff]))
+
+        argmin = np.mean(list_of_argmin[2:4], axis=0)
+        ixs = np.argsort(argmin)[::-1]
+        cutoff = np.argmin(argmin[ixs] > cutoff_ix)
+        list_of_ixs.append((ixs[:cutoff]))
 
     list_of_ixs.append(np.arange(list_of_psths[0].shape[0]))
     final_ixs = _sort_by_ixs(list_of_ixs)

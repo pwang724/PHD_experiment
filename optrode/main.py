@@ -95,7 +95,7 @@ def _raster_convert(mat, raster_bin):
         a.append(b)
     return a
 
-opt = 'HALO_10min'
+opt = 'HALO'
 
 if opt == 'JAWS':
     config = JAWS_Config()
@@ -114,10 +114,10 @@ if opt == 'JAWS':
     shankDirs = sorted(glob.glob(os.path.join(config.directory, 'shank*')))
     for shankDir in shankDirs:
         spikeFile = os.path.join(shankDir, config.spike_file)
-        temp = _parse_data(spikeFile, events, mat)
+        _parse_data(spikeFile, events, mat)
 
 
-if opt == 'HALO' or 'HALO_10min':
+elif opt == 'HALO' or 'HALO_10min':
     if opt == 'HALO':
         config = HALO_Config()
         small_bound = 20
