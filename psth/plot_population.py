@@ -55,7 +55,7 @@ class OFC_Config(Base_Config):
         super(OFC_Config, self).__init__()
         self.condition = experimental_conditions.OFC
         self.mouse = 0
-        self.days = [0, 5]
+        self.days = [0, 1, 2, 3, 4, 5]
         self.vlim = .3
         self.sort_day_ix = 1
         self.independent_sort = True
@@ -65,7 +65,7 @@ class BLA_Config(Base_Config):
         super(BLA_Config, self).__init__()
         self.condition = experimental_conditions.BLA
         self.mouse = 3
-        self.days = [1, 5]
+        self.days = [0, 1, 2, 3, 4, 5]
         self.sort_day_ix = 1
         self.vlim = .2
         self.threshold = .02
@@ -132,7 +132,7 @@ class MPFC_COMPOSITE_DT_Config(Base_Config):
         super(MPFC_COMPOSITE_DT_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
         self.mouse = 0
-        self.days = [0, 4, 5, 6, 7]
+        self.days = [0, 4, 5, 6, 7, 8]
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .02
@@ -265,9 +265,9 @@ class BLA_BIG_Config(Base_Config):
         self.plot_big_days = [5, 4, 6, 6]
         self.plot_big_naive = False
 
-black = True
+black = False
 config = PSTHConfig()
-condition_config = OFC_BIG_Config()
+condition_config = BLA_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -421,8 +421,6 @@ else:
 
 if black:
     plt.style.use('dark_background')
-
-print(image.shape)
 
 frames_per_trial = 75
 for i, image in enumerate(images):

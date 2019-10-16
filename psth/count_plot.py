@@ -25,7 +25,7 @@ import psth.count_methods.consistency as consistency
 import psth.count_methods.cory as cory
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = psth.count_analyze.PIR_NAIVE_Config()
+condition_config = psth.count_analyze.OFC_Config()
 
 config = psth.psth_helper.PSTHConfig()
 condition = condition_config.condition
