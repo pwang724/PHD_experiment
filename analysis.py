@@ -8,7 +8,10 @@ from collections import defaultdict
 def load_data(data_path):
     res = load_all_cons(data_path)
     data_pathnames = sorted(glob.glob(os.path.join(data_path, '*' + Config.mat_ext)))
-    list_of_all_data = np.array([Config.load_mat_f(d) for d in data_pathnames])
+    list_of_all_data = np.zeros(len(data_pathnames), dtype='object')
+    for i in range(len(data_pathnames)):
+        list_of_all_data[i] = Config.load_mat_f(data_pathnames[i])
+
     res['data'] = list_of_all_data
     assert len(list_of_all_data) == len(res['TRIAL_FRAMES']), 'number of data files does not equal number of cons files'
     return res

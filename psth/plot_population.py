@@ -65,7 +65,7 @@ class BLA_Config(Base_Config):
         super(BLA_Config, self).__init__()
         self.condition = experimental_conditions.BLA
         self.mouse = 3
-        self.days = [0, 1, 2, 3, 4, 5]
+        self.days = [0, 1, 2, 3, 4, 5, 6]
         self.sort_day_ix = 1
         self.vlim = .2
         self.threshold = .02
