@@ -61,6 +61,7 @@ def load_timepoint_from_matlab(path, name, timing_override = False):
         start_time = time.time()
         mat, obj_name = load_calcium_traces_from_matlab(p, eng)
         dir = eng.eval(obj_name + ".constants.DIR")
+        dir = 'I' + dir[1:]
         cons = Cons(dir, timing_override)
         print('[***] LOADED {0:<50s} in: {1:3.3f} seconds'.format(p, time.time() - start_time))
 
@@ -112,9 +113,9 @@ if __name__ == '__main__':
     # condition = conditions.PIR
     # load_condition(condition)
 
-    # condition = conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
-    # load_condition(condition, arg = 'behavior')
-
-    condition = conditions.BEHAVIOR_OFC_MUSH_HALO
-    # condition.paths = [condition.paths[-1]]
+    condition = conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
     load_condition(condition, arg = 'behavior')
+
+    # condition = conditions.BEHAVIOR_OFC_MUSH_JAWS_HALO
+    # condition.paths = [condition.paths[0]]
+    # load_condition(condition, arg = 'timepoint')

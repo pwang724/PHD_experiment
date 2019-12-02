@@ -49,6 +49,7 @@ class PIR_Config(Base_Config):
         self.threshold = .1
         self.sort_method = 'selectivity'
         self.delete_nonselective = True
+        self.include_water = False
 
 class OFC_Config(Base_Config):
     def __init__(self):
@@ -56,8 +57,9 @@ class OFC_Config(Base_Config):
         self.condition = experimental_conditions.OFC
         self.mouse = 0
         self.days = [0, 1, 2, 3, 4, 5]
-        self.vlim = .3
+        self.vlim = .25
         self.sort_day_ix = 1
+        self.include_water = False
         self.independent_sort = True
 
 class BLA_Config(Base_Config):
@@ -267,7 +269,7 @@ class BLA_BIG_Config(Base_Config):
 
 black = False
 config = PSTHConfig()
-condition_config = BLA_Config()
+condition_config = OFC_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

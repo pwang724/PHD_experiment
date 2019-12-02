@@ -112,7 +112,8 @@ def convert(res, condition, includeRaw = False):
 
         for j, odor in enumerate(odorTrials):
             if odor in relevant_odors:
-                start = int(res['DAQ_O_ON'][i] * res['DAQ_SAMP'][i])
+                # start = int(res['DAQ_O_OFF'][i] * res['DAQ_SAMP'][i])
+                # start = int((res['DAQ_O_ON'][i]) * res['DAQ_SAMP'][i])
                 start = int((res['DAQ_W_ON'][i]-1) * res['DAQ_SAMP'][i])
                 end = int(res['DAQ_W_ON'][i] * res['DAQ_SAMP'][i])
                 end_coll = int((res['DAQ_W_ON'][i] + 1) * res['DAQ_SAMP'][i])
@@ -152,7 +153,8 @@ def agglomerate_days(res, condition, first_day, last_day):
             temp_res['lick_collection'] = temp_res_['lick_collection']
             temp_res['day'] = np.array(sorted(filtered_res['day']))
             temp_res['trial'] = np.arange(len(temp_res['lick']))
-            append_defaultdicts(out, temp_res)
+            if len(temp_res['lick']):
+                append_defaultdicts(out, temp_res)
     for key, val in out.items():
         out[key] = np.array(val)
     return out

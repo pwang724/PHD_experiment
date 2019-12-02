@@ -18,20 +18,22 @@ conditions = [
     # experimental_conditions.OFC,
     # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
-    experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
+    # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH_UNUSED,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.BLA,
     # experimental_conditions.BLA_JAWS,
     # experimental_conditions.OFC_REVERSAL,
     # experimental_conditions.OFC_STATE
+    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
+
 ]
 experiments = [
     # 'individual',
-    # 'summary',
+    'summary',
     # 'summary_mean_sem',
-    'summary_all_conditions',
+    # 'summary_all_conditions',
     # 'lick_per_day'
     # 'individual_half_max',
     # 'basic_3'
