@@ -23,10 +23,10 @@ mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
-    # 'individual',
+    'individual',
     # 'individual_half_max',
     # 'summary',
-    'simple_summary',
+    # 'simple_summary',
     # 'control',
     # 'trials_to_criterion',
     # 'basic_3'
@@ -35,8 +35,8 @@ experiments = [
 
 conditions = [
     experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS_HALO,
@@ -48,8 +48,6 @@ conditions = [
     # experimental_conditions.OFC_LONGTERM
 ]
 
-# [119 130 116 95 118 39 60 91]
-# [119 116]
 collapse_arg = 'condition_pretraining'
 # collapse_arg = 'condition_discrimination'
 # collapse_arg = 'condition_mush'
@@ -60,7 +58,6 @@ def _collapse_conditions(res, control_condition, str):
     conditions[np.invert(control_ix)] = 'INH'
     res[str] = conditions
 
-
 list_of_res = []
 names = []
 for i, condition in enumerate(conditions):
@@ -69,9 +66,6 @@ for i, condition in enumerate(conditions):
     else:
         data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_BEHAVIOR_FOLDER, condition.name)
     res = analyze_behavior(data_path, condition)
-
-    # if 'COMPOSITE' in condition.name:
-    #     res['condition'] = np.array([condition.name] * len(res['mouse']))
 
     if 'YFP' in condition.name:
         res['condition'] = np.array(['YFP'] * len(res['mouse']))
@@ -83,7 +77,6 @@ for i, condition in enumerate(conditions):
     list_of_res.append(res)
     names.append(condition.name)
 name = ','.join(names) + '_' + collapse_arg
-
 
 color_dict = {'PT CS+': 'C1', 'CS+':'green', 'CS-':'red'}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],

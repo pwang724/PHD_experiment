@@ -274,15 +274,29 @@ def add_behavior_stats(res, arg ='normal'):
 
 
     config = behaviorConfig()
-    res['lick_collection_smoothed'] = [_filter(y, config.smoothing_window) for y in res['lick_collection']]
-    res['boolean_collection_smoothed'] = [100 * _filter(y > 0, config.smoothing_window_boolean) for y in res['lick_collection']]
+    if 'PT CS+' in res['odor_valence']:
+        rules_lick = config.rules_two_phase_lick
+        rules_boolean = config.rules_two_phase_boolean
+    else:
+        rules_lick = config.rules_single_phase_lick
+        rules_boolean = config.rules_single_phase_boolean
 
-    res['lick_smoothed'] = [_filter(y, config.smoothing_window) for y in res['lick']]
+    for i, v in enumerate(res['odor_valence']):
+        smoothing_window_lick = rules_lick[v]
+        smoothing_window_boolean = rules_boolean[v]
+
+        lick = res['lick'][i]
+        boolean = 100 * lick > 0
+        res['lick_smoothed'].append(_filter(lick, smoothing_window_lick))
+        res['boolean_smoothed'].append(_filter(boolean, smoothing_window_boolean))
+        lick_collection = res['lick_collection'][i]
+        boolean_collection = 100 * lick_collection > 0
+        res['lick_collection_smoothed'].append(_filter(lick_collection, smoothing_window_lick))
+        res['boolean_collection_smoothed'].append(_filter(boolean_collection, smoothing_window_boolean))
+
     res['boolean'] = [100 * y > 0 for y in res['lick']]
-    res['boolean_smoothed'] = [100 * _filter(y > 0, config.smoothing_window_boolean) for y in res['lick']]
     for x in res['boolean_smoothed']:
         x[x>100] = 100
-    res['false_negative'] = [100 - x for x in res['boolean_smoothed']]
 
     up_half = []
     up_criterion = []
