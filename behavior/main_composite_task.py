@@ -24,13 +24,9 @@ mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     'individual',
-    # 'individual_half_max',
     # 'summary',
-    # 'simple_summary',
-    # 'control',
-    # 'trials_to_criterion',
-    # 'basic_3'
     # 'roc',
+    # 'trials_to_criterion',
 ]
 
 conditions = [
@@ -81,14 +77,10 @@ name = ','.join(names) + '_' + collapse_arg
 color_dict = {'PT CS+': 'C1', 'CS+':'green', 'CS-':'red'}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
                 'xlim': [0, 200]}
-ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],
-              # 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]
-              }
-ax_args_dt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],
-              # 'xticks': [0, 50, 100],'xlim': [0, 100]
-              }
-bool_ax_args_dt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 75], 'xlim': [0, 125]}
-bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]}
+ax_args_dt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],'xticks': [0, 50],'xlim': [0, 50]}
+bool_ax_args_dt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50], 'xlim': [0, 50]}
+ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12], 'xticks': [0, 50, 100, 150], 'xlim': [0, 150]}
+bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150], 'xlim': [0, 150]}
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
@@ -119,123 +111,38 @@ if 'individual' in experiments:
         for i, mouse in enumerate(mice):
             select_dict = {'mouse': mouse, 'odor': condition.pt_odors[i]}
             plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args_dt, plot_args=line_args_copy,
-                              path=save_path)
-            plot.plot_results(res, x_key='trial', y_key=lick, loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args_dt, plot_args=line_args_copy,
-                              path=save_path)
-            plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args_dt, plot_args=line_args_copy,
-                              path=save_path)
-
-            select_dict = {'mouse': mouse, 'odor': condition.pt_csp[i]}
-            plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args_pt, plot_args=line_args_copy,
-                              path=save_path)
-            plot.plot_results(res, x_key='trial', y_key=lick, loop_keys='odor_standard',
                               select_dict=select_dict, colors=colors, ax_args=ax_args_pt, plot_args=line_args_copy,
                               path=save_path)
             plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
                               select_dict=select_dict, colors=colors, ax_args=bool_ax_args_pt, plot_args=line_args_copy,
                               path=save_path)
 
-if 'individual_half_max' in experiments:
-    for res, condition in zip(list_of_res, conditions):
-        save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
+            select_dict = {'mouse': mouse, 'odor': condition.pt_csp[i]}
+            plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=ax_args_pt, plot_args=line_args_copy,
+                              path=save_path)
+            plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args_pt, plot_args=line_args_copy,
+                              path=save_path)
 
-        # bar plot
-        colors = ['black', 'black']
-        select_dicts = [
-            {'odor_valence': 'PT CS+'},
-            {'odor_valence': 'CS+'},
-            {'odor_valence': 'CS-'}
-        ]
-        y_keys = ['half_max', 'criterion']
+        for i, mouse in enumerate(mice):
+            select_dict = {'mouse': mouse, 'odor': condition.dt_odors[i]}
+            plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=ax_args_dt, plot_args=line_args_copy,
+                              path=save_path)
+            plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args_dt, plot_args=line_args_copy,
+                              path=save_path)
 
-        for select_dict in select_dicts:
-            for y_key in y_keys:
-                nMouse = np.unique(res['mouse']).size
-                ax_args = {'yticks': [0, 50, 100, 150], 'ylim': [0, 150], 'xticks': np.arange(nMouse)}
-                plot.plot_results(res, x_key='mouse', y_key=y_key, loop_keys='odor_standard', colors=colors,
-                                  select_dict=select_dict, path=save_path, plot_function=plt.scatter, plot_args=scatter_args,
-                                  ax_args=ax_args, save=False)
+            select_dict = {'mouse': mouse, 'odor': condition.dt_csp[i]}
+            plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=ax_args_dt, plot_args=line_args_copy,
+                              path=save_path)
+            plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
+                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args_dt, plot_args=line_args_copy,
+                              path=save_path)
 
-                csp_res = filter.filter(res, select_dict)
-                summary_res = reduce.new_filter_reduce(csp_res, filter_keys='mouse', reduce_key=y_key)
-                ax_args = {'yticks': [0, 50, 100, 150], 'ylim': [0, 150], }
-                plot.plot_results(summary_res, x_key='mouse', y_key=y_key,
-                                  select_dict=select_dict, path=save_path, plot_function=plt.bar, plot_args=bar_args,
-                                  ax_args=ax_args, save=True, reuse=True)
-
-if 'control' in experiments:
-    all_res = defaultdict(list)
-
-    for res, condition in zip(list_of_res, conditions):
-        reduce.chain_defaultdicts(all_res, res)
-    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', name)
-
-    all_res = filter.filter(all_res, {'odor_valence': ['CS+', 'CS-', 'PT CS+']})
-    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence', 'mouse'],
-                                            reduce_key=lick_smoothed)
-    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence', 'mouse'],
-                                            reduce_key=boolean_smoothed)
-    if collapse_arg == 'condition_pretraining':
-        _collapse_conditions(all_res_lick, control_condition='PRETRAINING', str=collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='PRETRAINING', str=collapse_arg)
-    elif collapse_arg == 'condition_discrimination':
-        _collapse_conditions(all_res_lick, control_condition='DISCRIMINATION', str=collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='DISCRIMINATION', str=collapse_arg)
-    elif collapse_arg == 'condition_mush':
-        _collapse_conditions(all_res_lick, control_condition='HALO', str=collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='HALO', str=collapse_arg)
-    else:
-        collapse_arg = 'condition'
-    all_res_bool.pop(boolean_sem)
-    all_res_lick.pop(lick_sem)
-
-    line_args_copy = line_args.copy()
-    line_args_copy.update({'marker': None, 'linewidth': .75})
-
-    if collapse_arg == 'condition_mush':
-        valences = [['CS+', 'CS-'], ['CS+'], ['CS-']]
-    else:
-        valences = [['PT CS+'], ['CS+', 'CS-'], ['CS+'], ['CS-']]
-    for valence in valences:
-        color = [color_dict[x] for x in valence]
-        all_res_bool_ = all_res_bool.copy()
-        all_res_bool_ = filter.filter(all_res_bool_, {'odor_valence': valence})
-        all_res_lick_ = all_res_lick.copy()
-        all_res_lick_ = filter.filter(all_res_lick_, {'odor_valence': valence})
-
-        if valence == ['PT CS+']:
-            ax_args = ax_args_pt.copy()
-            ax_args.update({'xlim': [-10, 170], 'xticks': [0, 50, 100, 150]})
-            bool_ax_args = bool_ax_args_pt
-            bool_ax_args.update({'xlim': [-10, 170], 'xticks': [0, 50, 100, 150]})
-        elif collapse_arg == 'condition_discrimination':
-            ax_args = ax_args_dt.copy()
-            ax_args.update({'xlim': [-5, 85], 'xticks': [0, 25, 50]})
-            bool_ax_args = bool_ax_args_dt
-            bool_ax_args.update({'xlim': [-5, 85], 'xticks': [0, 25, 50]})
-        else:
-            ax_args = ax_args_dt.copy()
-            ax_args.update({'xlim': [-5, 125], 'xticks': [0, 50, 100]})
-            bool_ax_args = bool_ax_args_dt
-            bool_ax_args.update({'xlim': [-5, 125], 'xticks': [0, 50, 100]})
-
-        plot.plot_results(all_res_bool_, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_valence',
-                          select_dict={collapse_arg: 'YFP_ALL', 'odor_valence': valence},
-                          colors=['black']*50,
-                          ax_args=bool_ax_args, plot_args=line_args_copy,
-                          path=save_path)
-
-        plot.plot_results(all_res_lick_, x_key='trial', y_key=lick_smoothed, loop_keys='odor_valence',
-                          select_dict={collapse_arg: 'YFP_ALL', 'odor_valence': valence},
-                          colors=['black']*50,
-                          ax_args=ax_args, plot_args=line_args_copy,
-                          path=save_path)
-
-if 'simple_summary' in experiments:
+if 'summary' in experiments:
     all_res = defaultdict(list)
 
     for res, condition in zip(list_of_res, conditions):
@@ -245,19 +152,10 @@ if 'simple_summary' in experiments:
     all_res = filter.filter(all_res, {'odor_valence':['CS+','CS-', 'PT CS+']})
     all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=lick_smoothed)
     all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=boolean_smoothed)
-    if collapse_arg == 'condition_pretraining':
-        _collapse_conditions(all_res_lick, control_condition='YFP', str = collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='YFP', str = collapse_arg)
-    elif collapse_arg == 'condition_discrimination':
-        _collapse_conditions(all_res_lick, control_condition='YFP', str = collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='YFP', str = collapse_arg)
-    elif collapse_arg == 'condition_mush':
-        _collapse_conditions(all_res_lick, control_condition='YFP', str = collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='YFP', str = collapse_arg)
-    else:
-        collapse_arg = 'condition'
     all_res_bool.pop(boolean_sem)
     all_res_lick.pop(lick_sem)
+    _collapse_conditions(all_res_lick, control_condition='YFP', str = collapse_arg)
+    _collapse_conditions(all_res_bool, control_condition='YFP', str = collapse_arg)
 
     line_args_copy = line_args.copy()
     line_args_copy.update({'marker': None, 'linewidth':.75})
@@ -311,115 +209,6 @@ if 'simple_summary' in experiments:
                           ax_args=ax_args, plot_args=line_args_copy,
                           reuse = False, save=True,
                           path=save_path)
-
-if 'summary' in experiments:
-    all_res = defaultdict(list)
-
-    for res, condition in zip(list_of_res, conditions):
-        reduce.chain_defaultdicts(all_res, res)
-    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', name)
-
-    all_res = filter.filter(all_res, {'odor_valence':['CS+','CS-', 'PT CS+']})
-    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=lick_smoothed)
-    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=boolean_smoothed)
-    if collapse_arg == 'condition_pretraining':
-        _collapse_conditions(all_res_lick, control_condition='YFP', str = collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='YFP', str = collapse_arg)
-    elif collapse_arg == 'condition_discrimination':
-        _collapse_conditions(all_res_lick, control_condition='YFP', str = collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='YFP', str = collapse_arg)
-    elif collapse_arg == 'condition_mush':
-        _collapse_conditions(all_res_lick, control_condition='YFP', str = collapse_arg)
-        _collapse_conditions(all_res_bool, control_condition='YFP', str = collapse_arg)
-    else:
-        collapse_arg = 'condition'
-
-    all_res_bool.pop(boolean_sem)
-    all_res_lick.pop(lick_sem)
-
-    line_args_copy = line_args.copy()
-    line_args_copy.update({'marker': None, 'linewidth':.75})
-
-    if collapse_arg == 'condition_mush':
-        valences = [['CS+','CS-'],['CS+'],['CS-']]
-    else:
-        valences = [['PT CS+'],['CS+'],['CS-']]
-    for valence in valences:
-        color = [color_dict[x] for x in valence]
-        all_res_bool_ = all_res_bool.copy()
-        all_res_bool_ = filter.filter(all_res_bool_, {'odor_valence':valence})
-        all_res_lick_ = all_res_lick.copy()
-        all_res_lick_ = filter.filter(all_res_lick_, {'odor_valence':valence})
-
-        if valence == ['PT CS+']:
-            ax_args = ax_args_pt.copy()
-            ax_args.update({'xlim':[-10, 170],'xticks':[0, 50, 100, 150]})
-            bool_ax_args = bool_ax_args_pt
-            bool_ax_args.update({'xlim':[-10, 170],'xticks':[0, 50, 100, 150]})
-        elif collapse_arg == 'condition_discrimination':
-            ax_args = ax_args_dt.copy()
-            ax_args.update({'xlim':[-5, 55],'xticks':[0, 25, 50]})
-            bool_ax_args = bool_ax_args_dt
-            bool_ax_args.update({'xlim': [-5, 55], 'xticks': [0, 25, 50]})
-        else:
-            ax_args = ax_args_dt.copy()
-            ax_args.update({'xlim': [-5, 125], 'xticks': [0, 50, 100]})
-            bool_ax_args = bool_ax_args_dt
-            bool_ax_args.update({'xlim': [-5, 125], 'xticks': [0, 50, 100]})
-
-        summary = reduce.new_filter_reduce(all_res_bool_, filter_keys=['odor_valence', collapse_arg], reduce_key=boolean_smoothed,
-                                           regularize='max')
-
-        plot.plot_results(all_res_bool_, x_key='trial', y_key=boolean_smoothed, loop_keys= 'odor_valence',
-                          select_dict={collapse_arg: 'JAWS'},
-                          colors=color,
-                          ax_args=bool_ax_args, plot_args=line_args_copy,
-                          reuse = False, save=False,
-                          path=save_path)
-        c = behavior.behavior_config.behaviorConfig()
-
-        if 'CS+' in valence or 'PT CS+' in valence:
-            y = c.fully_learned_threshold_up
-            plt.plot(plt.xlim(), [y, y], '--', color = 'gray', linewidth =.5)
-
-        if 'CS-' in valence:
-            y = c.fully_learned_threshold_down
-            plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
-
-        plot.plot_results(summary, x_key='trial', y_key=boolean_smoothed,
-                          select_dict={'odor_valence': valence, collapse_arg: 'YFP_ALL'},
-                          ax_args=bool_ax_args,
-                          plot_args=line_args_copy,
-                          colors='black', reuse=True, save=False,
-                          path=save_path)
-        plot.plot_results(summary, x_key='trial', y_key= boolean_smoothed, error_key=boolean_sem,
-                          select_dict={'odor_valence': valence, collapse_arg: 'YFP_ALL'},
-                          ax_args=bool_ax_args,
-                          plot_function=plt.fill_between, plot_args=fill_args,
-                          colors='black', reuse=True, save=True,
-                          path=save_path)
-
-        plot.plot_results(all_res_lick_, x_key='trial', y_key=lick_smoothed, loop_keys= 'odor_valence',
-                          select_dict={collapse_arg: 'JAWS'},
-                          colors=color,
-                          ax_args=ax_args, plot_args=line_args_copy,
-                          reuse = False, save=False,
-                          path=save_path)
-        summary = reduce.new_filter_reduce(all_res_lick_, filter_keys=['odor_valence', collapse_arg], reduce_key=lick_smoothed,
-                                           regularize='max')
-        plot.plot_results(summary, x_key='trial', y_key=lick_smoothed,
-                          select_dict={'odor_valence': valence, collapse_arg: 'YFP_ALL'},
-                          ax_args=ax_args,
-                          plot_args=line_args_copy,
-                          colors='black', reuse=True, save=False,
-                          path=save_path)
-        plot.plot_results(summary, x_key='trial', y_key= lick_smoothed, error_key=lick_sem,
-                          select_dict={'odor_valence': valence, collapse_arg: 'YFP_ALL'},
-                          ax_args=ax_args,
-                          plot_function=plt.fill_between, plot_args=fill_args,
-                          colors='black', reuse=True, save=True,
-                          path=save_path)
-
 
 if 'roc' in experiments:
     x = 'roc_trial'

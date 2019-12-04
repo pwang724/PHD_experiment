@@ -286,11 +286,11 @@ def add_behavior_stats(res, arg ='normal'):
         smoothing_window_boolean = rules_boolean[v]
 
         lick = res['lick'][i]
-        boolean = 100 * lick > 0
+        boolean = 100 * (lick > 0)
         res['lick_smoothed'].append(_filter(lick, smoothing_window_lick))
         res['boolean_smoothed'].append(_filter(boolean, smoothing_window_boolean))
         lick_collection = res['lick_collection'][i]
-        boolean_collection = 100 * lick_collection > 0
+        boolean_collection = 100 * (lick_collection > 0)
         res['lick_collection_smoothed'].append(_filter(lick_collection, smoothing_window_lick))
         res['boolean_collection_smoothed'].append(_filter(boolean_collection, smoothing_window_boolean))
 
