@@ -2,8 +2,8 @@ class behaviorConfig(object):
     def __init__(self):
         #extra time (seconds) given to CS- odors after water onset for quantification.
         self.extra_csm_time = 0
-        self.smoothing_window = 11
-        self.smoothing_window_boolean = 11
+        # self.smoothing_window = 11
+        # self.smoothing_window_boolean = 11
         self.polynomial_degree = 0
 
         self.rules_single_phase_lick = {'CS+': 19, 'CS-': 19}
