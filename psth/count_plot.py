@@ -54,6 +54,31 @@ temp_res = behavior.behavior_analysis.analyze_behavior(data_path, condition)
 temp_res = filter.filter(temp_res, {'odor_valence': ['CS+']})
 temp_res = reduce.new_filter_reduce(temp_res, ['odor_valence', 'mouse'], reduce_key='boolean_smoothed')
 
+if condition.name == 'PIR_CONTEXT':
+    psth.count_analyze.analyze_data(res, condition_config)
+
+    compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
+                                                arg='all', valence='CS+', more_stats=False, figure_path= figure_path)
+    compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
+                                                arg='all', valence='CS-', more_stats=False, figure_path= figure_path)
+
+    power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+                     colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=0.15)
+    power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
+                     colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=0.15)
+
+    shuffle = False
+    odor_end = False
+    days = [[[0,0],[1,1]]]
+    temp = correlation.plot_correlation_across_days(res, days, loop_keys=['mouse', 'odor'], shuffle=shuffle, figure_path = figure_path,
+                                                    reuse=False, save=True, analyze=True, plot_bool=False, odor_end=odor_end)
+    correlation.plot_correlation_across_days(temp, days, loop_keys=['mouse', 'odor'], shuffle=shuffle, figure_path = figure_path,
+                                                    reuse=False, save=True, analyze=False, plot_bool=True, odor_end=odor_end)
+    ixa = temp['odor_valence'] == 'CS+'
+    ixb = temp['odor_valence'] == 'CS-'
+    a = temp['corrcoef'][ixa]
+    b = temp['corrcoef'][ixb]
+    print(ranksums(a,b))
 
 if condition.name == 'PIR':
     naive_config = psth.count_analyze.PIR_NAIVE_Config()
@@ -189,7 +214,7 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
     #                                        figure_path=figure_path)
     # overlap.plot_overlap_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path = figure_path)
-    overlap.plot_overlap_water(res, training_start_day_per_mouse, last_day_per_mouse, figure_path = figure_path)
+    # overlap.plot_overlap_water(res, training_start_day_per_mouse, last_day_per_mouse, figure_path = figure_path)
 
     # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='onset', figure_path=figure_path)
     # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
@@ -209,8 +234,8 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # valence_responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, last_day_per_mouse,
     #                                                              figure_path=figure_path, normalize=False, ylim=.65)
 
-    # a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
-    # b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
     #
     # def _get_ixs(r):
     #     A = r['Odor_A']

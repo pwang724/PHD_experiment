@@ -26,12 +26,12 @@ experiments = [
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
 ]
-EXPERIMENT = False
+EXPERIMENT = True
 ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.PIR_NAIVE
+condition = experimental_conditions.PIR_CONTEXT
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -48,7 +48,7 @@ if 'test_odor_across_days' in experiments:
     save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_across_days', condition.name)
 
     style = ['identity', 'csp_identity', 'csm_identity','valence']
-    if condition.name == 'PIR':
+    if condition.name == 'PIR' or condition.name == 'PIR_CONTEXT':
         neurons = 40
         no_end_time = True
     elif condition.name == 'PIR_NAIVE':
@@ -103,7 +103,7 @@ if 'test_odor_across_days' in experiments:
             ixTrain = analysis['Training Day']
 
             ixBefore = np.logical_and(ixTest == 0, ixTrain == 0)
-            ixAfter = np.logical_and(ixTest == 3, ixTrain == 3)
+            ixAfter = np.logical_and(ixTest > 0, ixTrain > 0)
 
             scores_before = analysis['top_score'][ixBefore]
             scores_after = analysis['top_score'][ixAfter]

@@ -75,8 +75,8 @@ class Cons(ConstantCons):
         self.ODOR_UNIQUE = None
         self.ODOR_TRIALIDX = None
 
-        self.DEFAULT_O_ON = 7.4
-        self.DEFAULT_O_OFF = 9.4
+        self.DEFAULT_O_ON = 5.7
+        self.DEFAULT_O_OFF = 7.7
 
         self.DAQ_W_ON = None
         self.DAQ_O_ON = None

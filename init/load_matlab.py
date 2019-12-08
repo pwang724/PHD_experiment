@@ -1,5 +1,5 @@
 from init.cons import Cons
-# import matlab.engine
+import matlab.engine
 import matlab
 import time
 import numpy as np
@@ -110,11 +110,11 @@ if __name__ == '__main__':
     # for condition in conditions.all_conditions():
     #     load_condition(condition)
 
-    # condition = conditions.PIR
-    # load_condition(condition)
+    condition = conditions.PIR_CONTEXT
+    load_condition(condition)
 
-    condition = conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
-    load_condition(condition, arg = 'behavior')
+    # condition = conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION
+    # load_condition(condition, arg = 'behavior')
 
     # condition = conditions.BEHAVIOR_OFC_MUSH_JAWS_HALO
     # condition.paths = [condition.paths[0]]

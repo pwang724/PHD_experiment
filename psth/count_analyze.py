@@ -87,6 +87,12 @@ class PIR_NAIVE_Config(Base_Config):
         self.start_at_training = False
         self.m_threshold = 0.1
 
+class PIR_CONTEXT_Config(Base_Config):
+    def __init__(self):
+        super(PIR_CONTEXT_Config, self).__init__()
+        self.condition = experimental_conditions.PIR_CONTEXT
+        self.start_at_training = False
+        self.m_threshold = 0.1
 
 class OFC_State_Config(Base_Config):
     def __init__(self):
@@ -266,7 +272,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = OFC_LONGTERM_Config()
+    condition_config = PIR_CONTEXT_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

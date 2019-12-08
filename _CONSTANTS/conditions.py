@@ -63,6 +63,24 @@ class PIR_NAIVE:
     training_start_day = [0, 0, 0, 0]
     min_neurons = 46
 
+class PIR_CONTEXT:
+    name = 'PIR_CONTEXT'
+    paths = [
+        r'I:\IMPORTANT DATA\DATA_2P\M183\training_CONTEXT',
+        r'I:\IMPORTANT DATA\DATA_2P\M184\training_CONTEXT',
+             ]
+    odors = [
+        ['pin', 'msy', '4mt', 'lim'],
+        ['pin', 'msy', '4mt', 'lim'],
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+           ]
+    timing_override = [True, True]
+    training_start_day = [0, 0]
+    # min_neurons = 46
+
 
 class OFC:
     name = 'OFC'
