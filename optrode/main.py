@@ -4,7 +4,7 @@ import os
 import scipy.io as io
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from optrode.helper_functions import _plot_firing_rate, _raster_plot, _plot_summary
+from optrode.helper_functions import _plot_firing_rate, _raster_plot, _plot_summary, _plot_graph
 
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
@@ -28,7 +28,7 @@ class JAWS_Config(Base_Config):
         self.t_after = 10 * self.conversion
         self.t_total = self.t_base + self.t_stim + self.t_after
         self.figure_path = os.path.join(self.base_path, 'OPTRODE','JAWS')
-        self.directory = r'D:\MANUSCRIPT_DATA\PHILIP\Peter Data\2017.02.05_Y2_1861'
+        self.directory = r'D:\MANUSCRIPT_DATA\OPTRODE\PHILIP\Peter Data\2017.02.05_Y2_1861'
         self.event_file = 'events_ChR2.mat'
         self.color = 'salmon'
         self.cells = [5, 10, 12]
@@ -42,7 +42,7 @@ class HALO_Config(Base_Config):
         self.t_after = 10 * self.conversion
         self.t_total = self.t_base + self.t_stim + self.t_after
         self.figure_path = os.path.join(self.base_path, 'OPTRODE','HALO')
-        self.directory = r'D:\MANUSCRIPT_DATA\ephys data - old'
+        self.directory = r'D:\MANUSCRIPT_DATA\OPTRODE\ephys data - old'
         self.event_file = 'events_HALO.mat'
         self.color = 'yellow'
         self.cells = [7, 10, 50, 77]
@@ -57,7 +57,7 @@ class HALO_10min_Config(Base_Config):
         self.t_after = 100 * self.conversion
         self.t_total = self.t_base + self.t_stim + self.t_after
         self.figure_path = os.path.join(self.base_path, 'OPTRODE','HALO_10min')
-        self.directory = r'D:\MANUSCRIPT_DATA\ephys data - old'
+        self.directory = r'D:\MANUSCRIPT_DATA\OPTRODE\ephys data - old'
         self.event_file = 'events_HALO.mat'
         self.color = 'yellow'
         self.cells = [7, 10, 50, 77]
@@ -95,7 +95,7 @@ def _raster_convert(mat, raster_bin):
         a.append(b)
     return a
 
-opt = 'HALO'
+opt = 'HALO_10min'
 
 if opt == 'JAWS':
     config = JAWS_Config()
@@ -184,6 +184,8 @@ data = [mean_before, mean_after]
 norm_data = [np.ones_like(mean_before), mean_after/mean_before]
 print(np.sum(mask))
 
-_plot_summary(data, ylim = [0, 22], yticks = [0, 10, 20], figure_path=figure_path, name ='spike_rate')
+_plot_graph(data, lim = [-1, 25], ticks = [0, 10, 20], figure_path= figure_path, name = 'graph_rate')
+
+_plot_summary(data, ylim = [-1, 22], yticks = [0, 10, 20], figure_path=figure_path, name ='spike_rate')
 _plot_summary(norm_data, ylim = [0, 1.3], yticks = [0, .5, 1],
               figure_path=figure_path, name ='spike_rate_normalized')

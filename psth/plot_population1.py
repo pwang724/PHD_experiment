@@ -32,7 +32,7 @@ class Base_Config(object):
         self.mouse = None #if not plotting big, the mouse id
         self.days = None #if not plotting big, the list of days to plot
 
-        self.independent_sort = False #whether to sort independently on a given day
+        self.independent_sort = True #whether to sort independently on a given day
         self.sort_days = None #if not independent sort, the day to align all other days to. if plot big, list of days for each mouse to sort to
 
         self.period = None
@@ -95,11 +95,12 @@ class OFC_LONGTERM_Config(Base_Config):
         super(OFC_LONGTERM_Config, self).__init__()
         self.condition = experimental_conditions.OFC_LONGTERM
         self.mouse = 0
-        self.days = [3, 6]
-        self.sort_day_ix = 0
+        self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        # self.independent_sort = True
+        self.independent_sort = False
+        self.sort_days = 3
         self.vlim = .25
-        self.threshold = .02
-        self.independent_sort = True
+        self.threshold = .03
         self.include_water = False
 
 class OFC_COMPOSITE_PT_Config(Base_Config):
@@ -399,7 +400,7 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         xticks = np.concatenate((odor_on_lines, odor_on_lines + 8))
 
     plt.xticks(xticks, '')
-    plt.yticks([])
+    plt.yticks(np.arange(0, image.shape[0], 50))
 
     for line in condition_lines:
         plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.5)
@@ -407,8 +408,8 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
     for j, x in enumerate(odor_on_lines_raw):
         plt.text(x, -1, titles[j].upper())
 
-    ax = fig.add_axes(rect_cb)
-    cb = plt.colorbar(cax=ax, ticks=[-condition_config.vlim, condition_config.vlim])
+    axcb = fig.add_axes(rect_cb)
+    cb = plt.colorbar(cax=axcb, ticks=[-condition_config.vlim, condition_config.vlim])
 
     if black:
         cb.outline.set_visible(False)
@@ -429,6 +430,8 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         if not condition_config.independent_sort:
             name += '_sorted_to_' + str(condition_config.sort_days)
 
+    plt.sca(ax)
+    plt.title(name)
     plot._easy_save(save_path, name)
 
 def sort_helper(list_of_psth, odor_on, water_on, condition_config):
@@ -447,7 +450,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = BLA_Config()
+condition_config = OFC_LONGTERM_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

@@ -4,6 +4,28 @@ from scipy.stats import sem
 from format import ax_args
 from plot import _easy_save
 
+def _plot_graph(data, lim, ticks, figure_path, name):
+    fig_size = (2, 1.5)
+    fig = plt.figure(figsize=fig_size)
+    rect = [.2, .3, .6, .6]
+    ax = fig.add_axes(rect, **ax_args)
+
+    plt.plot(data[0], data[1], '.', color='k', markersize=2, alpha=0.5)
+
+    plt.xlim(lim)
+    plt.ylim(lim)
+    plt.yticks(ticks, ticks)
+    plt.xticks(ticks, ticks)
+    plt.xlabel('Firing Rate (Laser OFF)')
+    plt.ylabel('Firing Rate (Laser ON)')
+    plt.text(-.2, lim[1], 'Baseline: {0:.2f}, Inhibition: {1:.2f}'.format(np.mean(data[0]), np.mean(data[1])))
+
+    ax.spines['top'].set_visible(False)
+    ax.spines['right'].set_visible(False)
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+    _easy_save(figure_path, name=name, pdf=True)
+
 def _plot_summary(data, ylim, yticks, figure_path, name):
     fig_size = (2, 1.5)
     fig = plt.figure(figsize=fig_size)
