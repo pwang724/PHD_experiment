@@ -10,6 +10,7 @@ def save_pickle(save_path, save_name, data):
     save_pathname = os.path.join(save_path, save_name + '.pkl')
     with open(save_pathname, "wb") as f:
         pickle.dump(data, f)
+        print(save_pathname)
 
 def load_pickle(pickle_path):
     with open(pickle_path, "rb") as f:

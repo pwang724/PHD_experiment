@@ -59,7 +59,7 @@ def significance_str(x, y, val):
     return str
 
 
-def _easy_save(path, name, dpi=300, pdf=True):
+def _easy_save(path, name, dpi=300, pdf=True, close=True):
     '''
     convenience function for saving figs while taking care of making folders
     :param path: save path
@@ -75,7 +75,9 @@ def _easy_save(path, name, dpi=300, pdf=True):
 
     if pdf:
         plt.savefig(os.path.join(figname + '.pdf'), transparent=True)
-    plt.close()
+
+    if close:
+        plt.close()
 
 
 def _string_to_index(xdata):

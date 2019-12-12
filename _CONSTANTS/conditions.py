@@ -14,12 +14,12 @@ def all_conditions():
 
 class PIR:
     name = 'PIR'
-    paths = ['E:/IMPORTANT DATA/DATA_2P/M183/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M184/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M199_pir/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M200_pir/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M201_pir/training_LEARNING',
-             'E:/IMPORTANT DATA/DATA_2P/M202_pir/training_LEARNING']
+    paths = ['I:/IMPORTANT DATA/DATA_2P/M183/training_LEARNING',
+             'I:/IMPORTANT DATA/DATA_2P/M184/training_LEARNING',
+             'I:/IMPORTANT DATA/DATA_2P/M199_pir/training_LEARNING',
+             'I:/IMPORTANT DATA/DATA_2P/M200_pir/training_LEARNING',
+             'I:/IMPORTANT DATA/DATA_2P/M201_pir/training_LEARNING',
+             'I:/IMPORTANT DATA/DATA_2P/M202_pir/training_LEARNING']
     odors = [
         ['pin', 'msy', '4mt', 'lim'],
         ['pin', 'msy', '4mt', 'lim'],
@@ -85,11 +85,11 @@ class PIR_CONTEXT:
 class OFC:
     name = 'OFC'
     paths = [
-        'E:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
-        'E:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING'
+        'I:/IMPORTANT DATA/DATA_2P/M187_ofc/training_LEARNING',
+        'I:/IMPORTANT DATA/DATA_2P/M188_ofc/training_LEARNING',
+        'I:/IMPORTANT DATA/DATA_2P/M206_ofc/training_LEARNING',
+        'I:/IMPORTANT DATA/DATA_2P/M233_ofc/training_LEARNING',
+        'I:/IMPORTANT DATA/DATA_2P/M234_ofc/training_LEARNING'
     ]
     odors = [
         ['pin', 'msy', 'euy', 'lim'],
@@ -187,10 +187,10 @@ class OFC_REVERSAL:
 class OFC_LONGTERM:
     name = 'OFC_LONGTERM'
     paths = [
-        'E:/IMPORTANT DATA/DATA_2P/M230_ofc/training_LONGTERM',
-        'E:/IMPORTANT DATA/DATA_2P/M232_ofc/training_LONGTERM',
-        'E:/IMPORTANT DATA/DATA_2P/M239_ofc/training_LONGTERM',
-        'E:/IMPORTANT DATA/DATA_2P/M241_ofc/training_LONGTERM'
+        'I:/IMPORTANT DATA/DATA_2P/M230_ofc/training_LONGTERM',
+        'I:/IMPORTANT DATA/DATA_2P/M232_ofc/training_LONGTERM',
+        'I:/IMPORTANT DATA/DATA_2P/M239_ofc/training_LONGTERM',
+        'I:/IMPORTANT DATA/DATA_2P/M241_ofc/training_LONGTERM'
     ]
     odors = [
         ['pin', 'msy', 'euy', 'lim'],
@@ -234,10 +234,10 @@ class BEHAVIOR_OFC_MUSH_JAWS:
 class OFC_COMPOSITE:
     name = 'OFC_COMPOSITE'
     paths = [
-        'E:/IMPORTANT DATA/DATA_2P/M2_OFC/training', #days 1-4
-        'E:/IMPORTANT DATA/DATA_2P/M3_OFC/training', #days 1-4
-        'E:/IMPORTANT DATA/DATA_2P/M4_OFC/training', #days 1-6
-        'E:/IMPORTANT DATA/DATA_2P/M5_OFC/training', #days 1-4
+        'I:/IMPORTANT DATA/DATA_2P/M2_OFC/training', #days 1-4
+        'I:/IMPORTANT DATA/DATA_2P/M3_OFC/training', #days 1-4
+        'I:/IMPORTANT DATA/DATA_2P/M4_OFC/training', #days 1-6
+        'I:/IMPORTANT DATA/DATA_2P/M5_OFC/training', #days 1-4
              ]
     dt_odors = [
         ['pin', 'msy', 'euy', 'lim'],
@@ -276,10 +276,10 @@ class OFC_COMPOSITE:
 class MPFC_COMPOSITE:
     name = 'MPFC_COMPOSITE'
     paths = [
-        'E:/IMPORTANT DATA/DATA_2P/M2_MPFC/training',   #days 1-3
-        'E:/IMPORTANT DATA/DATA_2P/M3_MPFC/training',   #days 1-3
-        'E:/IMPORTANT DATA/DATA_2P/M4_MPFC/training',   #days 1-4
-        'E:/IMPORTANT DATA/DATA_2P/M6_MPFC/training'    #days 1-4
+        'I:/IMPORTANT DATA/DATA_2P/M2_MPFC/training',   #days 1-3
+        'I:/IMPORTANT DATA/DATA_2P/M3_MPFC/training',   #days 1-3
+        'I:/IMPORTANT DATA/DATA_2P/M4_MPFC/training',   #days 1-4
+        'I:/IMPORTANT DATA/DATA_2P/M6_MPFC/training'    #days 1-4
     ]
     dt_odors = [
         ['pin', 'msy', 'euy', 'lim'],
