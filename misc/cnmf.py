@@ -8,10 +8,154 @@ import numpy as np
 from _CONSTANTS.config import Config
 import _CONSTANTS.conditions as conditions
 import tools.file_io
+from scipy.ndimage.measurements import center_of_mass
+import matplotlib as mpl
+
+plt.style.use('default')
+mpl.rcParams['pdf.fonttype'] = 42
+mpl.rcParams['ps.fonttype'] = 42
+mpl.rcParams['font.family'] = 'arial'
+
+def ani_frame(save_path, fps=30):
+    def plot():
+        plt.style.use('dark_background')
+        widths = [1, 1, 1]
+        heights = [4, 1, 1, 1]
+        gs_kw = dict(width_ratios=widths, height_ratios=heights)
+        fig, axs = plt.subplots(4, 3, figsize=(16, 10), constrained_layout=True,
+                                gridspec_kw=gs_kw)
+
+        stacks = [raw, bg, denoised]
+        titles = ['Raw (After Registration)',
+                  'Synchronized Background Activity',
+                  'Denoised']
+        ims = []
+        for i in range(len(stacks)):
+            ax = axs[0, i]
+            curdata = stacks[i][0]
+            min, max = np.min(curdata), np.max(curdata)
+            im = ax.imshow(curdata, cmap='gray', vmax=max + 1000)
+            for mask in roi_masks:
+                ax.imshow(mask, 'binary', interpolation=None, alpha=1)
+            for j, centroid in enumerate(centroids):
+                ax.text(centroid[1], centroid[0]-15, str(j+1), fontsize=15)
+            ax.axis('image')
+            ax.axis('off')
+            ax.set_title(titles[i])
+            ims.append(im)
+
+        roi_ims = []
+        for i, roimovie in enumerate(roi_movies):
+            ax = axs[1, i]
+            im = ax.imshow(roimovie[0], cmap='gray', vmin=0, vmax=4)
+            ax.axis('image')
+            ax.axis('off')
+            ax.set_title('ROI {}'.format(str(i+1)))
+            roi_ims.append(im)
+
+        def style_helper(ax, ylim, ylabel, show_xlabel=True, show_ylabel=True):
+            ax.grid(False)
+            ax.tick_params(axis=u'both', which=u'both', length=0)
+            ax.set_xlim([0, window])
+            ax.set_ylim(ylim)
+            ax.set_yticks(ylim)
+            ax.set_xticks([0, 88, 176])
+            ax.set_xticklabels([0, 20, 40])
+            if show_ylabel:
+                ax.set_ylabel(ylabel)
+            if show_xlabel:
+                ax.set_xlabel('Time (s)')
+            for loc in ['bottom', 'top', 'left', 'right']:
+                ax.spines[loc].set_visible(False)
+
+        lines_noisy = []
+        for i, trace in enumerate(traces_noisy):
+            if i == 0:
+                ylabel = True
+            else:
+                ylabel = False
+            ax = axs[2, i]
+            line, = ax.plot(trace[0])
+            style_helper(ax, ylim1, ylabel='F (AU)',
+                         show_xlabel=False, show_ylabel=ylabel)
+            lines_noisy.append(line)
+
+        lines = []
+        for i, trace in enumerate(traces_denoised):
+            if i == 0:
+                ylabel = True
+            else:
+                ylabel = False
+
+            ax = axs[3, i]
+            line, = ax.plot(trace[0])
+            style_helper(ax, ylim, ylabel= 'DF/F',
+                         show_ylabel=ylabel)
+            lines.append(line)
+
+        return fig, ims, roi_ims, lines, lines_noisy
+
+    def update_img(n):
+        ims[0].set_data(raw[n])
+        ims[1].set_data(bg[n])
+        ims[2].set_data(denoised[n])
+        for i, im in enumerate(roi_ims):
+            im.set_data(roi_movies[i][n])
+
+        for i, line in enumerate(lines):
+            if n < window:
+                x = np.arange(n)
+                y = traces_denoised[i][:n]
+            else:
+                x = np.arange(window)
+                y = traces_denoised[i][n - window:n]
+            line.set_xdata(x)
+            line.set_ydata(y)
+
+        for i, line in enumerate(lines_noisy):
+            if n < window:
+                x = np.arange(n)
+                y = traces_noisy[i][:n]
+            else:
+                x = np.arange(window)
+                y = traces_noisy[i][n - window:n]
+            line.set_xdata(x)
+            line.set_ydata(y)
+        if n % 10 == 0:
+            print(n)
+        # return ims, roi_ims, lines, lines_noisy
+
+    fig, ims, roi_ims, lines, lines_noisy = plot()
+    ani = animation.FuncAnimation(fig, update_img, end_frame, interval=1)
+    writer = animation.writers['ffmpeg'](fps=fps)
+    ani.save(os.path.join(save_path, mouse + '__' + date + '.mp4'), writer=writer)
+    return ani
 
 mouse = 'M232_ofc'
 date = '05-30-2017'
 reload = True
+
+start_frame = 0
+end_frame = 1500
+ylim = [0.9, 2]
+ylim1 = [0, 20]
+window = 200
+roi_ixs = [2, 67, 78]
+pad = 20
+
+# load images
+d = os.path.join('I:\IMPORTANT DATA\DATA_X', mouse, date)
+start_time = time.time()
+raw_dir = glob.glob(os.path.join(d, '*z'))
+d_raw = glob.glob(os.path.join(raw_dir[0], '*.tif'))[0]
+raw = io.imread(d_raw)[start_frame:end_frame]
+d_bg = os.path.join(d, 'bg.tif')
+bg = io.imread(d_bg)[start_frame:end_frame]
+d_residual = os.path.join(d, 'res.tif')
+residual = io.imread(d_residual)[start_frame:end_frame]
+d_denoised = os.path.join(d, 'den_bg.tif')
+denoised = io.imread(d_denoised)[start_frame:end_frame]
+print('finished reading : {} s'.format(time.time() - start_time))
 
 # load ROIs
 data_directory = Config().LOCAL_DATA_PATH
@@ -39,64 +183,51 @@ else:
     print(roiT.shape)
     print(signal.shape)
 
-# load images
-d = os.path.join('I:\IMPORTANT DATA\DATA_X', mouse, date)
-start_frame = 1
-end_frame = 50
+# make ROI movies
+roi_movies = []
+centroids = []
+for r in roi_ixs:
+    temporal = signal[r].reshape(-1,1)
+    spatial = roiT[r].reshape(1,-1)
+    out = np.matmul(temporal, spatial)
+    outR = out.reshape(out.shape[0], roiT.shape[1], roiT.shape[2])
 
-start_time = time.time()
+    comy, comx = np.round(center_of_mass(outR[0])).astype(int)
+    outSmall = outR[:, comy - pad:comy + pad, comx - pad:comx + pad]
+    centroids.append([comy, comx])
+    roi_movies.append(outSmall)
 
-raw_dir = glob.glob(os.path.join(d, '*z'))
-d_raw = glob.glob(os.path.join(raw_dir[0], '*.tif'))[0]
-raw = io.imread(d_raw)
-print(raw.shape)
+# make ROI outlines
+from scipy.ndimage.morphology import binary_erosion
+roi_edges = []
+roi_masks = []
+for r in roi_ixs:
+    t = roiT[r] > 0
+    edge = t - binary_erosion(t)
+    masked = np.ma.masked_where(edge == 0, edge)
+    roi_edges.append(edge)
+    roi_masks.append(masked)
 
-# d_bg = os.path.join(d, 'bg.tif')
-# bg = io.imread(d_bg)
+# make ROI outlines
+from scipy.ndimage.morphology import binary_erosion
+roi_edges = []
+roi_masks = []
+for r in roi_ixs:
+    t = roiT[r] > 0
+    edge = t - binary_erosion(t)
+    masked = np.ma.masked_where(edge == 0, edge)
+    roi_edges.append(edge)
+    roi_masks.append(masked)
 
-# d_residual = os.path.join(d, 'res.tif')
-# residual = io.imread(d_residual)
+#make ROI traces
+traces_denoised = signal[np.array(roi_ixs)]
+traces_noisy = []
+for r in roi_ixs:
+    trace_roi = np.multiply(raw, roiT[r])
+    trace_noisy = np.mean(trace_roi, axis=(1, 2))
+    traces_noisy.append(trace_noisy)
 
-# d_denoised = os.path.join(d, 'den_bg.tif')
-# denoised = io.imread(d_denoised)
+save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'MISC','CNMF')
 
-print('finished reading : {} s'.format(time.time() - start_time))
-
-plt.figure(figsize=(15,3))
-plt.plot(signal[0])
-
-element_mult = np.multiply(raw, roiT[0])
-raw_trace = np.mean(element_mult, axis=(1,2))
-plt.figure(figsize=(15,3))
-plt.plot(raw_trace)
-
-
-#
-#
-#
-#
-# def ani_frame(fps = 30):
-#     def plot_weights():
-#         fig, axs = plt.subplots(2, 2, figsize=(8, 8))
-#         plt.style.use('dark_background')
-#
-#         im0 = axs[0].imshow(raw[0], cmap='gray')
-#         axs[0].axis('tight')
-#         axs[0].axis('off')
-#         axs[0].set_title('raw')
-#         for loc in ['bottom', 'top', 'left', 'right']:
-#             axs.spines[loc].set_visible(False)
-#         return fig, im0
-#
-#     def update_img(n):
-#         im0.set_data(raw[n,:,:])
-#         return im0
-#
-#     fig, im0 = plot_weights()
-#     ani = animation.FuncAnimation(fig, update_img, end_frame, interval=1)
-#     writer = animation.writers['ffmpeg'](fps=fps)
-#     dpi = 200
-#     ani.save('help.mp4', writer=writer, dpi=dpi)
-#     return ani
-#
-# ani_frame(fps=30)
+ani_frame(save_path, fps=30)
+print('done')
