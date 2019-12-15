@@ -34,7 +34,7 @@ def ani_frame(save_path, fps=30):
             ax = axs[0, i]
             curdata = stacks[i][0]
             min, max = np.min(curdata), np.max(curdata)
-            im = ax.imshow(curdata, cmap='gray', vmax=max + 1000)
+            im = ax.imshow(curdata, cmap='gray', vmax=max + 1500)
             for mask in roi_masks:
                 ax.imshow(mask, 'binary', interpolation=None, alpha=1)
             for j, centroid in enumerate(centroids):
@@ -140,7 +140,8 @@ end_frame = 1500
 ylim = [0.9, 2]
 ylim1 = [0, 20]
 window = 200
-roi_ixs = [2, 67, 78]
+# roi_ixs = [2, 69, 78]
+roi_ixs = [2, 69, 39]
 pad = 20
 
 # load images
