@@ -114,6 +114,7 @@ def convert(res, condition, includeRaw = False):
             if odor in relevant_odors:
                 # start = int(res['DAQ_O_OFF'][i] * res['DAQ_SAMP'][i])
                 # start = int((res['DAQ_O_ON'][i]) * res['DAQ_SAMP'][i])
+                start_odor = int((res['DAQ_O_ON'][i]) * res['DAQ_SAMP'][i])
                 start = int((res['DAQ_W_ON'][i]-1) * res['DAQ_SAMP'][i])
                 end = int(res['DAQ_W_ON'][i] * res['DAQ_SAMP'][i])
                 end_coll = int((res['DAQ_W_ON'][i] + 1) * res['DAQ_SAMP'][i])
@@ -121,10 +122,12 @@ def convert(res, condition, includeRaw = False):
 
                 if odor in csms:
                     end += int(config.extra_csm_time * res['DAQ_SAMP'][i])
+                n_licks_baseline = _parseLick(lick_data, 0, start_odor)
                 n_licks = _parseLick(lick_data, start, end)
                 n_licks_coll = _parseLick(lick_data, end, end_coll)
 
                 new_res['odor'].append(odor)
+                new_res['lick_baseline'].append(n_licks_baseline)
                 new_res['lick'].append(n_licks)
                 new_res['lick_collection'].append(n_licks_coll)
                 new_res['ix'].append(j)
@@ -150,6 +153,8 @@ def agglomerate_days(res, condition, first_day, last_day):
             filtered_res = filter.filter(res, filter_dict)
             temp_res = reduce_by_concat(filtered_res, 'lick', rank_keys=['day', 'ix'])
             temp_res_ = reduce_by_concat(filtered_res, 'lick_collection', rank_keys=['day', 'ix'])
+            temp_res__ = reduce_by_concat(filtered_res, 'lick_baseline', rank_keys=['day', 'ix'])
+            temp_res['lick_baseline'] = temp_res__['lick_baseline']
             temp_res['lick_collection'] = temp_res_['lick_collection']
             temp_res['day'] = np.array(sorted(filtered_res['day']))
             temp_res['trial'] = np.arange(len(temp_res['lick']))

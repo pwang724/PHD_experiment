@@ -742,5 +742,100 @@ class BEHAVIOR_OFC_JAWS_DISCRIMINATION:
     training_start_day = [0, 0, 0,0,0, 0]
     # last_pt_day = [3, 3, 2, 2]
 
+class BEHAVIOR_OFC_OUTPUT_CHANNEL:
+    name = 'BEHAVIOR_OFC_OUTPUT_CHANNEL'
+    paths = [
+        '/Users/peterwang/Desktop/DATA_2P/AH08_OUTPUT_CHANNEL',
+        '/Users/peterwang/Desktop/DATA_2P/AH09_OUTPUT_CHANNEL',
+        '/Users/peterwang/Desktop/DATA_2P/AH10_OUTPUT_CHANNEL',
+        '/Users/peterwang/Desktop/DATA_2P/AH11_OUTPUT_CHANNEL',
+        '/Users/peterwang/Desktop/DATA_2P/AH14_OUTPUT_CHANNEL',
+        '/Users/peterwang/Desktop/DATA_2P/AH19_OUTPUT_CHANNEL',
+        '/Users/peterwang/Desktop/DATA_2P/AH20_OUTPUT_CHANNEL',
+    ]
+    pt_odors = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    pt_csp = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    dt_odors = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    dt_csp = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    timing_override = [True, True, True, True, True, True, True]
+    training_start_day = [0, 0, 0, 0, 0, 0, 0]
+
+class BEHAVIOR_OFC_OUTPUT_YFP:
+    name = 'BEHAVIOR_OFC_OUTPUT_YFP'
+    paths = [
+        '/Users/peterwang/Desktop/DATA_2P/AH16_OUTPUT_YFP',
+        '/Users/peterwang/Desktop/DATA_2P/AH18_OUTPUT_YFP',
+        '/Users/peterwang/Desktop/DATA_2P/AH21_OUTPUT_YFP',
+        '/Users/peterwang/Desktop/DATA_2P/AH24_OUTPUT_YFP',
+        '/Users/peterwang/Desktop/DATA_2P/AH25_OUTPUT_YFP',
+        '/Users/peterwang/Desktop/DATA_2P/AH26_OUTPUT_YFP',
+    ]
+    pt_odors = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    pt_csp = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    dt_odors = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    dt_csp = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    timing_override = [True, True, True, True, True, True]
+    training_start_day = [0, 0, 0, 0, 0, 0]
+
 
 
