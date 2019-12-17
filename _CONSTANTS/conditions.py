@@ -531,6 +531,44 @@ class BEHAVIOR_OFC_MUSH_JAWS_HALO:
     timing_override = [True] * 9
     training_start_day = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 
+class BEHAVIOR_OFC_MUSH_JAWS_HALO:
+    name = 'BEHAVIOR_OFC_JAWS_HALO_MUSH'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_HALO\PN14',
+        'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_HALO\PN15',
+        'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_HALO\PN16',
+        'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_HALO\PN17',
+        'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_HALO\PN18',
+        'I:\IMPORTANT DATA\DATA_2P/M222_jawsofc_bla/training_LEARNING',
+        'I:\IMPORTANT DATA\DATA_2P/M226_jawsofc_bla/training_LEARNING',
+        'I:\IMPORTANT DATA\DATA_2P/M227_jawsofc_bla/training_LEARNING',
+        'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_JAWS_BLA_IMAGING/M221_jawsofc_bla',
+    ]
+    odors = [
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim'],
+        ['pin', 'msy', 'euy', 'lim']
+    ]
+    csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+    ]
+    timing_override = [True] * 9
+    training_start_day = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+
 
 class BEHAVIOR_OFC_YFP_PRETRAINING:
     name = 'BEHAVIOR_OFC_YFP_PRETRAINING'
