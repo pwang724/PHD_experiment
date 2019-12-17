@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
 import os
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 import seaborn as sns
 
 plt.style.use('default')
@@ -89,13 +89,15 @@ def _string_to_index(xdata):
     nice_labels = [nice_names(key) for key in labels]
     return indices, nice_labels
 
-def _plot(plot_function, x, y, color, label, plot_args):
+def _plot(plot_function, x, y, color, label, plot_args, xjitter= 0):
     if x.dtype == 'O' and y.dtype == 'O':
         # print('plotted O')
         for i in range(x.shape[0]):
+            # xj = x[i] + np.random.uniform(low=-xjitter,high=xjitter, size=x[i].shape)
             plot_function(x[i], y[i], color=color, label=label, **plot_args)
     else:
         x = np.squeeze(x)
+        # xj = x + np.random.uniform(low=-xjitter, high=xjitter, size=x.shape)
         y = np.squeeze(y)
         plot_function(x, y, color=color, label=label, **plot_args)
 
@@ -130,6 +132,7 @@ def _plot_fill(plot_function, x, y, err, color, label, plot_args):
 def plot_results(res, x_key, y_key, loop_keys =None,
                  select_dict=None, path=None, colors= None, colormap='cool',
                  plot_function= plt.plot, ax_args={}, plot_args={},
+                 xjitter = 0,
                  save = True, reuse = False, twinax = False, sort = False, error_key = '_sem',
                  fig_size = (2, 1.5), rect = (.2, .2, .6, .6), legend = True, name_str = ''):
     '''
@@ -201,10 +204,13 @@ def plot_results(res, x_key, y_key, loop_keys =None,
             error_plot = res[error_key][plot_ix]
             _plot_fill(plot_function, x_plot, y_plot, error_plot, color=color, label=label, plot_args=plot_args)
         elif plot_function == sns.swarmplot:
-            sns.swarmplot(x = x_key, y = y_key, hue=loop_keys[0], data=res, **plot_args)
+            t = defaultdict(list)
+            for k, v in res.items():
+                t[k] = res[k][plot_ix]
+            sns.swarmplot(x = x_key, y = y_key, hue=loop_keys[0], data=t, **plot_args)
             ax.get_legend().remove()
         else:
-            _plot(plot_function, x_plot, y_plot, color=color, label=label, plot_args=plot_args)
+            _plot(plot_function, x_plot, y_plot, color=color, label=label, plot_args=plot_args, xjitter=xjitter)
 
     #format
     # plt.xticks(rotation=45)

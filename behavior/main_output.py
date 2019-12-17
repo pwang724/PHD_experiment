@@ -23,11 +23,7 @@ mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
-    # 'licks_per_day',
-    # 'summary',
-    # 'mean_sem',
-    # 'trials_to_criterion',
-    'cdf'
+    'trials_to_criterion',
 ]
 
 conditions = [
@@ -69,145 +65,6 @@ lick_smoothed = 'lick_smoothed'
 boolean_smoothed = 'boolean_smoothed'
 boolean_sem = 'boolean_smoothed_sem'
 lick_sem = 'lick_smoothed_sem'
-
-if 'individual' in experiments:
-    line_args_copy = line_args.copy()
-    line_args_copy.update({'markersize':0})
-
-    for res, condition in zip(list_of_res, conditions):
-        save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR', condition.name)
-        colors = ['green', 'lime', 'red', 'maroon']
-
-        mice = np.unique(res['mouse'])
-        for i, mouse in enumerate(mice):
-            select_dict = {'mouse': mouse, 'odor': condition.pt_odors[i]}
-            plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=ax_args_pt, plot_args=line_args_copy,
-                              path=save_path)
-            plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
-                              select_dict=select_dict, colors=colors, ax_args=bool_ax_args_pt, plot_args=line_args_copy,
-                              path=save_path)
-
-if 'cdf' in experiments:
-    ctrl = filter.filter(all_res, {'condition':'YFP'})
-    channel = filter.filter(all_res, {'condition':'CHANNEL'})
-    ctrl_licks = ctrl['lick']
-    channel_licks = channel['lick']
-
-    # #shorten
-    # ctrl_min = np.min([len(x) for x in ctrl_licks])
-    # channel_min = np.min([len(x) for x in channel_licks])
-    # both_min = np.min([ctrl_min, channel_min])
-    # _shorten = lambda array, length: [x[:length] for x in array]
-    # ctrl_licks = _shorten(ctrl_licks, both_min)
-    # channel_licks = _shorten(channel_licks, both_min)
-
-    #concatenate
-    ctrl_licks = np.concatenate(ctrl_licks)
-    channel_licks = np.concatenate(channel_licks)
-
-    #get cdf
-    range = [-.1, 13]
-    def _cdf(data, range):
-        num_bins = np.arange(range[0], range[1], .1)
-        counts, bin_edges = np.histogram(data, bins=num_bins, range=range)
-        counts = counts / np.sum(counts)
-        cdf = np.cumsum(counts)
-        return cdf, bin_edges
-
-    ctrl_cdf, edges = _cdf(ctrl_licks, range)
-    channel_cdf, _ = _cdf(channel_licks, range)
-
-    #plot cdf
-    res = defaultdict(list)
-    res['condition'] = ['YFP', 'CHANNEL']
-    res['lick'] = [edges[1:], edges[1:]]
-    res['cdf'] = [ctrl_cdf, channel_cdf]
-    for k, v in res.items():
-        res[k] = np.array(v)
-
-    line_args_copy = line_args.copy()
-    line_args_copy.update({'marker': None, 'linewidth':1})
-    plot.plot_results(res, x_key='lick', y_key='cdf', loop_keys='condition', colors=['blue','black'],
-                      plot_args=line_args_copy,
-                      path=save_path_all)
-
-if 'summary' in experiments:
-    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=lick_smoothed)
-    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=boolean_smoothed)
-
-    line_args_copy = line_args.copy()
-    line_args_copy.update({'marker': None, 'linewidth':.75})
-
-    valences = np.unique(all_res['odor_valence'])
-    for valence in valences:
-        color = [color_dict[valence]]
-        color.append('black')
-
-        path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, loop_keys= 'condition',
-                                       colors=color, select_dict={'odor_valence':valence},
-                                       ax_args=bool_ax_args_pt, plot_args=line_args_copy,
-                                       reuse = False, save=False,
-                                       path=save_path_all)
-        c = behavior.behavior_config.behaviorConfig()
-        y = c.fully_learned_threshold_up
-        plt.plot(plt.xlim(), [y, y], '--', color = 'gray', linewidth =.5)
-        plot._easy_save(path=path, name=name)
-
-        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, loop_keys= 'condition',
-                          colors=color, select_dict={'odor_valence':valence},
-                          ax_args=ax_args_pt, plot_args=line_args_copy,
-                          reuse = False, save=True,
-                          path=save_path_all)
-
-if 'mean_sem' in experiments:
-    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence'], reduce_key=lick_smoothed,
-                                            regularize='max')
-    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence'], reduce_key=boolean_smoothed,
-                                            regularize='max')
-
-    line_args_copy = line_args.copy()
-    line_args_copy.update({'marker': None, 'linewidth':.75})
-
-    valences = np.unique(all_res['odor_valence'])
-    for valence in valences:
-        color = [color_dict[valence]]
-        color.append('black')
-
-        path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed,
-                                       loop_keys= 'condition',
-                                       colors=color, select_dict={'odor_valence':valence},
-                                       ax_args=bool_ax_args_pt, plot_args=line_args_copy,
-                                       save=False,
-                                       path=save_path_all)
-
-        plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, error_key='boolean_smoothed_sem',
-                          loop_keys= 'condition',
-                          colors= color, select_dict={'odor_valence':valence},
-                          ax_args=bool_ax_args_pt, plot_args= fill_args,
-                          save = False, reuse=True,
-                          plot_function= plt.fill_between,
-                          path=save_path_all)
-
-        c = behavior.behavior_config.behaviorConfig()
-        y = c.fully_learned_threshold_up
-        plt.plot(plt.xlim(), [y, y], '--', color = 'gray', linewidth =.5)
-        plot._easy_save(path=path, name=name + '_mean_sem')
-
-        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed,
-                                       loop_keys= 'condition',
-                                       colors=color, select_dict={'odor_valence':valence},
-                                       ax_args=ax_args_pt, plot_args=line_args_copy,
-                                       save=False,
-                                       path=save_path_all)
-
-        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key='lick_smoothed_sem',
-                          loop_keys= 'condition',
-                          colors= color, select_dict={'odor_valence':valence},
-                          ax_args=ax_args_pt, plot_args= fill_args,
-                          save = True, reuse=True,
-                          plot_function= plt.fill_between,
-                          path=save_path_all, name_str='_mean_sem')
 
 if 'trials_to_criterion' in experiments:
     reduce_key = 'criterion'
@@ -251,22 +108,4 @@ if 'trials_to_criterion' in experiments:
     #stats
     print(mean_std_res[x_key])
     print(mean_std_res[reduce_key])
-    ix_a = all_res[x_key] == 'YFP_CS+'
-    ix_b = all_res[x_key] == 'INH_CS+'
-    ix_c = all_res[x_key] == 'YFP_CS-'
-    ix_d = all_res[x_key] == 'INH_CS-'
-    from scipy.stats import ranksums
-    rsplus = ranksums(all_res[reduce_key][ix_a], all_res[reduce_key][ix_b])
-    rsminus = ranksums(all_res[reduce_key][ix_c], all_res[reduce_key][ix_d])
-    print(rsplus)
-    print(rsminus)
-
-    try:
-        ix_e = all_res[x_key] == 'YFP_PT CS+'
-        ix_f = all_res[x_key] == 'INH_PT CS+'
-        rspt = ranksums(all_res[reduce_key][ix_e], all_res[reduce_key][ix_f])
-        print(all_res[reduce_key][ix_e])
-        print(all_res[reduce_key][ix_f])
-        print(rspt)
-    except:
-        print('no pt')
+    print(mean_std_res[reduce_key + '_sem'])

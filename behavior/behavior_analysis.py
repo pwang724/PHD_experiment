@@ -70,7 +70,7 @@ def analyze_behavior(data_path, condition):
     last_day_per_mouse = np.array([x[-1] for x in days_per_mouse])
     plot_res = agglomerate_days(lick_res, condition, condition.training_start_day, last_day_per_mouse)
     add_odor_value(plot_res, condition)
-    add_behavior_stats(plot_res)
+    add_behavior_stats(plot_res, condition)
     return plot_res
 
 def convert(res, condition, includeRaw = False):
@@ -80,11 +80,23 @@ def convert(res, condition, includeRaw = False):
     :param condition:
     :return:
     '''
-    def _parseLick(mat, start, end):
+    def _get_number_of_licks(mat, start, end):
         mask = mat > 1
         on_off = np.diff(mask, n=1)
         n_licks = np.sum(on_off[start:end] > 0)
         return n_licks
+
+    def _get_time_of_first_lick(mat, start, end, sample_rate):
+        mask = mat > 1
+        on_off = np.diff(mask, n=1)[start:end]
+        if any(on_off):
+            ix = np.argwhere(on_off)[0][0]
+            ix /= sample_rate
+        else:
+            ix = -1
+        return ix
+
+
 
     config = behaviorConfig()
     new_res = defaultdict(list)
@@ -122,10 +134,13 @@ def convert(res, condition, includeRaw = False):
 
                 if odor in csms:
                     end += int(config.extra_csm_time * res['DAQ_SAMP'][i])
-                n_licks_baseline = _parseLick(lick_data, 0, start_odor)
-                n_licks = _parseLick(lick_data, start, end)
-                n_licks_coll = _parseLick(lick_data, end, end_coll)
 
+                time_first_lick = _get_time_of_first_lick(lick_data, start_odor, end, res['DAQ_SAMP'][i])
+                n_licks_baseline = _get_number_of_licks(lick_data, 0, start_odor)
+                n_licks = _get_number_of_licks(lick_data, start, end)
+                n_licks_coll = _get_number_of_licks(lick_data, end, end_coll)
+
+                new_res['time_first_lick'].append(time_first_lick)
                 new_res['odor'].append(odor)
                 new_res['lick_baseline'].append(n_licks_baseline)
                 new_res['lick'].append(n_licks)
@@ -154,6 +169,8 @@ def agglomerate_days(res, condition, first_day, last_day):
             temp_res = reduce_by_concat(filtered_res, 'lick', rank_keys=['day', 'ix'])
             temp_res_ = reduce_by_concat(filtered_res, 'lick_collection', rank_keys=['day', 'ix'])
             temp_res__ = reduce_by_concat(filtered_res, 'lick_baseline', rank_keys=['day', 'ix'])
+            temp_res___ = reduce_by_concat(filtered_res, 'time_first_lick', rank_keys=['day', 'ix'])
+            temp_res['time_first_lick'] = temp_res___['time_first_lick']
             temp_res['lick_baseline'] = temp_res__['lick_baseline']
             temp_res['lick_collection'] = temp_res_['lick_collection']
             temp_res['day'] = np.array(sorted(filtered_res['day']))
@@ -209,7 +226,7 @@ def get_roc(res):
     return res_
 
 
-def add_behavior_stats(res, arg ='normal'):
+def add_behavior_stats(res, condition, arg ='normal'):
     '''
 
     :param res:
@@ -285,6 +302,20 @@ def add_behavior_stats(res, arg ='normal'):
     else:
         rules_lick = config.rules_single_phase_lick
         rules_boolean = config.rules_single_phase_boolean
+
+    if 'OUTPUT' in condition.name:
+        rules_lick = config.rules_output_lick
+        rules_boolean = config.rules_output_boolean
+
+    for i, v in enumerate(res['time_first_lick']):
+        res['time_first_lick'][i] = v[v > -1]
+        res['time_first_lick_trial'].append(res['trial'][i][v > -1])
+        time_first_lick = res['time_first_lick'][i]
+        time_filter = config.smoothing_window_first_lick
+        if len(time_first_lick) < time_filter:
+            res['time_first_lick_smoothed'].append(time_first_lick)
+        else:
+            res['time_first_lick_smoothed'].append(_filter(time_first_lick, time_filter))
 
     for i, v in enumerate(res['odor_valence']):
         smoothing_window_lick = rules_lick[v]
