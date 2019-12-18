@@ -83,7 +83,6 @@ for i, condition in enumerate(conditions):
     else:
         res['condition'] = np.array([condition.name] * len(res['mouse']))
 
-
     list_of_res.append(res)
     names.append(condition.name)
 directory_name = ','.join(names)

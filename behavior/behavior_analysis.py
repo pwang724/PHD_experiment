@@ -96,8 +96,6 @@ def convert(res, condition, includeRaw = False):
             ix = -1
         return ix
 
-
-
     config = behaviorConfig()
     new_res = defaultdict(list)
     toConvert = ['day', 'mouse']
