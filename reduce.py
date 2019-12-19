@@ -32,7 +32,9 @@ def _regularize_length_cristian_data(res, key):
                 if type(v[0]) == np.ndarray or type(v[0]) == list:
                     new_array = []
                     for i, x in enumerate(v):
-                        if len(x) < length:
+                        if len(x) == 0:
+                            new_array.append(np.zeros(length))
+                        elif len(x) < length:
                             temp = np.zeros(length)
                             temp[:len(x)] = x
                             temp[len(x):] = x[-1]

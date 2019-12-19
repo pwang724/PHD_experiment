@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import reduce
 from format import *
-from scipy.stats import ranksums
+from scipy.stats import ranksums, sem
 import behavior.behavior_config
 
 plt.style.use('default')
@@ -25,17 +25,18 @@ mpl.rcParams['font.family'] = 'arial'
 experiments = [
     # 'licks_per_day'
     # 'individual',
-    'summary',
+    # 'summary',
     # 'mean_sem',
     # 'trials_to_criterion',
     # 'roc',
-    # 'cdf'
+    # 'cdf',
+    'bar'
 ]
 
 conditions = [
-    # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
+    experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
+    experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
@@ -54,8 +55,8 @@ conditions = [
     # experimental_conditions.OFC_REVERSAL,
     # experimental_conditions.OFC_STATE
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
-    experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
+    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
 ]
 
 collapse_arg = 'condition'
@@ -187,8 +188,10 @@ if 'individual' in experiments:
 
 if 'summary' in experiments:
     all_res = filter.filter(all_res, {'odor_valence':['CS+','CS-', 'PT CS+']})
-    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=lick_smoothed)
-    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'], reduce_key=boolean_smoothed)
+    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'],
+                                            reduce_key=lick_smoothed)
+    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'],
+                                            reduce_key=boolean_smoothed)
     _collapse_conditions(all_res_lick, control_condition='YFP', str=collapse_arg)
     _collapse_conditions(all_res_bool, control_condition='YFP', str=collapse_arg)
 
@@ -242,13 +245,13 @@ if 'summary' in experiments:
 
 if 'mean_sem' in experiments:
     all_res = filter.filter(all_res, {'odor_valence':['CS+','CS-', 'PT CS+']})
-    _collapse_conditions(all_res, control_condition='YFP', str = collapse_arg)
-    composite_arg = collapse_arg + '_' + 'odor_valence'
-    filter.assign_composite(all_res, [collapse_arg, 'odor_valence'])
+    _collapse_conditions(all_res, control_condition='YFP', str=collapse_arg)
     all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence'], reduce_key=lick_smoothed,
                                             regularize='max')
     all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence'], reduce_key=boolean_smoothed,
                                             regularize='max')
+    composite_arg = collapse_arg + '_' + 'odor_valence'
+    filter.assign_composite(all_res, [collapse_arg, 'odor_valence'])
 
     line_args_copy = line_args.copy()
     line_args_copy.update({'marker': None, 'linewidth':.75})
@@ -272,14 +275,14 @@ if 'mean_sem' in experiments:
             bool_ax_args = bool_ax_args_mush
 
         path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed,
-                          loop_keys= composite_arg,
+                          loop_keys= 'condition',
                           colors=color, select_dict={'odor_valence':valence},
                           ax_args=bool_ax_args, plot_args=line_args_copy,
                           save=False,
                           path=save_path)
 
         plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, error_key='boolean_smoothed_sem',
-                          loop_keys= composite_arg,
+                          loop_keys= 'condition',
                           colors= color, select_dict={'odor_valence':valence},
                           ax_args=bool_ax_args, plot_args= fill_args,
                           save = False, reuse=True,
@@ -298,14 +301,14 @@ if 'mean_sem' in experiments:
         plot._easy_save(path=path, name=name + '_mean_sem')
 
         path, name = plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed,
-                          loop_keys= composite_arg,
+                          loop_keys= 'condition',
                           colors=color, select_dict={'odor_valence':valence},
                           ax_args=ax_args, plot_args=line_args_copy,
                           save=False,
                           path=save_path)
 
         plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key='lick_smoothed_sem',
-                          loop_keys= composite_arg,
+                          loop_keys= 'condition',
                           colors= color, select_dict={'odor_valence':valence},
                           ax_args=ax_args, plot_args= fill_args,
                           save = True, reuse=True,
@@ -467,16 +470,16 @@ if 'cdf' in experiments:
         experimental_licks = experimental['lick']
 
         # #shorten
-        # ctrl_min = np.min([len(x) for x in ctrl_licks])
-        # channel_min = np.min([len(x) for x in experimental_licks])
-        # both_min = np.min([ctrl_min, channel_min])
-        # _shorten = lambda array, length: [x[:length] for x in array]
-        # ctrl_licks = _shorten(ctrl_licks, both_min)
-        # experimental_licks = _shorten(experimental_licks, both_min)
+        ctrl_min = np.min([len(x) for x in ctrl_licks])
+        channel_min = np.min([len(x) for x in experimental_licks])
+        both_min = np.min([ctrl_min, channel_min])
+        _shorten = lambda array, length: [x[:length] for x in array]
+        ctrl_licks = _shorten(ctrl_licks, both_min)
+        experimental_licks = _shorten(experimental_licks, both_min)
 
         #concatenate
-        ctrl_licks = np.concatenate(ctrl_licks)
-        experimental_licks = np.concatenate(experimental_licks)
+        ctrl_licks_cat = np.concatenate(ctrl_licks)
+        experimental_licks_cat = np.concatenate(experimental_licks_cat)
 
         #get cdf
         range = [-.1, 13]
@@ -487,8 +490,8 @@ if 'cdf' in experiments:
             cdf = np.cumsum(counts)
             return cdf, bin_edges
 
-        ctrl_cdf, edges = _cdf(ctrl_licks, range)
-        experimental_cdf, _ = _cdf(experimental_licks, range)
+        ctrl_cdf, edges = _cdf(ctrl_licks_cat, range)
+        experimental_cdf, _ = _cdf(experimental_licks_cat, range)
 
         #plot cdf
         res = defaultdict(list)
@@ -499,9 +502,98 @@ if 'cdf' in experiments:
         for k, v in res.items():
             res[k] = np.array(v)
 
-        line_args_copy = line_args.copy()
-        line_args_copy.update({'marker': None, 'linewidth':1})
-        plot.plot_results(res, x_key='lick', y_key='cdf', loop_keys='condition', colors=['blue','black'],
-                          select_dict={'valence':valence},
-                          plot_args=line_args_copy,
+if 'bar' in experiments:
+    def windowed_stat(x, y, window):
+        def _rolling_window(a, window):
+            shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
+            strides = a.strides + (a.strides[-1],)
+            return np.lib.stride_tricks.as_strided(a, shape=shape, strides=strides)
+
+        a = _rolling_window(x, window)
+        b = _rolling_window(y, window)
+        out = []
+        for i in np.arange(a.shape[1]):
+            x = a[:,i,:]
+            y = b[:,i,:]
+            stat = ranksums(x.flatten(), y.flatten())[-1]
+            out.append(stat)
+        out = [out[0]] * (window//2) + out + [out[-1]] * (window//2)
+        return np.array(out)
+
+    def nonzero_intervals(value):
+        lvalue = np.array(value)
+        lvalue[0] = 0
+        lvalue[-1] = 0
+        a = np.diff((lvalue == 0) * 1)
+        intervals = zip(np.argwhere(a == -1).flatten(), np.argwhere(a == 1).flatten())
+        return intervals
+
+    all_res_ = filter.filter(all_res, {'odor_valence':['CS+','CS-', 'PT CS+']})
+    _collapse_conditions(all_res_, control_condition='YFP', str=collapse_arg)
+    all_res_lick = reduce.new_filter_reduce(all_res_, filter_keys=['condition', 'odor_valence'], reduce_key=lick_smoothed,
+                                            regularize='max')
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'marker': None, 'linewidth':.75})
+    valences = np.unique(all_res_['odor_valence'])
+    for valence in valences:
+        color = [color_dict_valence[valence]]
+        color.append('black')
+
+        config = behavior.behavior_config.behaviorConfig()
+        if 'PT CS+' in valence or 'PT Naive' in valence:
+            ax_args = ax_args_pt
+            bool_ax_args = bool_ax_args_pt
+            window = config.rules_two_phase_lick[valence]
+        elif 'PT CS+' in all_res_['odor_valence']:
+            ax_args = ax_args_dt
+            bool_ax_args = bool_ax_args_dt
+            window = config.rules_two_phase_lick[valence]
+        else:
+            ax_args = ax_args_mush
+            bool_ax_args = bool_ax_args_mush
+            window = config.rules_single_phase_lick[valence]
+
+        if 'OUTPUT' in all_res_['condition'][0]:
+            ax_args = ax_args_output
+            bool_ax_args = bool_ax_args_output
+            print('ok')
+
+        all_res__ = filter.filter(all_res, {'odor_valence':valence})
+        all_res__ = reduce.new_filter_reduce(all_res__, filter_keys=['condition','mouse','odor_valence'], reduce_key='lick')
+        all_res__.pop('lick_sem')
+        ctrl = filter.filter(all_res__, {'condition': 'YFP'})
+        experimental = filter.exclude(all_res__, {'condition': 'YFP'})
+        ctrl_licks = ctrl['lick']
+        experimental_licks = experimental['lick']
+
+        ctrl_min = np.min([len(x) for x in ctrl_licks])
+        channel_min = np.min([len(x) for x in experimental_licks])
+        both_min = np.min([ctrl_min, channel_min])
+        _shorten = lambda array, length: np.array([x[:length] for x in array])
+        ctrl_licks = _shorten(ctrl_licks, both_min)
+        experimental_licks = _shorten(experimental_licks, both_min)
+
+        print(ctrl_licks.shape)
+        print(experimental_licks.shape)
+        out = windowed_stat(ctrl_licks, experimental_licks, window=window)
+        out = out < .05
+        intervals = nonzero_intervals(out)
+
+        path, name = plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed,
+                          loop_keys= 'condition',
+                          colors=color, select_dict={'odor_valence':valence},
+                          ax_args=ax_args, plot_args=line_args_copy,
+                          save=False,
                           path=save_path)
+
+        ylim = plt.ylim()
+        for interval in intervals:
+            plt.plot(interval, [.7 * (ylim[-1] - ylim[0])]* len(interval), '-',color='black',markersize=1)
+
+        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key='lick_smoothed_sem',
+                          loop_keys= 'condition',
+                          colors= color, select_dict={'odor_valence':valence},
+                          ax_args=ax_args, plot_args= fill_args,
+                          save = True, reuse = True,
+                          plot_function= plt.fill_between,
+                          path=save_path, name_str='_mean_sem')

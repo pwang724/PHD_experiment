@@ -128,16 +128,19 @@ def convert(res, condition, includeRaw = False):
                 start = int((res['DAQ_W_ON'][i]-1) * res['DAQ_SAMP'][i])
                 end = int(res['DAQ_W_ON'][i] * res['DAQ_SAMP'][i])
                 end_coll = int((res['DAQ_W_ON'][i] + 1) * res['DAQ_SAMP'][i])
+                end_coll_time = int((res['DAQ_W_ON'][i] + 5) * res['DAQ_SAMP'][i])
                 lick_data = res_data[i][:,res['DAQ_L'][i],j]
 
                 if odor in csms:
                     end += int(config.extra_csm_time * res['DAQ_SAMP'][i])
 
                 time_first_lick = _get_time_of_first_lick(lick_data, start_odor, end, res['DAQ_SAMP'][i])
+                time_first_lick_collection = _get_time_of_first_lick(lick_data, end, end_coll_time, res['DAQ_SAMP'][i])
                 n_licks_baseline = _get_number_of_licks(lick_data, 0, start_odor)
                 n_licks = _get_number_of_licks(lick_data, start, end)
                 n_licks_coll = _get_number_of_licks(lick_data, end, end_coll)
 
+                new_res['time_first_lick_collection'].append(time_first_lick_collection)
                 new_res['time_first_lick'].append(time_first_lick)
                 new_res['odor'].append(odor)
                 new_res['lick_baseline'].append(n_licks_baseline)
@@ -168,6 +171,8 @@ def agglomerate_days(res, condition, first_day, last_day):
             temp_res_ = reduce_by_concat(filtered_res, 'lick_collection', rank_keys=['day', 'ix'])
             temp_res__ = reduce_by_concat(filtered_res, 'lick_baseline', rank_keys=['day', 'ix'])
             temp_res___ = reduce_by_concat(filtered_res, 'time_first_lick', rank_keys=['day', 'ix'])
+            temp_res____ = reduce_by_concat(filtered_res, 'time_first_lick_collection', rank_keys=['day', 'ix'])
+            temp_res['time_first_lick_collection'] = temp_res____['time_first_lick_collection']
             temp_res['time_first_lick'] = temp_res___['time_first_lick']
             temp_res['lick_baseline'] = temp_res__['lick_baseline']
             temp_res['lick_collection'] = temp_res_['lick_collection']
@@ -305,15 +310,23 @@ def add_behavior_stats(res, condition, arg ='normal'):
         rules_lick = config.rules_output_lick
         rules_boolean = config.rules_output_boolean
 
-    for i, v in enumerate(res['time_first_lick']):
+    time_filter = config.smoothing_window_first_lick
+    for i in range(len(res['time_first_lick'])):
+        v = res['time_first_lick'][i]
         res['time_first_lick'][i] = v[v > -1]
         res['time_first_lick_trial'].append(res['trial'][i][v > -1])
-        time_first_lick = res['time_first_lick'][i]
-        time_filter = config.smoothing_window_first_lick
-        if len(time_first_lick) < time_filter:
-            res['time_first_lick_smoothed'].append(time_first_lick)
+        if len(res['time_first_lick'][i]) < time_filter:
+            res['time_first_lick_smoothed'].append(res['time_first_lick'][i])
         else:
-            res['time_first_lick_smoothed'].append(_filter(time_first_lick, time_filter))
+            res['time_first_lick_smoothed'].append(_filter(res['time_first_lick'][i], time_filter))
+
+        v = res['time_first_lick_collection'][i]
+        res['time_first_lick_collection'][i] = v[v > -1]
+        res['time_first_lick_collection_trial'].append(res['trial'][i][v > -1])
+        if len(res['time_first_lick_collection'][i]) < time_filter:
+            res['time_first_lick_collection_smoothed'].append(res['time_first_lick_collection'][i])
+        else:
+            res['time_first_lick_collection_smoothed'].append(_filter(res['time_first_lick_collection'][i], time_filter))
 
     for i, v in enumerate(res['odor_valence']):
         smoothing_window_lick = rules_lick[v]
@@ -387,7 +400,7 @@ def add_behavior_stats(res, condition, arg ='normal'):
             else:
                 day=None
         elif odor_valence == 'PT Naive':
-                day=None
+            day=None
         else:
             raise ValueError('Odor Valence is not known {}'.format(odor_valence))
         res['learned_day'].append(day)

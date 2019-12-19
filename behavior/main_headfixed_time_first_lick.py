@@ -24,18 +24,18 @@ mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
-    # 'summary_raw',
-    'summary_line'
+    'summary_raw',
+    # 'summary_line'
 ]
 
 conditions = [
-    experimental_conditions.OFC_COMPOSITE,
-    experimental_conditions.MPFC_COMPOSITE,
+    # experimental_conditions.OFC_COMPOSITE,
+    # experimental_conditions.MPFC_COMPOSITE,
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
@@ -106,32 +106,24 @@ scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
 collection = False
 if collection:
-    lick = 'lick_collection'
-    lick_smoothed = 'lick_collection_smoothed'
-    boolean_smoothed = 'boolean_collection_smoothed'
-    boolean_sem = 'boolean_collection_smoothed_sem'
-    lick_sem = 'lick_collection_smoothed_sem'
+    reduce_key = 'time_first_lick_collection_smoothed'
+    xkey = 'time_first_lick_collection_trial'
+    ax_args_local = {'yticks': [0, 1], 'ylim': [-.1, 1.5], 'xlabel': 'Time',
+                     'xticks': [0, 50, 100], 'xlim': [0, 130]}
 else:
-    lick = 'lick'
-    lick_smoothed = 'lick_smoothed'
-    boolean_smoothed = 'boolean_smoothed'
-    boolean_sem = 'boolean_smoothed_sem'
-    lick_sem = 'lick_smoothed_sem'
-
-if 'summary_raw' in experiments:
     reduce_key = 'time_first_lick_smoothed'
     xkey = 'time_first_lick_trial'
-    ax_args_local = {'yticks': [0, 2, 5], 'ylim': [0, 5], 'yticklabels': ['odor on', 'odor off', 'US'],
+    ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['odor on', 'odor off', 'US'], 'xlabel': 'Time',
                      'xticks': [0, 50, 100], 'xlim': [0, 130]}
+
+if 'summary_raw' in experiments:
     line_args_local = line_args.copy()
     line_args_local.update({'marker': '.', 'markersize':.5, 'linewidth': .75, 'alpha':.5})
 
     all_res_ = filter.filter(all_res, {'odor_valence': ['CS+', 'CS-', 'PT CS+']})
+    _collapse_conditions(all_res_, control_condition='YFP', str=collapse_arg)
     filter.assign_composite(all_res_, [collapse_arg, 'odor_valence'])
     composite_arg = collapse_arg + '_' + 'odor_valence'
-
-    all_res_lick = reduce.new_filter_reduce(all_res_, filter_keys=['condition', 'odor_valence', 'mouse'],
-                                            reduce_key=reduce_key)
 
     valences = np.unique(all_res_['odor_valence'])
     for valence in valences:
@@ -146,12 +138,33 @@ if 'summary_raw' in experiments:
         else:
             ax_args = ax_args_mush
 
-        plot.plot_results(all_res_, x_key=xkey, y_key= reduce_key, loop_keys= 'odor_valence',
+        plot.plot_results(all_res_, x_key=xkey, y_key= reduce_key, loop_keys= composite_arg,
                           rect = (.3, .2, .6, .6),
                           colors=color, select_dict={'odor_valence': valence},
                           ax_args=ax_args_local, plot_args=line_args_local,
-                          reuse=False, save=True,
                           path=save_path)
+
+        if 'CS+' in valence:
+            line_args_mean_sem = {'marker': '.', 'markersize': 0, 'linewidth': .75, 'alpha': .5}
+            temp = filter.filter(all_res_,{'odor_valence':valence})
+            mean_sem = reduce.new_filter_reduce(temp, filter_keys=['condition'], reduce_key=reduce_key, regularize='max')
+
+            path, name = plot.plot_results(mean_sem, x_key=xkey, y_key= reduce_key,
+                              loop_keys= composite_arg,
+                              colors=color, select_dict={'odor_valence':valence},
+                              ax_args=ax_args_local, plot_args=line_args_mean_sem,
+                              save=False,
+                              path=save_path)
+
+            plot.plot_results(mean_sem, x_key=xkey, y_key=reduce_key, error_key=reduce_key+'_sem',
+                              loop_keys= composite_arg,
+                              rect = (.3, .2, .6, .6),
+                              colors=color, select_dict={'odor_valence': valence},
+                              ax_args=ax_args_local,
+                              plot_function=plt.fill_between,
+                              plot_args=fill_args,
+                              reuse=True,
+                              path=save_path, name_str='_mean_sem')
 
 if 'summary_line' in experiments:
     r = defaultdict(list)
@@ -194,6 +207,7 @@ if 'summary_line' in experiments:
             sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=stat)
             plot._easy_save(path, name)
             print(np.mean(a), np.mean(b))
+            print(stat)
         except:
             print('no stats')
 
