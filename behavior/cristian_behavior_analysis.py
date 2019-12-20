@@ -3,6 +3,7 @@ from collections import defaultdict
 import numpy as np
 import filter
 from scipy.signal import savgol_filter
+import tools.file_io
 
 class Indices(object):
     def __init__(self):
@@ -28,6 +29,7 @@ class Constants(object):
         self.csp_file_prefix = 'plus'
         self.csm_file_prefix = 'minus'
         self.detail_file_prefix = 'details'
+        self.raw_file_prefix = 'raw'
         self.csp_stimulus_identity = 1
         self.csm_stimulus_identity = 2
         self.halo = 'H'
@@ -57,13 +59,17 @@ def parse(files, experiment, condition, phase):
         if mouse[-2:].isdigit():
             data_name = prefix + mouse[:-2] + mouse[-1] + '.npy'
             detail_name = constants.detail_file_prefix + mouse[:-2] + mouse[-1] + '.npy'
+            raw_name = constants.raw_file_prefix + mouse[:-2] + mouse[-1]
         else:
             data_name = prefix + mouse + '.npy'
             detail_name = constants.detail_file_prefix + mouse + '.npy'
+            raw_name = constants.raw_file_prefix + mouse
             mouse = mouse[0] + '0' + mouse[1:]
+
         detail_name = os.path.join(f, detail_name)
         data_name = os.path.join(f, data_name)
-        return mouse, data_name, detail_name
+        raw_name = os.path.join(f, raw_name)
+        return mouse, data_name, detail_name, raw_name
 
     def _add_details(res, detail_name):
         detail_data = np.load(detail_name)
@@ -72,7 +78,7 @@ def parse(files, experiment, condition, phase):
         res['session_date'].append(dates)
         res['session_time'].append(time)
 
-    def _add_data(res, data_name, is_csp):
+    def _add_data(res, data_name, raw_name, is_csp):
         data = np.load(data_name)
         indices_dict = indices.__dict__
         for k, v in indices_dict.items():
@@ -86,9 +92,19 @@ def parse(files, experiment, condition, phase):
             valence = 'CS-'
         res['odor_valence'].append(valence)
 
+        if os.path.isfile(raw_name):
+            trials = data[:,indices.trials].astype(int) - 1
+            raw_res = tools.file_io.load_pickle(raw_name)
+
+            for k, v in raw_res.items():
+                v = np.array(v)
+                v_ = v[trials,:]
+                res[k + '_raw'].append(v_)
+
     def _fix_trials(res):
         import filter
         combinations, ixs = filter.retrieve_unique_entries(res, loop_keys=['mouse'])
+        res['old_trials'] = np.copy(res['trials'])
         for ix in ixs:
             for i in ix:
                 trials = res['trials'][i]
@@ -101,9 +117,9 @@ def parse(files, experiment, condition, phase):
     for f in files:
         is_csp = [True, False]
         for csp in is_csp:
-            mouse, data_name, detail_name = _names(f, is_csp=csp)
+            mouse, data_name, detail_name, raw_name = _names(f, is_csp=csp)
             _add_details(res, detail_name)
-            _add_data(res, data_name, csp)
+            _add_data(res, data_name, raw_name, csp)
     for k, v in res.items():
         res[k] = np.array(v)
     _fix_trials(res)
