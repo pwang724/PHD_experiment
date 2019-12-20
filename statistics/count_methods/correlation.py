@@ -46,44 +46,44 @@ def _correlation(res, loop_keys, shuffle, odor_end = True):
                     corrcoef /= (n_iter * 1.0)
                 else:
                     if i != j:
-                        # datas = res['data'][ixs[i]]
-                        # s = res['DAQ_O_ON_F'][ixs[i]]
-                        # e = res['DAQ_W_ON_F'][ixs[i]]
-                        # ds = []
-                        # for cell_data in datas:
-                        #     config = psth.psth_helper.PSTHConfig()
-                        #     d = psth.psth_helper.subtract_baseline(cell_data, config.baseline_start,
-                        #                                            s - config.baseline_end)
-                        #     ds.append(d)
-                        # datas_i = np.array(ds)
-                        #
-                        # datas = res['data'][ixs[j]]
-                        # s = res['DAQ_O_ON_F'][ixs[j]]
-                        # e = res['DAQ_W_ON_F'][ixs[j]]
-                        # ds = []
-                        # for cell_data in datas:
-                        #     config = psth.psth_helper.PSTHConfig()
-                        #     d = psth.psth_helper.subtract_baseline(cell_data, config.baseline_start,
-                        #                                            s - config.baseline_end)
-                        #     ds.append(d)
-                        # datas_j = np.array(ds)
-                        #
-                        # corrcoefs_ = []
-                        # for rep in np.arange(100):
-                        #     s_ix_a = np.random.choice(datas_i.shape[1], datas_i.shape[1]//2, replace=False)
-                        #     s_ix_b = np.random.choice(datas_j.shape[1], datas_j.shape[1]//2, replace=False)
-                        #     dffa = np.mean(datas_i[:,s_ix_a,:], axis=1)
-                        #     dffb = np.mean(datas_j[:,s_ix_b,:], axis=1)
-                        #     if odor_end:
-                        #         amplitudea = np.max(dffa[:, s:e], axis=1)
-                        #         amplitudeb = np.max(dffb[:, s:e], axis=1)
-                        #     else:
-                        #         amplitudea = np.max(dffa[:, s:], axis=1)
-                        #         amplitudeb = np.max(dffb[:, s:], axis=1)
-                        #     corrcoefs_.append(np.corrcoef(amplitudea, amplitudeb)[0,1])
-                        # corrcoef = np.mean(corrcoefs_)
+                        datas = res['data'][ixs[i]]
+                        s = res['DAQ_O_ON_F'][ixs[i]]
+                        e = res['DAQ_W_ON_F'][ixs[i]]
+                        ds = []
+                        for cell_data in datas:
+                            config = psth.psth_helper.PSTHConfig()
+                            d = psth.psth_helper.subtract_baseline(cell_data, config.baseline_start,
+                                                                   s - config.baseline_end)
+                            ds.append(d)
+                        datas_i = np.array(ds)
 
-                        corrcoef = np.corrcoef((data_1, data_2))[0, 1]
+                        datas = res['data'][ixs[j]]
+                        s = res['DAQ_O_ON_F'][ixs[j]]
+                        e = res['DAQ_W_ON_F'][ixs[j]]
+                        ds = []
+                        for cell_data in datas:
+                            config = psth.psth_helper.PSTHConfig()
+                            d = psth.psth_helper.subtract_baseline(cell_data, config.baseline_start,
+                                                                   s - config.baseline_end)
+                            ds.append(d)
+                        datas_j = np.array(ds)
+
+                        corrcoefs_ = []
+                        for rep in np.arange(100):
+                            s_ix_a = np.random.choice(datas_i.shape[1], datas_i.shape[1]//2, replace=False)
+                            s_ix_b = np.random.choice(datas_j.shape[1], datas_j.shape[1]//2, replace=False)
+                            dffa = np.mean(datas_i[:,s_ix_a,:], axis=1)
+                            dffb = np.mean(datas_j[:,s_ix_b,:], axis=1)
+                            if odor_end:
+                                amplitudea = np.max(dffa[:, s:e], axis=1)
+                                amplitudeb = np.max(dffb[:, s:e], axis=1)
+                            else:
+                                amplitudea = np.max(dffa[:, s:], axis=1)
+                                amplitudeb = np.max(dffb[:, s:], axis=1)
+                            corrcoefs_.append(np.corrcoef(amplitudea, amplitudeb)[0,1])
+                        corrcoef = np.mean(corrcoefs_)
+
+                        # corrcoef = np.corrcoef((data_1, data_2))[0, 1]
                     else:
                         # corrcoef = np.corrcoef((data_1, data_2))[0, 1]
 
