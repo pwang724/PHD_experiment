@@ -11,9 +11,11 @@ import analysis
 import scikit_posthocs
 
 import statistics.analyze
+import statistics.count_methods.cory as cory
 import statistics.count_methods.power as power
 import statistics.count_methods.compare as compare
 import statistics.count_methods.correlation as correlation
+import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
 
 condition_config = statistics.analyze.PIR_NAIVE_Config()
@@ -22,8 +24,6 @@ data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOL
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
 figure_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'COUNTING',  condition.name)
 
-#analysis
-res = fio.load_pickle(os.path.join(save_path, 'dict.pkl'))
 # res.pop('data')
 # retrieving relevant days
 learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condition)
@@ -31,7 +31,7 @@ learned_day_per_mouse, last_day_per_mouse = get_days_per_mouse(data_path, condit
 if condition_config.start_at_training and hasattr(condition, 'training_start_day'):
     start_days_per_mouse = condition.training_start_day
 else:
-    start_days_per_mouse = [0] * len(np.unique(res['mouse']))
+    start_days_per_mouse = [0] * len(condition_config.condition.paths)
 training_start_day_per_mouse = condition.training_start_day
 
 lick_res = behavior.behavior_analysis.get_licks_per_day(data_path, condition)
@@ -41,7 +41,7 @@ lick_res = reduce.new_filter_reduce(lick_res, ['odor_valence', 'day', 'mouse'], 
 
 temp_res = behavior.behavior_analysis.analyze_behavior(data_path, condition)
 temp_res = filter.filter(temp_res, {'odor_valence': ['CS+']})
-temp_res = reduce.new_filter_reduce(temp_res, ['odor_valence', 'mouse'], reduce_key='boolean_smoothed')
+# temp_res = reduce.new_filter_reduce(temp_res, ['odor_valence', 'mouse'], reduce_key='boolean_smoothed')
 
 if condition.name == 'PIR_CONTEXT':
     statistics.analyze.analyze_data(res, condition_config)
@@ -70,18 +70,24 @@ if condition.name == 'PIR_CONTEXT':
     print(ranksums(a,b))
 
 if condition.name == 'PIR':
-    naive_config = statistics.analyze.PIR_NAIVE_Config()
-    data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
-    save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
-    res_naive = fio.load_pickle(os.path.join(save_path_, 'dict.pkl'))
-    learned_day_per_mouse_, last_day_per_mouse_ = get_days_per_mouse(data_path_, naive_config.condition)
+    # naive_config = statistics.analyze.PIR_NAIVE_Config()
+    # data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
+    # save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
+    # res_naive = fio.load_pickle(os.path.join(save_path_, 'dict.pkl'))
+    # learned_day_per_mouse_, last_day_per_mouse_ = get_days_per_mouse(data_path_, naive_config.condition)
+    #
+    # res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= .1)
+    # statistics.analyze.analyze_data(res_naive, naive_config, m_threshold= .1)
+    # res_naive['odor_valence'] = np.array(['Naive'] * len(res_naive['day']))
 
-    statistics.analyze.analyze_data(res, condition_config, m_threshold= .1)
-    statistics.analyze.analyze_data(res_naive, naive_config, m_threshold= .1)
-    res_naive['odor_valence'] = np.array(['Naive'] * len(res_naive['day']))
+    excitatory = [True, False]
+    thresholds = [0.1, -0.05]
+    for i, sign in enumerate(excitatory):
+        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+        responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
+                                           figure_path=figure_path, excitatory= sign)
+
     # responsive.plot_individual(res, lick_res, figure_path = figure_path)
-    # responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, learned_day_per_mouse,
-    #                                        figure_path=figure_path)
     # overlap.plot_overlap_odor(res, start_days_per_mouse, learned_day_per_mouse,
     #                                              delete_non_selective=True, figure_path= figure_path)
     # stability.plot_stability_across_days(res, start_days_per_mouse, learned_day_per_mouse, figure_path = figure_path)
@@ -91,10 +97,26 @@ if condition.name == 'PIR':
 
     # responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
     #                                        figure_path=figure_path)
+
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
-    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=0.15)
+    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+    #                  excitatory=True, ylim=[-0.005, .15])
+    # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+    #                  excitatory=False, ylim=[-0.1, .005])
+    #
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
-    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=0.15)
+    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+    #                  excitatory=True, ylim=[-0.005, .15])
+    # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
+    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+    #                  excitatory=False, ylim=[-0.1, .005])
+
+    # cory.main(res, temp_res, figure_path, excitatory=True)
+    # cory.main(res, temp_res, figure_path, excitatory=False)
+
+
+
     # overlap.plot_overlap_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path = figure_path)
 
     # responsive.plot_responsive_difference_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
@@ -104,17 +126,20 @@ if condition.name == 'PIR':
     #                                                      include_water=False, normalize=False,
     #                                                      figure_path=figure_path, average=False, reuse_arg=True, save_arg=True)
 
-    odor_end = False
-    a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path, odor_end=odor_end)
-    b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path, odor_end=odor_end)
-    ac = a['corrcoef']
-    bc = b['corrcoef']
-    ac = ac[a['Odor_A'] != a['Odor_B']]
-    bc = bc[b['Odor_A'] != b['Odor_B']]
-    x = wilcoxon(ac, bc)
-    print(x)
-    print(np.mean(ac))
-    print(np.mean(bc))
+    # odor_end = False
+    # for d in [-1, 0, 1]:
+    #     a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False,
+    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
+    #     b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
+    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
+    # ac = a['corrcoef']
+    # bc = b['corrcoef']
+    # ac = ac[a['Odor_A'] != a['Odor_B']]
+    # bc = bc[b['Odor_A'] != b['Odor_B']]
+    # x = wilcoxon(ac, bc)
+    # print(x)
+    # print(np.mean(ac))
+    # print(np.mean(bc))
 
 
     # correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=True, figure_path = figure_path)
@@ -151,11 +176,15 @@ if condition.name == 'PIR':
 
 
 if condition.name == 'PIR_NAIVE':
-    odor_end = False
     days = [3, 3, 2, 2]
-    statistics.analyze.analyze_data(res, condition_config)
-    a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path, odor_end=odor_end)
-    b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False, figure_path = figure_path, odor_end=odor_end)
+    # statistics.analyze.analyze_data(res, condition_config)
+
+    excitatory = [True, False]
+    thresholds = [0.1, -0.05]
+    for i, sign in enumerate(excitatory):
+        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+        responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
+                                           figure_path=figure_path, excitatory= sign)
     #
     # ac = a['corrcoef']
     # bc = b['corrcoef']
@@ -171,7 +200,22 @@ if condition.name == 'PIR_NAIVE':
     #                                              delete_non_selective=True, figure_path= figure_path)
     # stability.plot_stability_across_days(res, start_days_per_mouse, learned_day_per_mouse, figure_path = figure_path)
 
+    # cory.main(res, temp_res, figure_path, excitatory=True)
+    # cory.main(res, temp_res, figure_path, excitatory=False)
+
+    # odor_end = False
+    # for d in [-1, 0, 1]:
+    #     a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False,
+    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
+    #     b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
+    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
+
+
     # res['odor_valence'] = np.array(['CS'] * np.size(res['odor_valence']))
     # res = filter.exclude(res, {'odor':'2pe'})
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS'],
-    #                  colors_before = {'CS':'Gray'}, colors_after = {'CS':'GoldenRod'}, ylim=0.15)
+    #                  colors_before = {'CS':'Gray'}, colors_after = {'CS':'GoldenRod'},
+    #                  excitatory=True, ylim=[-0.005, .15])
+    # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS'],
+    #                  colors_before={'CS': 'Gray'}, colors_after={'CS': 'GoldenRod'},
+    #                  excitatory=False, ylim=[-0.1, .005])

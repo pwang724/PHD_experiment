@@ -151,7 +151,7 @@ def convert(res, condition_config):
         d[key] = np.array(val)
     return d
 
-def parse_data(res):
+def parse_data(res, excitatory = True):
     list_odor_on = res['DAQ_O_ON_F']
     list_odor_off = res['DAQ_O_OFF_F']
     list_water_on = res['DAQ_W_ON_F']
@@ -169,7 +169,10 @@ def parse_data(res):
             data_time_pixels = data_time_trial_window.reshape(data_time_trial_window.shape[0],-1)
 
             #statistical significance
-            f = lambda y: mannwhitneyu(baseline, y, use_continuity=True, alternative='less')[-1]
+            if excitatory:
+                f = lambda y: mannwhitneyu(baseline, y, use_continuity=True, alternative='less')[-1]
+            else:
+                f = lambda y: mannwhitneyu(baseline, y, use_continuity=True, alternative='greater')[-1]
             p = []
             for y in data_time_pixels:
                 try:
@@ -180,7 +183,7 @@ def parse_data(res):
             while (len(p) < cell_data.shape[-1]):
                 p.append(p[-1])
 
-            #magnitude significance
+            #magnitude
             dff = psth.psth_helper.subtract_baseline(cell_data, config.baseline_start, list_odor_on[i] - config.baseline_end)
             dff = np.mean(dff, axis=0)
 
@@ -193,9 +196,17 @@ def parse_data(res):
     for key, val in res.items():
         res[key] = np.array(val)
     # res.pop('data')
-    fio.save_pickle(save_path=save_path, save_name= 'dict', data= res)
+    name_str = 'dict'
+    if not excitatory:
+        name_str += '_I'
+    fio.save_pickle(save_path=save_path, save_name= name_str, data= res)
 
-def analyze_data(res, condition_config, m_threshold=None):
+def analyze_data(save_path, condition_config, m_threshold=None, excitatory = True):
+    name = 'dict'
+    if not excitatory:
+        name += '_I'
+    res = fio.load_pickle(os.path.join(save_path, name + '.pkl'))
+
     list_odor_on = res['DAQ_O_ON_F']
     list_water_on = res['DAQ_W_ON_F']
     res['ssig'] = []
@@ -229,7 +240,12 @@ def analyze_data(res, condition_config, m_threshold=None):
                 magnitude_threshold = condition_config.m_threshold
             else:
                 magnitude_threshold = m_threshold
-            msig = dff > magnitude_threshold
+
+            if excitatory:
+                msig = dff > magnitude_threshold
+            else:
+                msig = dff < magnitude_threshold
+
             reached_msig = np.array([np.all(x) for x in _rolling_window(msig, condition_config.m_window)])
             if np.any(reached_msig[s:e]):
                 mag_significance = True
@@ -243,7 +259,10 @@ def analyze_data(res, condition_config, m_threshold=None):
                 duration = np.sum(reached_msig[s:e])
                 duration_list.append(duration)
 
-                amplitude = np.max(dff[s:e])
+                if excitatory:
+                    amplitude = np.max(dff[s:e])
+                else:
+                    amplitude = np.min(dff[s:e])
                 amplitude_list.append(amplitude)
             else:
                 onset_list.append(-1)
@@ -263,6 +282,7 @@ def analyze_data(res, condition_config, m_threshold=None):
         res['amplitude'].append(np.array(amplitude_list))
     for key, val in res.items():
         res[key] = np.array(val)
+    return res
 
 def _rolling_window(a, window):
     shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
@@ -272,7 +292,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = PIR_CONTEXT_Config()
+    condition_config = OFC_LONGTERM_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -284,7 +304,7 @@ if __name__ == '__main__':
     analysis.add_time(res)
     odor_res = convert(res, condition_config)
     analysis.add_odor_value(odor_res, condition_config.condition)
-    parse_data(odor_res)
+    parse_data(odor_res, excitatory=False)
 
     # odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict_backup.pkl'))
     # analyze_data(odor_res, condition_config)

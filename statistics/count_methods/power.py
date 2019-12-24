@@ -11,37 +11,47 @@ from format import *
 from collections import defaultdict
 
 
-def plot_power(res, start_days, end_days, figure_path, odor_valence = ('CS+'), naive = False,
-               colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim = .1):
+def plot_power(res, start_days, end_days, figure_path,
+               excitatory = True,
+               odor_valence = ('CS+'), naive = False,
+               colors_before = {'CS+':'Green','CS-':'Red'},
+               colors_after = {'CS+':'Green','CS-':'Red'},
+               ylim = [0, .1]):
     res = copy.copy(res)
-    _get_power_1(res)
+    _power(res, excitatory)
 
     list_of_days = list(zip(start_days, end_days))
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
-
     add_naive_learned(start_end_day_res, start_days, end_days)
     if naive:
         start_end_day_res = filter.exclude(start_end_day_res, {'odor_standard': 'PT CS+','training_day':'Naive'})
         ix = start_end_day_res['odor_valence'] == 'PT Naive'
         start_end_day_res['odor_valence'][ix] = 'PT CS+'
-
     start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['training_day', 'odor_valence'],
                                                  reduce_key='Power')
 
     ax_args_copy = trace_ax_args.copy()
+    if excitatory:
+        yticks = np.arange(0, .2, .05)
+    else:
+        yticks = - 1 * np.arange(0, .2, .025)
     ax_args_copy.update({'xticks':[res['DAQ_O_ON_F'][-1], res['DAQ_W_ON_F'][-1]], 'xticklabels':['ON', 'US'],
-                         'ylim':[0, ylim], 'yticks':np.arange(0, .2, .05)})
+                         'ylim':ylim, 'yticks':yticks})
 
     colors_b = [colors_before[x] for x in odor_valence]
     colors = [colors_after[x] for x in odor_valence]
 
     strr = ','.join([str(x) for x in start_days]) + '_' + ','.join([str(x) for x in end_days])
+    if excitatory:
+        strr += '_E'
+    else:
+        strr += '_I'
     plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
                       x_key='Time', y_key='Power', loop_keys= 'odor_valence', error_key='Power_sem',
                       path=figure_path,
                       plot_function=plt.fill_between, plot_args=fill_args, ax_args=ax_args_copy,
                       colors = colors_b,
-                      fig_size=(2, 1.5), save=False)
+                      fig_size=(2, 1.5), rect=(.3, .2, .6, .6), save=False)
 
     plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
                       x_key='Time', y_key='Power', loop_keys= 'odor_valence',
@@ -66,37 +76,18 @@ def plot_power(res, start_days, end_days, figure_path, odor_valence = ('CS+'), n
     print(start_end_day_res['training_day'])
     print([np.max(x[res['DAQ_O_ON_F'][-1]:res['DAQ_W_ON_F'][-1]])-np.min(x) for x in start_end_day_res['Power']])
 
-
-def _get_power(res):
-    key = 'dff'
-    res['Power'] = np.copy(res['sig'])
-    res['Time'] = np.copy(res['sig'])
-    combinations, list_of_ixs = filter.retrieve_unique_entries(res, loop_keys=['mouse', 'odor'])
-    for ixs in list_of_ixs:
-        assert res['day'][ixs[0]] == 0, 'not the first day as reference'
-        mask_a = res['sig'][ixs[0]]
-        mask_b = res['sig'][ixs[1]]
-        mask = np.array([a or b for a, b in zip(mask_a, mask_b)]).astype(bool)
-        # mask = np.array(mask_a).astype(bool)
-        # mask = np.array(mask_b).astype(bool)
-
-        for ix in ixs:
-            dff = res[key][ix][mask.astype(bool)]
-            power = np.mean(dff, axis=0)
-            res['Power'][ix] = power
-            res['Time'][ix] = np.arange(0, len(power))
-    res['Power'] = np.array(res['Power'])
-    res['Time'] = np.array(res['Time'])
-
-def _get_power_1(res):
+def _power(res, excitatory):
     list_of_dff = res['dff']
     list_odor_on = res['DAQ_O_ON_F']
     list_water_on = res['DAQ_W_ON_F']
     for i, dff in enumerate(list_of_dff):
         s, e = list_odor_on[i], list_water_on[i]
         y_ = np.mean(dff[:, s:e], axis=1)
-        ix = y_>0.0
-        y = np.mean(np.abs(dff[ix,:]), axis=0)
+        if excitatory:
+            ix = y_> 0
+        else:
+            ix = y_< 0
+        y = np.mean(dff[ix,:], axis=0)
         x = np.arange(0, len(y))
         res['Power'].append(y)
         res['Time'].append(x)
@@ -124,7 +115,7 @@ def plot_mean_dff(res, start_days, end_days, figure_path):
     list_of_days = end_days
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
     start_end_day_res = filter.filter(start_end_day_res, {'odor_valence': ['CS+','CS-']})
-    _get_power_1(start_end_day_res)
+    _power(start_end_day_res)
     start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['odor_valence','mouse'],
                                                  reduce_key='mean_dff')
     add_naive_learned(start_end_day_res, start_days, end_days)

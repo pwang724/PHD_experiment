@@ -17,7 +17,7 @@ mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
-def _correlation(res, loop_keys, shuffle, odor_end = True):
+def _correlation(res, loop_keys, shuffle, odor_end = True, direction = 0):
     res = filter.exclude(res, {'odor_valence':'US'})
     for i, dff in enumerate(res['dff']):
         s = res['DAQ_O_ON_F'][i]
@@ -75,11 +75,34 @@ def _correlation(res, loop_keys, shuffle, odor_end = True):
                             dffa = np.mean(datas_i[:,s_ix_a,:], axis=1)
                             dffb = np.mean(datas_j[:,s_ix_b,:], axis=1)
                             if odor_end:
-                                amplitudea = np.max(dffa[:, s:e], axis=1)
-                                amplitudeb = np.max(dffb[:, s:e], axis=1)
+                                dffa = dffa[:, s:e]
+                                dffb = dffb[:, s:e]
                             else:
-                                amplitudea = np.max(dffa[:, s:], axis=1)
-                                amplitudeb = np.max(dffb[:, s:], axis=1)
+                                dffa = dffa[:,s:]
+                                dffb = dffb[:,s:]
+
+                            if direction == 1:
+                                dffa[dffa < 0] = 0
+                                dffb[dffb < 0] = 0
+                                amplitudea = np.max(dffa, axis=1)
+                                amplitudeb = np.max(dffb, axis=1)
+                            elif direction == -1:
+                                dffa[dffa > 0] = 0
+                                dffb[dffb > 0] = 0
+                                amplitudea = np.min(dffa, axis=1)
+                                amplitudeb = np.min(dffb, axis=1)
+                            elif direction == 0:
+                                amplitudea = np.max(dffa, axis=1)
+                                amplitudeb = np.max(dffb, axis=1)
+                            else:
+                                raise ValueError('no direction given')
+
+                            # if odor_end:
+                            #     amplitudea = np.max(dffa[:, s:e], axis=1)
+                            #     amplitudeb = np.max(dffb[:, s:e], axis=1)
+                            # else:
+                            #     amplitudea = np.max(dffa[:, s:], axis=1)
+                            #     amplitudeb = np.max(dffb[:, s:], axis=1)
                             corrcoefs_.append(np.corrcoef(amplitudea, amplitudeb)[0,1])
                         corrcoef = np.mean(corrcoefs_)
 
@@ -104,12 +127,27 @@ def _correlation(res, loop_keys, shuffle, odor_end = True):
                             s_ix_b = [x for x in np.arange(datas.shape[1]) if x not in s_ix_a]
                             dffa = np.mean(datas[:,s_ix_a,:], axis=1)
                             dffb = np.mean(datas[:,s_ix_b,:], axis=1)
-                            if odor_end:
-                                amplitudea = np.max(dffa[:, s:e], axis=1)
-                                amplitudeb = np.max(dffb[:, s:e], axis=1)
+                            # if odor_end:
+                            #     amplitudea = np.max(dffa[:, s:e], axis=1)
+                            #     amplitudeb = np.max(dffb[:, s:e], axis=1)
+                            # else:
+                            #     amplitudea = np.max(dffa[:, s:], axis=1)
+                            #     amplitudeb = np.max(dffb[:, s:], axis=1)
+                            if direction == 1:
+                                dffa[dffa < 0] = 0
+                                dffb[dffb < 0] = 0
+                                amplitudea = np.max(dffa, axis=1)
+                                amplitudeb = np.max(dffb, axis=1)
+                            elif direction == -1:
+                                dffa[dffa > 0] = 0
+                                dffb[dffb > 0] = 0
+                                amplitudea = np.min(dffa, axis=1)
+                                amplitudeb = np.min(dffb, axis=1)
+                            elif direction == 0:
+                                amplitudea = np.max(dffa, axis=1)
+                                amplitudeb = np.max(dffb, axis=1)
                             else:
-                                amplitudea = np.max(dffa[:, s:], axis=1)
-                                amplitudeb = np.max(dffb[:, s:], axis=1)
+                                raise ValueError('no direction given')
                             corrcoefs_.append(np.corrcoef(amplitudea, amplitudeb)[0,1])
                         corrcoef = np.mean(corrcoefs_)
 
@@ -123,9 +161,9 @@ def _correlation(res, loop_keys, shuffle, odor_end = True):
         corrcoefs[key] = np.array(value)
     return corrcoefs
 
-def plot_correlation_matrix(res, days, loop_keys, shuffle, figure_path, odor_end = True):
+def plot_correlation_matrix(res, days, loop_keys, shuffle, figure_path, odor_end = True, direction = 0):
     res = filter.filter_days_per_mouse(res, days)
-    res_ = _correlation(res, loop_keys, shuffle, odor_end)
+    res_ = _correlation(res, loop_keys, shuffle, odor_end, direction=direction)
     res = reduce.new_filter_reduce(res_, filter_keys= ['Odor_A', 'Odor_B'], reduce_key='corrcoef')
     if shuffle:
         s = '_shuffled'
@@ -134,7 +172,7 @@ def plot_correlation_matrix(res, days, loop_keys, shuffle, figure_path, odor_end
     plot.plot_weight(res, x_key='Odor_A', y_key='Odor_B', val_key='corrcoef', title='Correlation', label='Correlation',
                      vmin = 0, vmax = 1, mask=True,
                      xticklabel= ['CS+1', 'CS+2', 'CS-1', 'CS-2'], yticklabel = ['CS+1', 'CS+2', 'CS-1', 'CS-2'],
-                     save_path=figure_path, text= ','.join([str(x) for x in days]) + s)
+                     save_path=figure_path, text= ','.join([str(x) for x in days]) + s + '_direction_' + str(direction))
     return res_
 
 def plot_correlation_across_days(res, days, loop_keys, shuffle, figure_path, reuse, save, analyze, plot_bool, odor_end = True):

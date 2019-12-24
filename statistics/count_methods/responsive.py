@@ -8,7 +8,7 @@ from format import *
 import matplotlib.pyplot as plt
 from collections import defaultdict
 
-def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True,
+def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, excitatory = True,
                                 arg = 'odor_valence', figure_path = None):
     include_water = True
 
@@ -46,6 +46,7 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
     if not use_colors:
         colors = ['Black'] * 4
 
+    name_str = '_E' if excitatory else '_I'
     for i, odor in enumerate(odor_list):
         reuse_arg = True
         if i == 0:
@@ -64,7 +65,7 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
                       colors= ['Turquoise']*len(mice),
                       path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                       fig_size=(1.6, 1.5), legend=False,
-                      reuse=True, save=True)
+                      reuse=True, save=True, name_str=name_str)
 
     before_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':['CS+','CS-']})
     after_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':['CS+','CS-']})
@@ -75,23 +76,26 @@ def plot_summary_odor_and_water(res, odor_start_days, water_start_days, end_days
     before_water = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'US'})
     after_water = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'US'})
 
-    from scipy.stats import ranksums, wilcoxon, kruskal
+    try:
+        from scipy.stats import ranksums, wilcoxon, kruskal
 
-    print('Before Odor: {}'.format(np.mean(before_odor['Fraction Responsive'])))
-    print('After Odor: {}'.format(np.mean(after_odor['Fraction Responsive'])))
-    print('Wilcoxin:{}'.format(wilcoxon(before_odor['Fraction Responsive'], after_odor['Fraction Responsive'])))
+        print('Before Odor: {}'.format(np.mean(before_odor['Fraction Responsive'])))
+        print('After Odor: {}'.format(np.mean(after_odor['Fraction Responsive'])))
+        print('Wilcoxin:{}'.format(wilcoxon(before_odor['Fraction Responsive'], after_odor['Fraction Responsive'])))
 
-    print('Before CS+: {}'.format(np.mean(before_csp['Fraction Responsive'])))
-    print('After CS+: {}'.format(np.mean(after_csp['Fraction Responsive'])))
-    print('Wilcoxin:{}'.format(wilcoxon(before_csp['Fraction Responsive'], after_csp['Fraction Responsive'])))
+        print('Before CS+: {}'.format(np.mean(before_csp['Fraction Responsive'])))
+        print('After CS+: {}'.format(np.mean(after_csp['Fraction Responsive'])))
+        print('Wilcoxin:{}'.format(wilcoxon(before_csp['Fraction Responsive'], after_csp['Fraction Responsive'])))
 
-    print('Before CS-: {}'.format(np.mean(before_csm['Fraction Responsive'])))
-    print('After CS-: {}'.format(np.mean(after_csm['Fraction Responsive'])))
-    print('Wilcoxin:{}'.format(wilcoxon(before_csm['Fraction Responsive'], after_csm['Fraction Responsive'])))
+        print('Before CS-: {}'.format(np.mean(before_csm['Fraction Responsive'])))
+        print('After CS-: {}'.format(np.mean(after_csm['Fraction Responsive'])))
+        print('Wilcoxin:{}'.format(wilcoxon(before_csm['Fraction Responsive'], after_csm['Fraction Responsive'])))
 
-    print('Before US: {}'.format(np.mean(before_water['Fraction Responsive'])))
-    print('After US: {}'.format(np.mean(after_water['Fraction Responsive'])))
-    print('Wilcoxin:{}'.format(wilcoxon(before_water['Fraction Responsive'], after_water['Fraction Responsive'])))
+        print('Before US: {}'.format(np.mean(before_water['Fraction Responsive'])))
+        print('After US: {}'.format(np.mean(after_water['Fraction Responsive'])))
+        print('Wilcoxin:{}'.format(wilcoxon(before_water['Fraction Responsive'], after_water['Fraction Responsive'])))
+    except:
+        print('stats didnt work')
 
 def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_days, end_days, use_colors= True, figure_path = None,
                                               include_water = True, normalize = False, pt_start = None, pt_learned = None,
@@ -199,7 +203,7 @@ def plot_responsive_difference_odor_and_water(res, odor_start_days, water_start_
                       fig_size=(2, 1.5), legend=False)
 
 
-def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path = None, reuse = False):
+def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path = None, reuse = False, excitatory=True):
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
     get_responsive_cells(res)
@@ -216,6 +220,7 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
         colors = ['Black'] * 4
     ax_args_copy = ax_args_copy.copy()
     ax_args_copy.update({'xlim':[-1, 8], 'ylim':[0, .4], 'yticks':[0, .1, .2, .3, .4]})
+    name_str = '_E' if excitatory else '_I'
     for i, odor in enumerate(odor_list):
         save_arg = False
         reuse_arg = True
@@ -231,7 +236,7 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           save=save_arg, reuse=reuse_arg,
                           fig_size=(2.5, 1.5),legend=False,
-                          name_str = ','.join([str(x) for x in start_days]))
+                          name_str = ','.join([str(x) for x in start_days]) + name_str)
 
     before_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':['CS+','CS-']})
     after_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':['CS+','CS-']})
@@ -247,7 +252,7 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
     print('Before CS-: {}'.format(np.mean(before_csm['Fraction Responsive'])))
     print('After CS-: {}'.format(np.mean(after_csm['Fraction Responsive'])))
 
-def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_path, save):
+def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_path, save, excitatory = True):
     ax_args_copy = ax_args.copy()
     res = copy.copy(res)
     list_of_days = list(zip(start_days, end_days))
@@ -287,7 +292,7 @@ def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_p
                           colors= [colors[i]]*len(mice),
                           path =figure_path, plot_args=line_args, ax_args= ax_args_copy,
                           save=save_arg, reuse=reuse_arg,
-                          fig_size=(2.5, 1.5),legend=False)
+                          fig_size=(2.5, 1.5),legend=False, name_str = '_E' if excitatory else '_I')
 
     before_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_standard':'PT CS+'})
     after_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_standard':'PT CS+'})
