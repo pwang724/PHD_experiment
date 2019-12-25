@@ -156,6 +156,7 @@ if condition.name == 'OFC' or condition.name == 'BLA':
 if condition.name == 'OFC_LONGTERM':
     #fully learned thres 70%
     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= 0.04)
+    res.pop('data')
     start_day = np.array([0,0,0,0])
     learned_day_per_mouse = np.array([3, 2, 2, 3])
     last_day_per_mouse = np.array([8, 7, 5, 5])
@@ -166,12 +167,12 @@ if condition.name == 'OFC_LONGTERM':
 
     excitatory = [True, False]
     thresholds = [0.04, -0.04]
-    for i, sign in enumerate(excitatory):
-        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
-        res = filter.exclude(res, {'mouse': 3})
-        responsive.plot_summary_odor(res, start_day, last_day_per_mouse, figure_path=figure_path, excitatory=sign)
-        responsive.plot_summary_odor(res, learned_day_per_mouse, last_day_per_mouse,
-                                     figure_path=figure_path, excitatory=sign)
+    # for i, sign in enumerate(excitatory):
+    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+    #     res = filter.exclude(res, {'mouse': 3})
+    #     responsive.plot_summary_odor(res, start_day, last_day_per_mouse, figure_path=figure_path, excitatory=sign)
+    #     responsive.plot_summary_odor(res, learned_day_per_mouse, last_day_per_mouse,
+    #                                  figure_path=figure_path, excitatory=sign)
 
     # cory.main(res, temp_res, figure_path, excitatory=True)
     # cory.main(res, temp_res, figure_path, excitatory=False)
@@ -188,7 +189,9 @@ if condition.name == 'OFC_LONGTERM':
     # power.plot_max_dff_days(res, [learned_day_per_mouse, last_day_per_mouse], ['CS+', 'CS+'], save=True, reuse=False, day_pad=0,
     #                         ylim=.17, figure_path=figure_path)
 
-    # power.plot_power(res, start_days_per_mouse, learned_day_per_mouse, figure_path, odor_valence=['CS+'],
+
+
+    # power.plot_power(res, start_day, learned_day_per_mouse, figure_path, odor_valence=['CS+'],
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=.05)
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=.05)
@@ -196,5 +199,11 @@ if condition.name == 'OFC_LONGTERM':
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=.05)
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=.05)
-    # power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
-    #                  colors_before = {'CS+':'Green'}, colors_after = {'CS+':'Black'}, ylim=.05)
+
+    # signs = [True, False]
+    # ylims = [[-0.01, 0.06], [-.05, 0.01]]
+    # for sign, ylim in zip(signs, ylims):
+    #     power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+    #                      colors_before = {'CS+':'Green'}, colors_after = {'CS+':'Black'}, ylim=ylim, excitatory=sign)
+    #     power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
+    #                      colors_before = {'CS-':'Red'}, colors_after = {'CS-':'Black'}, ylim=ylim, excitatory=sign)

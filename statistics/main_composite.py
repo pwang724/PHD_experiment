@@ -60,13 +60,13 @@ if condition.name == 'OFC_COMPOSITE':
     pt_res_['odor_standard'][ix] = ['PT CS+'] * np.sum(ix)
     pt_res_['day'][ix] = [0] * np.sum(ix)
 
-    # excitatory = [True, False]
-    # thresholds = [0.04, -0.04]
-    # for i, sign in enumerate(excitatory):
-    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
-    #     responsive.plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=False, excitatory=sign,
-    #                                              figure_path = figure_path, save=False)
-    #     responsive.plot_summary_odor(res, dt_naive, dt_learned, figure_path=figure_path, excitatory=sign, reuse=True)
+    excitatory = [True, False]
+    thresholds = [0.04, -0.04]
+    for i, sign in enumerate(excitatory):
+        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+        responsive.plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=False, excitatory=sign,
+                                                 figure_path = figure_path, save=False)
+        responsive.plot_summary_odor(res, dt_learned, dt_end, figure_path=figure_path, excitatory=sign, reuse=True)
 
 
     # cory.main(pt_res_, temp_res, figure_path, excitatory=True, valence='PT CS+')
@@ -133,13 +133,13 @@ if condition.name == 'OFC_COMPOSITE':
     #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'],
     #                      colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'}, excitatory=False, ylim=[-.06, .01])
 
-    days = [dt_naive, dt_start, dt_learned, dt_end]
-    correlations = []
-    for direction in [-1, 0, 1]:
-        for day in days:
-            a = correlation.plot_correlation_matrix(dt_res, day, loop_keys=['mouse'], shuffle=False,
-                                                    figure_path = figure_path, direction=direction)
-            correlations.append(a)
+    # days = [dt_naive, dt_start, dt_learned, dt_end]
+    # correlations = []
+    # for direction in [-1, 0, 1]:
+    #     for day in days:
+    #         a = correlation.plot_correlation_matrix(dt_res, day, loop_keys=['mouse'], shuffle=False,
+    #                                                 figure_path = figure_path, direction=direction)
+    #         correlations.append(a)
 
     # a = correlation.plot_correlation_matrix(dt_res, dt_naive, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
     # b = correlation.plot_correlation_matrix(dt_res, dt_start, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)

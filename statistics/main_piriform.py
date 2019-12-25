@@ -177,7 +177,7 @@ if condition.name == 'PIR':
 
 if condition.name == 'PIR_NAIVE':
     days = [3, 3, 2, 2]
-    # statistics.analyze.analyze_data(res, condition_config)
+    res = statistics.analyze.analyze_data(save_path, condition_config)
 
     excitatory = [True, False]
     thresholds = [0.1, -0.05]
@@ -200,7 +200,9 @@ if condition.name == 'PIR_NAIVE':
     #                                              delete_non_selective=True, figure_path= figure_path)
     # stability.plot_stability_across_days(res, start_days_per_mouse, learned_day_per_mouse, figure_path = figure_path)
 
-    # cory.main(res, temp_res, figure_path, excitatory=True)
+    # res['odor_valence'] = np.array(['CS'] * np.size(res['odor_valence']))
+    # temp_res['odor_valence'] = np.array(['CS'] * np.size(temp_res['odor_valence']))
+    # cory.main(res, temp_res, figure_path, excitatory=True, valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=False)
 
     # odor_end = False
