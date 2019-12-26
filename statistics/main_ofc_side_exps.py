@@ -17,7 +17,7 @@ import statistics.count_methods.correlation as correlation
 import statistics.count_methods.cory as cory
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.OFC_Config()
+condition_config = statistics.analyze.OFC_State_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -60,14 +60,16 @@ if condition.name == 'OFC_REVERSAL':
                      colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS-':'Red','CS+':'Green'})
 
 if condition.name == 'OFC_STATE':
-    statistics.analyze.analyze_data(res, condition_config, m_threshold=0.04)
+    res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)
     # responsive.plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path)
-    power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
-                     colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS+':'Gray','CS-':'Gray'})
+    # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+    #                  colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS+':'Gray','CS-':'Gray'})
     # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
-    #                                             arg='both', valence='CS+', more_stats=True, figure_path= figure_path)
-    start = [0,0,0,0,0]
-    end = [1,1,1,1,1]
+    #                                             arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
+    compare.distribution_dff(res, start_days_per_mouse, last_day_per_mouse, arg='all', valence='CS+',
+                             figure_path=figure_path)
+    # start = [0,0,0,0,0]
+    # end = [1,1,1,1,1]
     # valence_responsive.plot_responsive_difference_odor_and_water(res, start, end,
     #                                                              figure_path=figure_path, normalize=False, ylim=.4)
     # power.plot_max_dff_days(res, [start, end], ['CS+', 'CS+'], save=False, reuse=False, day_pad= 0, figure_path = figure_path, ylim=.2)
@@ -78,14 +80,16 @@ if condition.name == 'OFC_STATE':
     #                day_pad=0, save=True, reuse=True, figure_path=figure_path)
 
 if condition.name == 'OFC_CONTEXT':
-    statistics.analyze.analyze_data(res, condition_config, m_threshold=.04)
+    res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)
     # responsive.plot_summary_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path)
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
     #                  colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS+':'Gray','CS-':'Gray'})
-    compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
-                             arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
-    start = [0,0,0,0]
-    end = [1,1,1,1]
+    # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
+    #                          arg='all', valence='CS+', more_stats=True, figure_path= figure_path)
+    compare.distribution_dff(res, start_days_per_mouse, last_day_per_mouse, arg='all', valence='CS+',
+                             figure_path=figure_path)
+    # start = [0,0,0,0]
+    # end = [1,1,1,1]
     # valence_responsive.plot_responsive_difference_odor_and_water(res, [0,0,0,0], [1,1,1,1],
     #                                                              figure_path=figure_path, normalize=False, ylim=.65)
     # power.plot_max_dff_days(res, [start, end], ['CS+', 'CS+'], save=False, reuse=False, day_pad= 0, figure_path = figure_path, ylim=.2)

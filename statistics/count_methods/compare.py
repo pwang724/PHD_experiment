@@ -7,6 +7,8 @@ from plot import _easy_save
 from format import *
 import copy
 import reduce
+import os
+from scipy.stats import ranksums, wilcoxon
 
 def _compare_dff(res, loop_keys, arg):
     new = defaultdict(list)
@@ -23,6 +25,8 @@ def _compare_dff(res, loop_keys, arg):
             mask = np.array(mask_a).astype(bool)
         elif arg == 'last':
             mask = np.array(mask_b).astype(bool)
+        elif arg == 'none':
+            mask = np.ones_like(mask_b).astype(bool)
         else:
             raise ValueError('arg not recognized')
 
@@ -54,6 +58,43 @@ def _compare_dff(res, loop_keys, arg):
         new[k] = np.array(v)
     return new
 
+def distribution_dff(res, start_days, end_days, arg, valence, figure_path, hist_range = (-.05, 1.2)):
+    list_of_days = list(zip(start_days, end_days))
+    res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
+    res = filter.filter(res, {'odor_valence': valence})
+    new = _compare_dff(res, loop_keys=['mouse', 'odor'], arg=arg)
+
+    #
+    def _helper(real, label, bin = 20):
+        density, bins = np.histogram(real, bins=bin, density=True, range= hist_range)
+        unity_density = density / density.sum()
+        widths = bins[:-1] - bins[1:]
+        ax.bar(bins[1:], unity_density, width=widths, alpha=.5, label=label)
+
+    fig = plt.figure(figsize=(2, 1.5))
+    ax = fig.add_axes([0.2, 0.2, 0.7, 0.7])
+
+    x = np.concatenate(new['day_0'])
+    y = np.concatenate(new['day_1'])
+    sr = wilcoxon(x, y)[-1]
+    _helper(x, 'Before')
+    _helper(y, 'After')
+
+    ax.set_xlabel('Amplitude')
+    ax.set_ylabel('Density')
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+    plt.legend(frameon=False)
+    ylim = plt.ylim()
+    xlim = plt.xlim()
+    sig_str = plot.significance_str(x=(xlim[-1] - ylim[0]) * .7, y=.7 * (ylim[-1] - ylim[0]), val= sr)
+    _easy_save(os.path.join(figure_path, 'dff_distribution'), valence, dpi=300, pdf=True)
+
+
+
+
 def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure_path,
                      lim = (-.05, 1.2), ticks=(0, .5, 1)):
     list_of_days = list(zip(start_days,end_days))
@@ -67,7 +108,6 @@ def plot_compare_dff(res, start_days, end_days, arg, valence, more_stats, figure
     for x, y in zip(xs, ys):
         a.append(np.sum(x > y))
         b.append(np.sum(y > x))
-
     fraction = np.sum(a) / (np.sum(a) + np.sum(b))
 
     ax_args_copy = {}

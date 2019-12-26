@@ -26,12 +26,12 @@ experiments = [
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
 ]
-EXPERIMENT = True
+EXPERIMENT = False
 ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.PIR_CONTEXT
+condition = experimental_conditions.OFC_REVERSAL
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -81,7 +81,8 @@ if 'test_odor_across_days' in experiments:
 
     if ANALYZE:
         res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
-        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day'], reduce_key='top_score')
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day', 'shuffle'],
+                                               reduce_key='top_score')
 
         for style in np.unique(summary_res['decode_style']):
             temp = filter.filter(summary_res, {'decode_style': style})
@@ -96,27 +97,34 @@ if 'test_odor_across_days' in experiments:
                 vmin = .25
             else:
                 vmin = 0
-            plot.plot_weight(temp, x_key, y_key, val_key, title, vmin, vmax, label= True,
-                             save_path=os.path.join(save_path, temp['decode_style'][0]))
 
-            analysis = filter.filter(res, {'decode_style': style})
-            analysis = reduce.new_filter_reduce(analysis, filter_keys=['decode_style', 'Test Day', 'Training Day','mouse'],
-                                                   reduce_key='top_score')
-            ixTest = analysis['Test Day']
-            ixTrain = analysis['Training Day']
+            if condition.name == 'OFC_REVERSAL':
+                vmin = 0
 
-            ixBefore = np.logical_and(ixTest == 0, ixTrain == 0)
-            ixAfter = np.logical_and(ixTest > 0, ixTrain > 0)
+            for shuffle in [False, True]:
+                _ = filter.filter(temp, {'shuffle':shuffle})
+                text = '_shuffle' if shuffle else '_no_shuffle'
+                plot.plot_weight(_, x_key, y_key, val_key, title, vmin, vmax, label= True,
+                                 save_path=os.path.join(save_path, temp['decode_style'][0]), text=text)
 
-            scores_before = analysis['top_score'][ixBefore]
-            scores_after = analysis['top_score'][ixAfter]
-
-            from scipy.stats import ranksums, wilcoxon, kruskal
-            x = wilcoxon(scores_before, scores_after)
-            print(style)
-            print(x)
-            print(np.mean(scores_before))
-            print(np.mean(scores_after))
+            # analysis = filter.filter(res, {'decode_style': style})
+            # analysis = reduce.new_filter_reduce(analysis, filter_keys=['decode_style', 'Test Day', 'Training Day','mouse'],
+            #                                        reduce_key='top_score')
+            # ixTest = analysis['Test Day']
+            # ixTrain = analysis['Training Day']
+            #
+            # ixBefore = np.logical_and(ixTest == 0, ixTrain == 0)
+            # ixAfter = np.logical_and(ixTest > 0, ixTrain > 0)
+            #
+            # scores_before = analysis['top_score'][ixBefore]
+            # scores_after = analysis['top_score'][ixAfter]
+            #
+            # from scipy.stats import ranksums, wilcoxon, kruskal
+            # x = ranksums(scores_before, scores_after)
+            # print(style)
+            # print(x)
+            # print(np.mean(scores_before))
+            # print(np.mean(scores_after))
 
 
 if 'vary_decoding_style_odor' in experiments:
