@@ -64,6 +64,9 @@ if 'test_odor_across_days' in experiments:
     elif condition.name == 'MPFC_COMPOSITE':
         neurons = 40
         no_end_time = False
+    elif condition.name == 'OFC_REVERSAL':
+        neurons = 40
+        no_end_time = False
     else:
         neurons = 40
         no_end_time = False

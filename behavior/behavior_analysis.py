@@ -311,6 +311,7 @@ def add_behavior_stats(res, condition, arg ='normal'):
         rules_boolean = config.rules_output_boolean
 
     time_filter = config.smoothing_window_first_lick
+    res['time_first_lick_raw'] = np.copy(res['time_first_lick'])
     for i in range(len(res['time_first_lick'])):
         v = res['time_first_lick'][i]
         res['time_first_lick'][i] = v[v > -1]

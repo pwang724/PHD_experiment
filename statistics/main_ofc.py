@@ -11,6 +11,8 @@ import analysis
 import scikit_posthocs
 
 import statistics.analyze
+
+import statistics.count_methods.waveform as waveform
 import statistics.count_methods.power as power
 import statistics.count_methods.compare as compare
 import statistics.count_methods.correlation as correlation
@@ -18,7 +20,7 @@ import statistics.count_methods.cory as cory
 import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.OFC_LONGTERM_Config()
+condition_config = statistics.analyze.OFC_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -44,34 +46,39 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     if condition.name == 'OFC':
         last_day_per_mouse = [5, 5, 3, 4, 4]
 
-    # naive_config = statistics.analyze.OFC_LONGTERM_Config()
-    # data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
-    # save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
-    # res_naive = fio.load_pickle(os.path.join(save_path_, 'dict.pkl'))
-    # res_naive = filter.exclude(res_naive, {'mouse': 3})
-    # res_naive['mouse'] += 5
-    # temp_res_naive = behavior.behavior_analysis.analyze_behavior(data_path_, naive_config.condition)
-    # temp_res_naive = filter.filter(temp_res_naive, {'odor_valence': ['CS+']})
-    # temp_res_naive = filter.exclude(temp_res_naive, {'mouse': 3})
-    # temp_res_naive['mouse'] += 5
-    # res = filter.exclude(res, {'day': 0})
-    # reduce.chain_defaultdicts(res, res_naive)
-    # reduce.chain_defaultdicts(temp_res, temp_res_naive)
+    res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)
+
+    naive_config = statistics.analyze.OFC_LONGTERM_Config()
+    data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
+    save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
+    res_naive = statistics.analyze.analyze_data(save_path_, condition_config, m_threshold=0.04)
+    res_naive = filter.exclude(res_naive, {'mouse': 3})
+    res_naive['mouse'] += 5
+    temp_res_naive = behavior.behavior_analysis.analyze_behavior(data_path_, naive_config.condition)
+    temp_res_naive = filter.filter(temp_res_naive, {'odor_valence': ['CS+']})
+    temp_res_naive = filter.exclude(temp_res_naive, {'mouse': 3})
+    temp_res_naive['mouse'] += 5
+    res = filter.exclude(res, {'day': 0})
+    reduce.chain_defaultdicts(res, res_naive)
+    reduce.chain_defaultdicts(temp_res, temp_res_naive)
+    learned_days_combined = [5, 5, 3, 4, 4, 3, 2, 2]
+    last_days_combined = [5, 5, 3, 4, 4, 8, 7, 5]
     # cory.main(res, temp_res, figure_path, excitatory=True,valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=False,valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=True,valence='CS-')
     # cory.main(res, temp_res, figure_path, excitatory=False,valence='CS-')
 
-    # res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)
+    waveform.lick_onset_vs_neural_onset(res, temp_res, learned_days_combined, last_days_combined, figure_path)
 
-    excitatory = [True, False]
-    thresholds = [0.04, -0.04]
-    for i, sign in enumerate(excitatory):
-        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+
+    # excitatory = [True, False]
+    # thresholds = [0.04, -0.04]
+    # for i, sign in enumerate(excitatory):
+    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
         # res.pop('data')
         # responsive.plot_individual(res, lick_res, figure_path=figure_path)
-        responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
-                                           figure_path=figure_path, excitatory= sign)
+        # responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
+        #                                    figure_path=figure_path, excitatory= sign)
     # overlap.plot_overlap_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path = figure_path)
     # overlap.plot_overlap_water(res, training_start_day_per_mouse, last_day_per_mouse, figure_path = figure_path)
 
@@ -162,11 +169,22 @@ if condition.name == 'OFC_LONGTERM':
     last_day_per_mouse = np.array([8, 7, 5, 5])
 
     res = filter.exclude(res, {'mouse': 3})
+    temp_res = filter.exclude(temp_res, {'mouse': 3})
     learned_day_per_mouse = np.array([3, 2, 2])
     last_day_per_mouse = np.array([8, 7, 5])
 
-    excitatory = [True, False]
-    thresholds = [0.04, -0.04]
+    # onset_learned = waveform.distribution(res, start=learned_day_per_mouse, end=learned_day_per_mouse + 1, data_arg='onset',
+    #                       figure_path=figure_path, save = False)
+    # onset_late = waveform.distribution(res, start=last_day_per_mouse - 1, end=last_day_per_mouse, data_arg='onset',
+    #                       figure_path=figure_path, save = True)
+    # print('ranksum between distributions of odor onsets early and late in learning {}'.format(
+    #     ranksums(onset_learned,onset_late)[-1]))
+
+
+    waveform.lick_onset_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path)
+
+    # excitatory = [True, False]
+    # thresholds = [0.04, -0.04]
     # for i, sign in enumerate(excitatory):
     #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
     #     res = filter.exclude(res, {'mouse': 3})
