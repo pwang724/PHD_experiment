@@ -8,7 +8,7 @@ import tools.file_io as fio
 from behavior.behavior_analysis import get_days_per_mouse
 import behavior
 import analysis
-import scikit_posthocs
+# import scikit_posthocs
 
 import statistics.analyze
 

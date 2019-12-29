@@ -8,6 +8,22 @@ from collections import OrderedDict
 from decode.organizer import organizer_decode_odor_within_day
 from tools.experiment_tools import perform
 
+def test_fp_fn(argTest = True, neurons = 40, style = ('identity'), no_end_time=True, start_day = [], end_day = []):
+    decodeConfig = decode_config.DecodeConfig()
+    decodeConfig.repeat = 100
+    decodeConfig.neurons = neurons
+    decodeConfig.average_time = True
+    decodeConfig.no_end_time = no_end_time
+    decodeConfig.shuffle = False
+    decodeConfig.start_day = start_day
+    decodeConfig.end_day = end_day
+    hp_ranges = OrderedDict()
+    hp_ranges['decode_style'] = style
+
+    if argTest:
+        decodeConfig.repeat = 50
+    return decodeConfig, hp_ranges
+
 def test_across_days(argTest = True, neurons = 40, style = ('identity'), no_end_time=True):
     decodeConfig = decode_config.DecodeConfig()
     decodeConfig.repeat = 100

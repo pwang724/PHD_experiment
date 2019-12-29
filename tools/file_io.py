@@ -52,6 +52,8 @@ def save_json(save_path, save_name, config):
     for k, v in config_dict.items():
         if np.issubdtype(type(v), np.integer):
             config_dict[k] = int(v)
+        if isinstance(v, list) or isinstance(v, (np.ndarray)):
+            config_dict[k] = ','.join([str(x) for x in v])
     with open(save_pathname, 'w') as f:
         json.dump(config_dict, f)
 

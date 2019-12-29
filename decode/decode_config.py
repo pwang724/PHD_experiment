@@ -18,3 +18,5 @@ class DecodeConfig(BaseConfig):
         self.shuffle = False
         self.average_time = False
         self.no_end_time = True
+        self.start_day = None
+        self.end_day = None

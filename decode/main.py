@@ -22,16 +22,21 @@ from reduce import chain_defaultdicts
 experiments = [
     # 'vary_neuron_odor',
     # 'vary_decoding_style_odor',
-    'test_odor_across_days'
+    # 'test_odor_across_days',
+    # 'test_odor_across_days',
+    'test_fp_fn',
+    'fp_fn__ofc',
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
 ]
-EXPERIMENT = False
-ANALYZE = True
+# EXPERIMENT = False
+# ANALYZE = True
+EXPERIMENT = True
+ANALYZE = False
 argTest = False
 
 #inputs
-condition = experimental_conditions.OFC_REVERSAL
+condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -42,6 +47,110 @@ line_args = {'alpha': 1, 'linewidth': .5, 'marker': 'o', 'markersize': 1.5}
 bar_args = {'alpha': .6, 'fill': False}
 ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05]}
 error_args = {'fmt':'.', 'capsize':2, 'elinewidth':1, 'markersize':2, 'alpha': .5}
+
+if 'test_fp_fn' in experiments:
+    experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', condition.name)
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_fp_fn', condition.name)
+
+    neurons = 40
+    no_end_time = False
+    style = ['valence']
+
+    if EXPERIMENT:
+        if condition.name == 'OFC':
+            learned_days = np.array([5, 4, 3, 4, 5])
+            last_days = np.array([5, 5, 3, 4, 5])
+
+        if condition.name == 'OFC_LONGTERM':
+            learned_days = np.array([4, 3, 3, 0])
+            last_days = np.array([6, 6, 5, -1])
+
+        experiment_tools.perform(experiment=decode.organizer.organizer_test_fp_fn,
+                                 condition=condition,
+                                 experiment_configs=experiment_configs.test_fp_fn(
+                                argTest=argTest, neurons=neurons, style = style, no_end_time=no_end_time,
+                                 start_day=learned_days,end_day=last_days),
+                                 data_path=data_path,
+                                 save_path=experiment_path)
+
+    if ANALYZE:
+        res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'odor_valence', 'mouse','test_day'],
+                                               reduce_key='top_score')
+
+        for valence in np.unique(summary_res['odor_valence']):
+            x_key = 'mouse'
+            y_key = 'top_score'
+            title = 'Decoding ' + valence
+            vmax = 1
+            vmin = 0
+
+            plot.plot_results(summary_res, x_key=x_key, y_key=y_key,
+                              select_dict={'odor_valence': valence},
+                              plot_function=plt.bar,
+                              plot_args=bar_args,
+                              path=save_path)
+
+if 'fp_fn__ofc' in experiments:
+    experiment_path_ofc = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', 'OFC')
+    experiment_path_ofc_lt = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', 'OFC_LONGTERM')
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_fp_fn', 'OFC_COMBINED')
+
+    res = decode.decode_analysis.load_results_train_test_scores(experiment_path_ofc)
+    nMouse = len(np.unique(res['mouse']))
+    res_ = decode.decode_analysis.load_results_train_test_scores(experiment_path_ofc_lt)
+    res_['mouse'] += nMouse
+    reduce.chain_defaultdicts(res, res_)
+
+    summary_res = reduce.new_filter_reduce(res, filter_keys=['odor_valence', 'mouse', 'test_day'],
+                                           reduce_key='top_score')
+
+    ax_args = {'xlim':[-1, 2], 'ylim':[0, 1.05], 'yticks':[0, .25, .5, .75, 1.0]}
+    scatter_args = {'marker': '.', 's': 6, 'alpha': .5}
+    error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 0, 'alpha': .5}
+    x_key = 'mouse'
+    y_key = 'top_score'
+    for valence in np.unique(summary_res['odor_valence']):
+        title = 'Decoding ' + valence
+        vmax = 1
+        vmin = 0
+
+        plot.plot_results(summary_res, x_key=x_key, y_key=y_key,
+                          select_dict={'odor_valence': valence},
+                          plot_function=plt.scatter,
+                          plot_args=scatter_args,
+                          ax_args = {'ylim':[0, 1.05], 'yticks':[0, .25, .5, .75, 1.0]},
+                          path=save_path)
+
+    summary_res_ = reduce.new_filter_reduce(summary_res, filter_keys=['odor_valence', 'mouse'], reduce_key='top_score')
+    summary_res_.pop(y_key + '_sem')
+    summary_res_.pop(y_key + '_std')
+    summary_res__ = reduce.new_filter_reduce(summary_res_, filter_keys=['odor_valence'], reduce_key='top_score')
+
+    for valence in [['CS+'], ['CS+','CS-']]:
+        plot.plot_results(summary_res_, x_key='odor_valence', y_key=y_key, loop_keys='odor_valence',
+                          select_dict={'odor_valence':valence},
+                          plot_function=plt.scatter,
+                          plot_args=scatter_args,
+                          colors=['green','red'],
+                          ax_args= ax_args,
+                          path=save_path,
+                          rect=[0.25, 0.25, .6, .6],
+                          save=False)
+
+        plot.plot_results(summary_res__, x_key='odor_valence', y_key=y_key, error_key=y_key + '_sem',
+                          select_dict={'odor_valence': valence},
+                          plot_function=plt.errorbar,
+                          plot_args=error_args,
+                          ax_args= ax_args,
+                          path=save_path,
+                          reuse= True)
+
+
+
+
+
+
 
 if 'test_odor_across_days' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_across_days', condition.name)

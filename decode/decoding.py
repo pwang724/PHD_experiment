@@ -89,6 +89,73 @@ def decode_odor_labels(cons, data, chosen_odors, csp_odors, decode_config):
     out = np.stack(list_of_scores, axis=2)
     return out
 
+def test_fp_fn(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
+    def _helper(cons, traces):
+        list_of_masks = _get_odor_masks(cons, chosen_odors, csp_odors, decode_style)
+        data_trial_cell_time = utils.reshape_data(traces, trial_axis=0, cell_axis=1, time_axis=2,
+                                                  nFrames=cons.TRIAL_FRAMES)
+        if average_time:
+            on = cons.DAQ_O_ON_F
+            off = cons.DAQ_W_ON_F
+            if decode_config.no_end_time:
+                data_trial_cell_time = np.max(data_trial_cell_time[:, :, on:], axis=2, keepdims=True)
+            else:
+                data_trial_cell_time = np.max(data_trial_cell_time[:,:,on:off], axis=2, keepdims=True)
+
+        licks = cons.DAQ_DATA[:,cons.DAQ_L,:] > 0.5
+        start = np.round(cons.DAQ_O_ON * cons.DAQ_SAMP).astype(int)
+        end = np.round(cons.DAQ_W_ON * cons.DAQ_SAMP).astype(int)
+        lick_boolean = np.sum(licks[start:end], axis=0) > 0
+
+        csp_lick = np.bitwise_and(list_of_masks[0], lick_boolean)
+        csp_nolick = np.bitwise_and(list_of_masks[0], np.invert(lick_boolean))
+        csm_lick = np.bitwise_and(list_of_masks[1], lick_boolean)
+        csm_nolick = np.bitwise_and(list_of_masks[1], np.invert(lick_boolean))
+
+        train_trials = np.bitwise_or(csp_lick, csm_nolick)
+        train_labels = _assign_odor_labels([csp_lick, csm_nolick])[train_trials]
+        train_data = data_trial_cell_time[train_trials]
+
+        test_trials = np.bitwise_or(csp_nolick, csm_lick)
+        test_labels = _assign_odor_labels([csp_nolick, csm_lick])[test_trials]
+        test_data = data_trial_cell_time[test_trials]
+        return train_data, train_labels, test_data, test_labels
+
+    decode_style = decode_config.decode_style
+    decode_neurons = decode_config.neurons
+    decode_shuffle = decode_config.shuffle
+    decode_repeat = decode_config.repeat
+    average_time = decode_config.average_time
+
+    res = defaultdict(list)
+    for day, _ in enumerate(list_of_cons):
+        train_data, train_labels, test_data, test_labels = _helper(list_of_cons[day], list_of_data[day])
+        arg = ['CS+','CS-']
+        for i, current_label in enumerate([1,2]):
+            ix = test_labels == current_label
+            data = test_data[ix]
+            labels = test_labels[ix]
+
+            if len(labels):
+                for r in range(decode_repeat):
+                    if decode_shuffle:
+                        pass #TODO
+
+                    nCells = train_data.shape[1]
+                    cell_ixs = np.random.choice(nCells, size=decode_neurons, replace=False)
+                    models = model_odors_time_bin(train_data[:, cell_ixs, :], train_labels, shuffle=False)
+                    scores = test_odors_time_bin(data[:, cell_ixs, :], labels, models)
+                    res['test_day'].append(day)
+                    res['scores'].append(scores)
+                    res['n'].append(len(labels))
+                    res['odor_valence'].append(arg[i])
+            else:
+                print('no data for mouse: {}, day: {}, valence: {}'.format(list_of_cons[day].NAME_MOUSE, day, arg[i]))
+
+    for key, val in res.items():
+        res[key] = np.array(val)
+    return res
+
 def test_odors_across_days(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
     def _helper(day):
         list_of_masks = _get_odor_masks(list_of_cons[day], chosen_odors, csp_odors, decode_style)
