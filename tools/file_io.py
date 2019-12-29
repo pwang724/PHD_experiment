@@ -2,6 +2,7 @@ import json
 import os
 import pickle
 import numpy as np
+import copy
 
 
 def save_pickle(save_path, save_name, data):
@@ -45,6 +46,7 @@ def save_json(save_path, save_name, config):
     :param config:
     :return:
     '''
+    config = copy.copy(config)
     if not os.path.exists(save_path):
         os.makedirs(save_path)
     save_pathname = os.path.join(save_path, save_name + '.json')

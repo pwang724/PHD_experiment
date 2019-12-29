@@ -24,29 +24,30 @@ experiments = [
     # 'vary_decoding_style_odor',
     # 'test_odor_across_days',
     # 'test_odor_across_days',
-    'test_fp_fn',
+    # 'test_fp_fn',
     'fp_fn__ofc',
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
 ]
 # EXPERIMENT = False
 # ANALYZE = True
-EXPERIMENT = True
-ANALYZE = False
+EXPERIMENT = False
+ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.OFC
+condition = experimental_conditions.OFC_LONGTERM
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
 # init.load_matlab.load_condition(condition)
 
+scatter_args = {'marker': '.', 's': 6, 'alpha': .5}
+error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 0, 'alpha': .5}
 fill_args = {'zorder': 0, 'lw': 0, 'alpha': 0.3}
 line_args = {'alpha': 1, 'linewidth': .5, 'marker': 'o', 'markersize': 1.5}
 bar_args = {'alpha': .6, 'fill': False}
 ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05]}
-error_args = {'fmt':'.', 'capsize':2, 'elinewidth':1, 'markersize':2, 'alpha': .5}
 
 if 'test_fp_fn' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', condition.name)
@@ -75,7 +76,7 @@ if 'test_fp_fn' in experiments:
 
     if ANALYZE:
         res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
-        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'odor_valence', 'mouse','test_day'],
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'odor_valence', 'mouse','test_day','shuffle'],
                                                reduce_key='top_score')
 
         for valence in np.unique(summary_res['odor_valence']):
@@ -85,10 +86,11 @@ if 'test_fp_fn' in experiments:
             vmax = 1
             vmin = 0
 
-            plot.plot_results(summary_res, x_key=x_key, y_key=y_key,
+            plot.plot_results(summary_res, x_key=x_key, y_key=y_key, loop_keys='shuffle',
                               select_dict={'odor_valence': valence},
-                              plot_function=plt.bar,
-                              plot_args=bar_args,
+                              plot_function=plt.scatter,
+                              plot_args=scatter_args,
+                              colors=['red','black'],
                               path=save_path)
 
 if 'fp_fn__ofc' in experiments:
@@ -102,12 +104,10 @@ if 'fp_fn__ofc' in experiments:
     res_['mouse'] += nMouse
     reduce.chain_defaultdicts(res, res_)
 
-    summary_res = reduce.new_filter_reduce(res, filter_keys=['odor_valence', 'mouse', 'test_day'],
+    summary_res = reduce.new_filter_reduce(res, filter_keys=['odor_valence', 'mouse', 'test_day','shuffle'],
                                            reduce_key='top_score')
 
     ax_args = {'xlim':[-1, 2], 'ylim':[0, 1.05], 'yticks':[0, .25, .5, .75, 1.0]}
-    scatter_args = {'marker': '.', 's': 6, 'alpha': .5}
-    error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 0, 'alpha': .5}
     x_key = 'mouse'
     y_key = 'top_score'
     for valence in np.unique(summary_res['odor_valence']):
@@ -116,31 +116,41 @@ if 'fp_fn__ofc' in experiments:
         vmin = 0
 
         plot.plot_results(summary_res, x_key=x_key, y_key=y_key,
-                          select_dict={'odor_valence': valence},
+                          select_dict={'odor_valence': valence, 'shuffle':False},
                           plot_function=plt.scatter,
                           plot_args=scatter_args,
                           ax_args = {'ylim':[0, 1.05], 'yticks':[0, .25, .5, .75, 1.0]},
                           path=save_path)
 
-    summary_res_ = reduce.new_filter_reduce(summary_res, filter_keys=['odor_valence', 'mouse'], reduce_key='top_score')
+    summary_res_ = reduce.new_filter_reduce(summary_res, filter_keys=['odor_valence', 'mouse', 'shuffle'], reduce_key='top_score')
     summary_res_.pop(y_key + '_sem')
     summary_res_.pop(y_key + '_std')
-    summary_res__ = reduce.new_filter_reduce(summary_res_, filter_keys=['odor_valence'], reduce_key='top_score')
+    summary_res__ = reduce.new_filter_reduce(summary_res_, filter_keys=['odor_valence', 'shuffle'], reduce_key='top_score')
 
     for valence in [['CS+'], ['CS+','CS-']]:
-        plot.plot_results(summary_res_, x_key='odor_valence', y_key=y_key, loop_keys='odor_valence',
-                          select_dict={'odor_valence':valence},
-                          plot_function=plt.scatter,
-                          plot_args=scatter_args,
-                          colors=['green','red'],
-                          ax_args= ax_args,
-                          path=save_path,
-                          rect=[0.25, 0.25, .6, .6],
-                          save=False)
+        # plot.plot_results(summary_res_, x_key='odor_valence', y_key=y_key, loop_keys='odor_valence',
+        #                   select_dict={'odor_valence':valence, 'shuffle':False},
+        #                   plot_function=plt.scatter,
+        #                   plot_args=scatter_args,
+        #                   colors=['green','red'],
+        #                   ax_args= ax_args,
+        #                   path=save_path,
+        #                   rect=[0.25, 0.25, .6, .6],
+        #                   save=False)
 
         plot.plot_results(summary_res__, x_key='odor_valence', y_key=y_key, error_key=y_key + '_sem',
-                          select_dict={'odor_valence': valence},
+                          select_dict={'odor_valence': valence, 'shuffle':True},
                           plot_function=plt.errorbar,
+                          plot_args=error_args,
+                          ax_args= ax_args,
+                          path=save_path,
+                          reuse= False, save=False)
+
+        plot.plot_results(summary_res__, x_key='odor_valence', y_key=y_key, error_key=y_key + '_sem',
+                          loop_keys='odor_valence',
+                          select_dict={'odor_valence': valence, 'shuffle':False},
+                          plot_function=plt.errorbar,
+                          colors=['green', 'red'],
                           plot_args=error_args,
                           ax_args= ax_args,
                           path=save_path,

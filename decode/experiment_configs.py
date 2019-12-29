@@ -14,11 +14,11 @@ def test_fp_fn(argTest = True, neurons = 40, style = ('identity'), no_end_time=T
     decodeConfig.neurons = neurons
     decodeConfig.average_time = True
     decodeConfig.no_end_time = no_end_time
-    decodeConfig.shuffle = False
     decodeConfig.start_day = start_day
     decodeConfig.end_day = end_day
     hp_ranges = OrderedDict()
     hp_ranges['decode_style'] = style
+    hp_ranges['shuffle'] = [False, True]
 
     if argTest:
         decodeConfig.repeat = 50

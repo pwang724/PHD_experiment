@@ -139,12 +139,14 @@ def test_fp_fn(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_confi
             if len(labels):
                 for r in range(decode_repeat):
                     if decode_shuffle:
-                        pass #TODO
-
-                    nCells = train_data.shape[1]
-                    cell_ixs = np.random.choice(nCells, size=decode_neurons, replace=False)
-                    models = model_odors_time_bin(train_data[:, cell_ixs, :], train_labels, shuffle=False)
-                    scores = test_odors_time_bin(data[:, cell_ixs, :], labels, models)
+                        scores = decode_odors_time_bin(train_data, train_labels,
+                                                       number_of_cells=decode_neurons, cv=5)
+                        scores = np.mean(scores)
+                    else:
+                        nCells = train_data.shape[1]
+                        cell_ixs = np.random.choice(nCells, size=decode_neurons, replace=False)
+                        models = model_odors_time_bin(train_data[:, cell_ixs, :], train_labels, shuffle=False)
+                        scores = test_odors_time_bin(data[:, cell_ixs, :], labels, models)
                     res['test_day'].append(day)
                     res['scores'].append(scores)
                     res['n'].append(len(labels))
