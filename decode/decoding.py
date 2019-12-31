@@ -89,6 +89,76 @@ def decode_odor_labels(cons, data, chosen_odors, csp_odors, decode_config):
     out = np.stack(list_of_scores, axis=2)
     return out
 
+def test_split(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
+    def _helper(cons, traces):
+        list_of_masks = _get_odor_masks(cons, chosen_odors, csp_odors, decode_style)
+        data_trial_cell_time = utils.reshape_data(traces, trial_axis=0, cell_axis=1, time_axis=2,
+                                                  nFrames=cons.TRIAL_FRAMES)
+        if average_time:
+            on = cons.DAQ_O_ON_F
+            off = cons.DAQ_W_ON_F
+            if decode_config.no_end_time:
+                data_trial_cell_time = np.max(data_trial_cell_time[:, :, on:], axis=2, keepdims=True)
+            else:
+                data_trial_cell_time = np.max(data_trial_cell_time[:,:,on:off], axis=2, keepdims=True)
+
+        start = np.round(cons.DAQ_O_ON * cons.DAQ_SAMP).astype(int)
+        end = np.round(cons.DAQ_W_ON * cons.DAQ_SAMP).astype(int)
+        licks = cons.DAQ_DATA[start:end,cons.DAQ_L,:] > 0.5
+        licks = np.transpose(licks)
+
+        if decode_config.split_style == 'onset':
+            factor = []
+            for l in licks:
+                if np.any(l):
+                    loc = np.where(l)[0][0]
+                else:
+                    loc = 1000
+                factor.append(loc)
+            factor = np.array(factor)
+        elif decode_config.split_style == 'time':
+            factor = np.arange(len(licks))
+        elif decode_config.split_style == 'magnitude':
+            on_off = np.diff(licks, n=1, axis=1)
+            factor = np.sum(on_off > 0, axis=1)
+        else:
+            raise ValueError('split style {} not recognized'.format(decode_config.split_style))
+
+        data = []
+        labels = []
+        for mask in list_of_masks:
+            factor_current_odor = factor[mask]
+            ixs = np.argsort(factor_current_odor)
+            cutoff = len(ixs)//2
+
+            current_data = data_trial_cell_time[mask][ixs]
+            current_labels = np.ones_like(ixs)
+            current_labels[cutoff:] = 2
+            data.append(current_data)
+            labels.append(current_labels)
+
+        return data, labels
+
+    decode_style = decode_config.decode_style
+    decode_neurons = decode_config.neurons
+    decode_shuffle = decode_config.shuffle
+    decode_repeat = decode_config.repeat
+    average_time = decode_config.average_time
+
+    res = defaultdict(list)
+    for day, _ in enumerate(list_of_cons):
+        data, labels = _helper(list_of_cons[day], list_of_data[day])
+        for d, l in zip(data, labels):
+            for r in range(decode_repeat):
+                scores = decode_odors_time_bin(d, l, number_of_cells=decode_neurons, cv=5)
+                scores = np.mean(scores)
+                res['test_day'].append(day)
+                res['scores'].append(scores)
+
+    for key, val in res.items():
+        res[key] = np.array(val)
+    return res
+
 def test_fp_fn(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
     def _helper(cons, traces):
         list_of_masks = _get_odor_masks(cons, chosen_odors, csp_odors, decode_style)

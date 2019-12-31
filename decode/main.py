@@ -17,15 +17,18 @@ import _CONSTANTS.conditions as experimental_conditions
 import matplotlib.pyplot as plt
 from collections import defaultdict
 from reduce import chain_defaultdicts
+import scipy.stats as stats
+import scikit_posthocs
 
 #
 experiments = [
     # 'vary_neuron_odor',
     # 'vary_decoding_style_odor',
     # 'test_odor_across_days',
-    # 'test_odor_across_days',
+    'test_split',
+    'split__ofc',
     # 'test_fp_fn',
-    'fp_fn__ofc',
+    # 'fp_fn__ofc',
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
 ]
@@ -48,6 +51,111 @@ fill_args = {'zorder': 0, 'lw': 0, 'alpha': 0.3}
 line_args = {'alpha': 1, 'linewidth': .5, 'marker': 'o', 'markersize': 1.5}
 bar_args = {'alpha': .6, 'fill': False}
 ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05]}
+
+if 'test_split' in experiments:
+    experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_split', condition.name)
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_split', condition.name)
+
+    neurons = 40
+    no_end_time = False
+    style = ['csp_identity']
+
+    if EXPERIMENT:
+        if condition.name == 'OFC':
+            learned_days = np.array([3, 3, 2, 2, 3])
+            last_days = np.array([3, 3, 2, 2, 3])
+
+        if condition.name == 'OFC_LONGTERM':
+            learned_days = np.array([3, 2, 3, 0])
+            last_days = np.array([3, 2, 3, -1])
+
+        experiment_tools.perform(experiment=decode.organizer.organizer_test_split,
+                                 condition=condition,
+                                 experiment_configs=experiment_configs.test_split(
+                                argTest=argTest, neurons=neurons, style=style, no_end_time=no_end_time,
+                                 start_day=learned_days,end_day=last_days),
+                                 data_path=data_path,
+                                 save_path=experiment_path)
+    if ANALYZE:
+        res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['split_style', 'mouse','test_day'],
+                                               reduce_key='top_score')
+
+        x_key = 'mouse'
+        y_key = 'top_score'
+        for split_style in np.unique(summary_res['split_style']):
+            title = 'Decoding ' + split_style
+            vmax = 1
+            vmin = 0
+
+            plot.plot_results(summary_res, x_key=x_key, y_key=y_key,
+                              select_dict={'split_style': split_style},
+                              plot_function=plt.scatter,
+                              plot_args=scatter_args,
+                              rect=[.25, .25, .6, .6],
+                              ax_args= ax_args,
+                              path=save_path)
+
+        summary_res_ = reduce.new_filter_reduce(summary_res, filter_keys=['split_style', 'mouse'],
+                                                reduce_key='top_score')
+        summary_res_.pop(y_key + '_sem')
+        summary_res_.pop(y_key + '_std')
+        summary_res__ = reduce.new_filter_reduce(summary_res_, filter_keys=['split_style'],
+                                                 reduce_key='top_score')
+        plot.plot_results(summary_res__, x_key='split_style', y_key=y_key, error_key=y_key + '_sem',
+                          plot_function=plt.errorbar,
+                          plot_args=error_args,
+                          ax_args= ax_args,
+                          rect=[.25, .25, .6, .6],
+                          path=save_path)
+
+if 'split__ofc' in experiments:
+    experiment_path_ofc = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_split', 'OFC')
+    experiment_path_ofc_lt = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_split', 'OFC_LONGTERM')
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_split', 'OFC_COMBINED')
+
+    res = decode.decode_analysis.load_results_train_test_scores(experiment_path_ofc)
+    nMouse = len(np.unique(res['mouse']))
+    res_ = decode.decode_analysis.load_results_train_test_scores(experiment_path_ofc_lt)
+    res_['mouse'] += nMouse
+    reduce.chain_defaultdicts(res, res_)
+
+    x_key = 'mouse'
+    y_key = 'top_score'
+    summary_res = reduce.new_filter_reduce(res, filter_keys=['split_style', 'mouse', 'test_day'], reduce_key='top_score')
+    summary_res_ = reduce.new_filter_reduce(summary_res, filter_keys=['split_style', 'mouse'], reduce_key='top_score')
+    summary_res_.pop(y_key + '_sem')
+    summary_res_.pop(y_key + '_std')
+    summary_res__ = reduce.new_filter_reduce(summary_res_, filter_keys=['split_style'],
+                                             reduce_key='top_score')
+    path, name = plot.plot_results(summary_res__, x_key='split_style', y_key=y_key, error_key=y_key + '_sem',
+                      plot_function=plt.errorbar,
+                      plot_args=error_args,
+                      ax_args=ax_args,
+                      rect=[.25, .25, .6, .6],
+                      path=save_path,
+                      save=False)
+
+    # stats
+    lick_m = filter.filter(summary_res_, {'split_style': 'magnitude'})
+    lick_o = filter.filter(summary_res_, {'split_style': 'onset'})
+    time = filter.filter(summary_res_, {'split_style': 'time'})
+    m, o, t = lick_m['top_score'], lick_o['top_score'], time['top_score']
+    x = scikit_posthocs.posthoc_dunn([m, o, t], p_adjust=None)
+
+    xlim = plt.xlim()
+    ylim = plt.ylim()
+    a = stats.wilcoxon(m, t)[-1]
+    b = stats.wilcoxon(o, t)[-1]
+    bonferroni = 3
+    _ = plot.significance_str(x=0.25, y=.7 * (ylim[-1] - ylim[0]), val=a * bonferroni)
+    _ = plot.significance_str(x=1.25, y=.7 * (ylim[-1] - ylim[0]), val=b * bonferroni)
+    plot._easy_save(path, name)
+
+    print('magn: {} \n onst: {} \n time: {}'.format(m, o, t))
+
+
+
 
 if 'test_fp_fn' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', condition.name)
@@ -157,10 +265,6 @@ if 'fp_fn__ofc' in experiments:
                           ax_args= ax_args,
                           path=save_path,
                           reuse= True)
-
-
-
-
 
 
 

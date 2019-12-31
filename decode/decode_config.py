@@ -20,3 +20,4 @@ class DecodeConfig(BaseConfig):
         self.no_end_time = True
         self.start_day = None
         self.end_day = None
+        self.split_style = None

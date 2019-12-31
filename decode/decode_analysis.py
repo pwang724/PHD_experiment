@@ -43,7 +43,7 @@ def load_results_train_test_scores(data_path):
     keys = ['DAQ_O_ON_F', 'DAQ_O_OFF_F', 'DAQ_W_ON_F',
             'DAQ_O_ON', 'DAQ_O_OFF', 'DAQ_W_ON',
             'TRIAL_FRAMES', 'TRIAL_PERIOD','NAME_MOUSE', 'NAME_PLANE', 'NAME_DATE',
-            'decode_style', 'neurons','shuffle']
+            'decode_style', 'neurons','shuffle', 'split_style']
     for exp_dir in experiment_dirs:
         data_dirs = sorted(glob.glob(os.path.join(exp_dir, '*' + '.pkl')))
         config_dirs = sorted(glob.glob(os.path.join(exp_dir, '*.json')))

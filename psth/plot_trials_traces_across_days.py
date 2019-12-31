@@ -9,6 +9,7 @@ import numpy as np
 import analysis
 import tools.utils as utils
 from psth.psth_helper import PSTHConfig, subtract_baseline
+import scipy.signal as signal
 import copy
 
 mpl.rcParams['pdf.fonttype'] = 42
@@ -19,9 +20,11 @@ class OFC_Config(object):
     def __init__(self):
         self.condition = experimental_conditions.OFC
         self.mouse = 0
-        self.days = [[1,2,3,4,5]]
-        self.cells = [31]
-        self.ylim = .7
+        # self.days = [[1,2,3,4,5]]
+        # self.cells = [31]
+        self.days = [[1, 2, 3, 4, 5]]
+        self.cells = [4]
+        self.ylim = 1.25
         self.title = ['Naive','Learning','Learning','Learned','Learned']
 
 class BLA_Config(object):
@@ -85,32 +88,48 @@ for i,_ in enumerate(cell_days):
     odor_trials = res_mouse['ODOR_TRIALS'][i]
     frames_per_trial = res_mouse['TRIAL_FRAMES'][i]
     trial_period = res_mouse['TRIAL_PERIOD'][i]
+    samp = res_mouse['DAQ_SAMP'][i]
 
     data = utils.reshape_data(res_mouse['data'][i], nFrames=frames_per_trial,
                               cell_axis=0, trial_axis=1, time_axis=2)
+    lick_data = res_mouse['DAQ_DATA'][i][:,3,:] > 0.5
+    lick_limit = np.round(frames_per_trial * trial_period * samp).astype(int)
+    lick_data = lick_data[:lick_limit, :]
     list_of_psths = []
+    list_of_licks = []
     for j, odor in enumerate(odors):
         ix = odor == odor_trials
         cur_data = data[cell, ix, :]
         cur_data -= 1
+        cur_licks = np.transpose(lick_data[:, ix])
         list_of_psths.append(cur_data)
+        list_of_licks.append(cur_licks)
+
     min_trial = np.min([x.shape[0] for x in list_of_psths])
     list_of_psths = [x[:min_trial,:] for x in list_of_psths]
+    list_of_licks = [x[:min_trial, :] for x in list_of_licks]
 
     fig, axs = plt.subplots(1, 5, figsize=(3, 3))
 
     space_x = frames_per_trial
     space_y = gap + condition_config.ylim
     total_y = space_y * min_trial
+    resample = 50
     for o, psth in enumerate(list_of_psths):
+        licks = list_of_licks[o]
         cur_x = np.arange(0, space_x)
+        cur_x_lick = np.linspace(0, space_x, lick_limit)
         cur_y = total_y - space_y
         plt.sca(axs[o])
         for j, y in enumerate(psth):
+            y_lick = licks[j] * condition_config.ylim/ (8) + cur_y
+            plt.step(cur_x_lick,y_lick, 'b', linewidth=.15)
+
             y = y + cur_y
             plt.plot(cur_x,y, 'k', linewidth=.5)
             cur_y -= space_y
         cur_x += space_x
+        cur_x_lick += space_x
 
         plt.axis('tight')
         # plt.set_ticks_position('bottom')
@@ -147,6 +166,11 @@ for i,_ in enumerate(cell_days):
     time_coordinates = [frames_per_trial-time_frames, frames_per_trial]
     axs[4].plot(time_coordinates, [-space_y/2, -space_y/2], linewidth=1.5, color='black')
     axs[4].text(time_coordinates[0], -space_y, '{} s'.format(time_bar), fontsize=7)
+
+    df_bar = 0.5
+    df_coordinates = [0, df_bar]
+    axs[4].plot([frames_per_trial-5, frames_per_trial-5], df_coordinates, linewidth=1.5, color='black')
+    axs[4].text(frames_per_trial+5, df_bar, '{} DF/F'.format(df_bar), fontsize=7)
 
     axs[4].plot([])
     plot._easy_save(save_path,
