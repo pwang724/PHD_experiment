@@ -27,7 +27,7 @@ bool_ax_args_copy.update({'ylim':[-5, 105], 'yticks':[0, 50, 100]})
 
 class OFC_DT_Config():
     path = 'I:\MANUSCRIPT_DATA\FREELY MOVING\OFC_Discrimination_with_lick_data'
-    name = 'OFC_PT'
+    name = 'OFC_DT'
 
 indices = analysis.Indices()
 constants = analysis.Constants()

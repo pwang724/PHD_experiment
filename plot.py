@@ -134,7 +134,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
                  plot_function= plt.plot, ax_args={}, plot_args={},
                  xjitter = 0,
                  save = True, reuse = False, twinax = False, sort = False, error_key = '_sem',
-                 fig_size = (2, 1.5), rect = (.2, .2, .6, .6), legend = True, name_str = ''):
+                 fig_size = (2, 1.5), rect = (.25, .25, .6, .6), legend = True, name_str = ''):
     '''
 
     :param res: flattened dict of results

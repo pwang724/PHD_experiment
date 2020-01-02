@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 import plot
 
-def filter_days_per_mouse(res, days_per_mouse):
+def filter_days_per_mouse(res, days_per_mouse, key_day ='day'):
     '''
     Filter results to only include the days specified by days_per_mouse.
 
@@ -15,7 +15,7 @@ def filter_days_per_mouse(res, days_per_mouse):
     '''
     out = copy.copy(res)
     list_of_ixs = []
-    list_of_dates = res['day']
+    list_of_dates = res[key_day]
     list_of_mice = res['mouse']
     mouse_names, mouse_ixs = np.unique(list_of_mice, return_inverse=True)
     if mouse_names.size != len(days_per_mouse):

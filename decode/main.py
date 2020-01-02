@@ -155,8 +155,6 @@ if 'split__ofc' in experiments:
     print('magn: {} \n onst: {} \n time: {}'.format(m, o, t))
 
 
-
-
 if 'test_fp_fn' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', condition.name)
     save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_fp_fn', condition.name)
@@ -307,34 +305,92 @@ if 'test_odor_across_days' in experiments:
     if ANALYZE:
         res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
 
-        if condition.name == 'OFC_LONGTERM': #todo: FIX
-            res = filter.filter(res, {'mouse': [2]})
+        if condition.name == 'OFC_LONGTERM':
+            res = filter.exclude(res, {'mouse': [3]})
 
-        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day', 'shuffle'],
-                                               reduce_key='top_score')
+            res = filter.filter(res, {'shuffle':False})
+            days_learned = [[3,4,5],[3,4,5],[2,3]]
+            days_end = [[6,7,8],[6,7,8],[5,6]]
+            summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day', 'mouse'],
+                                                   reduce_key='top_score')
 
-        for style in np.unique(summary_res['decode_style']):
-            temp = filter.filter(summary_res, {'decode_style': style})
-            y_key = 'Test Day'
-            x_key = 'Training Day'
-            val_key = 'top_score'
-            title = 'Decoding ' + style +  ' Across Days'
-            vmax = 1
-            if style == 'csm_identity' or style == 'csp_identity' or style == 'valence':
-                vmin = 0.5
-            elif style == 'identity':
-                vmin = .25
-            else:
-                vmin = 0
+            res_learned = defaultdict(list)
+            res_end = defaultdict(list)
+            res_overall = defaultdict(list)
+            for i in range(len(days_learned)):
+                mouse_day_learned = days_learned[i]
+                mouse_day_end = days_end[i]
+                for day in mouse_day_learned:
+                    temp_learned = filter.filter(summary_res, {'mouse': i, 'Test Day': day, 'Training Day': day})
+                    reduce.chain_defaultdicts(res_learned, temp_learned)
 
-            if condition.name == 'OFC_REVERSAL':
-                vmin = 0
+                for day in mouse_day_end:
+                    temp_end = filter.filter(summary_res, {'mouse': i, 'Test Day': day, 'Training Day': day})
+                    reduce.chain_defaultdicts(res_end, temp_end)
 
-            for shuffle in [False, True]:
-                _ = filter.filter(temp, {'shuffle':shuffle})
-                text = '_shuffle' if shuffle else '_no_shuffle'
-                plot.plot_weight(_, x_key, y_key, val_key, title, vmin, vmax, label= True,
-                                 save_path=os.path.join(save_path, temp['decode_style'][0]), text=text)
+            res_learned['day'] = np.array([0] * len(res_learned['mouse']))
+            res_end['day'] = np.array([1] * len(res_end['mouse']))
+            reduce.chain_defaultdicts(res_overall, res_learned)
+            reduce.chain_defaultdicts(res_overall, res_end)
+            res_overall_mean = reduce.new_filter_reduce(res_overall,
+                                                        filter_keys=['decode_style', 'mouse','day'],
+                                                        reduce_key='top_score')
+            res_overall_mean.pop('top_score_sem')
+            res_overall_mean.pop('top_score_std')
+            res_overall_mean_ = reduce.new_filter_reduce(res_overall_mean,
+                                                        filter_keys=['decode_style','day'],
+                                                        reduce_key='top_score')
+
+            for style in np.unique(res_overall['decode_style']):
+                y_key = 'Test Day'
+                x_key = 'Training Day'
+                val_key = 'top_score'
+                ax_args = {'xlim': [-.5, 1.5], 'xticks':[0, 1], 'ylim': [0, 1.05], 'yticks': [0, .25, .5, .75, 1.0]}
+
+                plot.plot_results(res_overall_mean, x_key='day', y_key='top_score',
+                                  plot_function=plt.scatter,
+                                  plot_args=scatter_args,
+                                  ax_args= ax_args,
+                                  colors = 'black',
+                                  select_dict={'decode_style': style},
+                                  save=False,
+                                  path= save_path,
+                                  )
+
+                plot.plot_results(res_overall_mean_, x_key='day', y_key='top_score', error_key='top_score_sem',
+                                  plot_function=plt.errorbar,
+                                  plot_args=error_args,
+                                  ax_args= ax_args,
+                                  colors = 'black',
+                                  select_dict={'decode_style': style},
+                                  reuse=True,
+                                  path= save_path,
+                                  )
+
+
+
+        # for style in np.unique(summary_res['decode_style']):
+        #     temp = filter.filter(summary_res, {'decode_style': style})
+        #     y_key = 'Test Day'
+        #     x_key = 'Training Day'
+        #     val_key = 'top_score'
+        #     title = 'Decoding ' + style +  ' Across Days'
+        #     vmax = 1
+        #     if style == 'csm_identity' or style == 'csp_identity' or style == 'valence':
+        #         vmin = 0.5
+        #     elif style == 'identity':
+        #         vmin = .25
+        #     else:
+        #         vmin = 0
+        #
+        #     if condition.name == 'OFC_REVERSAL':
+        #         vmin = 0
+        #
+        #     for shuffle in [False, True]:
+        #         _ = filter.filter(temp, {'shuffle':shuffle})
+        #         text = '_shuffle' if shuffle else '_no_shuffle'
+        #         plot.plot_weight(_, x_key, y_key, val_key, title, vmin, vmax, label= True,
+        #                          save_path=os.path.join(save_path, temp['decode_style'][0]), text=text)
 
             # analysis = filter.filter(res, {'decode_style': style})
             # analysis = reduce.new_filter_reduce(analysis, filter_keys=['decode_style', 'Test Day', 'Training Day','mouse'],
@@ -408,7 +464,7 @@ if 'vary_decoding_style_odor' in experiments:
         # summary of performance for each day, line plot
         loopkey = ['mouse']
         mice = np.unique(res['mouse'])
-        for j, decode_style in enumerate(decode_styles):
+        for day, decode_style in enumerate(decode_styles):
             select_dict = {'decode_style': decode_style, 'shuffle':False}
             plot.plot_results(res, x_key='day', y_key='max', loop_keys=loopkey,
                               colors= ['Black'] * mice.size,
@@ -515,7 +571,7 @@ if 'vary_neuron_odor' in experiments:
         #comparing all decode conditions, averaged across mice
         decode_styles = np.unique(res_final_day['decode_style'])
         summary_all = defaultdict(list)
-        for j, decode_style in enumerate(decode_styles):
+        for day, decode_style in enumerate(decode_styles):
             temp_res = filter.filter(res_final_day, filter_dict={'decode_style': decode_style, 'neurons':[10,20,30,40]})
             summary_res = reduce.new_filter_reduce(temp_res, filter_keys=['neurons','shuffle'], reduce_key='max')
             chain_defaultdicts(summary_all, summary_res)
@@ -597,7 +653,7 @@ if 'vary_decoding_style_days' in experiments:
         loopkey = ['shuffle']
         mice = np.unique(res['mouse'])
         for i, mouse in enumerate(mice):
-            for j, dc in enumerate(decode_styles):
+            for day, dc in enumerate(decode_styles):
                 select_dict = {'mouse':mouse, 'decode_style': dc}
                 plot.plot_results(res, x_key='time', y_key='mean', loop_keys=loopkey,
                                   select_dict=select_dict, path=save_path, ax_args=ax_args)
