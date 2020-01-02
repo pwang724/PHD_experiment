@@ -24,9 +24,9 @@ import scikit_posthocs
 experiments = [
     # 'vary_neuron_odor',
     # 'vary_decoding_style_odor',
-    # 'test_odor_across_days',
-    'test_split',
-    'split__ofc',
+    'test_odor_across_days',
+    # 'test_split',
+    # 'split__ofc',
     # 'test_fp_fn',
     # 'fp_fn__ofc',
     # 'vary_decoding_style_days',
@@ -34,7 +34,7 @@ experiments = [
 ]
 # EXPERIMENT = True
 # ANALYZE = False
-EXPERIMENT = True
+EXPERIMENT = False
 ANALYZE = True
 argTest = False
 
@@ -306,6 +306,10 @@ if 'test_odor_across_days' in experiments:
 
     if ANALYZE:
         res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
+
+        if condition.name == 'OFC_LONGTERM': #todo: FIX
+            res = filter.filter(res, {'mouse': [2]})
+
         summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day', 'shuffle'],
                                                reduce_key='top_score')
 

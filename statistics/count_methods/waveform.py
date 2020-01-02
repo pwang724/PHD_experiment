@@ -39,13 +39,46 @@ def lick_onset_vs_neural_onset(neural_res, behavior_res, start, end, figure_path
         out['odor_standard'].append(odor_standard)
         out['neural_onset'].append(np.mean(neural_onset))
         out['lick_onset'].append(np.mean(lick_onset))
+        out['neural_onset_raw'].append(neural_onset)
+        out['lick_onset_raw'].append(lick_onset)
 
     for k, v in out.items():
         out[k] = np.array(v)
 
-    # out = reduce.new_filter_reduce(out, filter_keys=['mouse','day'], reduce_key='lick_onset')
-    # _ = reduce.new_filter_reduce(out, filter_keys=['mouse','day'], reduce_key='neural_onset')
-    # out['neural_onset'] = _['neural_onset']
+    all_neural = np.concatenate(out['neural_onset_raw'])
+    all_licks = np.concatenate(out['lick_onset_raw'])
+
+    def _helper(real, label, bin, range, ax):
+        density, bins = np.histogram(real, bins=bin, density=True, range= range)
+        unity_density = density / density.sum()
+        widths = bins[:-1] - bins[1:]
+        ax.bar(bins[1:], unity_density, width=widths, alpha=.5, label=label)
+
+    bins = 20
+    range = [0, 5]
+    xticks = [0, 2, 5]
+    xticklabels = ['Odor ON', 'Odor OFF', 'US']
+
+    fig = plt.figure(figsize=(2, 1.5))
+    ax = fig.add_axes([0.2, 0.2, 0.7, 0.7])
+    _helper(all_neural, 'Neural Onset', bins, range, ax)
+    _helper(all_licks, 'Lick Onset', bins, range, ax)
+
+    plt.xticks(xticks, xticklabels)
+    plt.xlim([range[0]-0.5, range[1] + .5])
+
+
+    ax.spines["right"].set_visible(False)
+    ax.spines["top"].set_visible(False)
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
+    folder = 'onset_distribution_lick_neural_'
+    name = ','.join([str(x) for x in start]) + '_' + ','.join([str(x) for x in end])
+
+    plt.legend(frameon=False)
+    _easy_save(os.path.join(figure_path, folder), name, dpi=300, pdf=True)
+
     ax_args = {'xlim':[0, 3.5], 'ylim':[0, 3.5], 'xticks':[0, 2, 4], 'yticks':[0, 2, 4],
                'xticklabels':['ON','OFF','4 s'], 'yticklabels':['ON','OFF', '4 s']}
     path, name = plot.plot_results(out, x_key='lick_onset', y_key='neural_onset', loop_keys='mouse',

@@ -26,8 +26,8 @@ bool_ax_args_copy = ax_args.copy()
 bool_ax_args_copy.update({'ylim':[-5, 105], 'yticks':[0, 50, 100]})
 
 class OFC_DT_Config():
-    path = '/Users/peterwang/Desktop/OFC_Discrimination'
-    name = 'OFC_DT'
+    path = 'I:\MANUSCRIPT_DATA\FREELY MOVING\OFC_Discrimination_with_lick_data'
+    name = 'OFC_PT'
 
 indices = analysis.Indices()
 constants = analysis.Constants()
@@ -82,6 +82,29 @@ for i in range(len(res['bin_ant_1_raw'])):
 
 for k, v in res.items():
     res[k] = np.array(v)
+
+def _raw_plot(res, i):
+    res = filter.filter(res, {'condition':'Y'})
+    print(res['mouse'][i])
+    print(res['session'][i])
+    a = res['bin_ir_raw'][i]
+    b = res['bin_samp_raw'][i]
+    x = res['bin_ant_raw'][i]
+
+    data = np.concatenate([a, b, x], axis=1)
+
+    fig = plt.figure(figsize=(3,3))
+    ax = fig.add_axes((.25, .25, .6, .6))
+    plt.imshow(data, cmap='gray')
+    xticks = [0, 120, 220, 300]
+    xticklabels = ['Nosepoke','Odor', '1 S', 'US']
+    plt.xticks(xticks, xticklabels)
+    plt.xlim([120, 300])
+    plt.xlabel('Time')
+    plt.ylabel('Trial')
+    plot._easy_save(path=os.path.join(save_path, 'example_licks'), name='Y_{}'.format(i))
+
+_raw_plot(res, 0)
 
 xname = 'time_on_port'
 yname = 'n_licks'
