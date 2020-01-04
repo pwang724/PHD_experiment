@@ -138,6 +138,7 @@ def convert(res, condition, includeRaw = False):
                 time_first_lick_collection = _get_time_of_first_lick(lick_data, end, end_coll_time, res['DAQ_SAMP'][i])
                 n_licks_baseline = _get_number_of_licks(lick_data, 0, start_odor)
                 n_licks = _get_number_of_licks(lick_data, start, end)
+                n_licks_5s = _get_number_of_licks(lick_data, start_odor, end)
                 n_licks_coll = _get_number_of_licks(lick_data, end, end_coll)
 
                 new_res['time_first_lick_collection'].append(time_first_lick_collection)
@@ -145,6 +146,7 @@ def convert(res, condition, includeRaw = False):
                 new_res['odor'].append(odor)
                 new_res['lick_baseline'].append(n_licks_baseline)
                 new_res['lick'].append(n_licks)
+                new_res['lick_5s'].append(n_licks_5s)
                 new_res['lick_collection'].append(n_licks_coll)
                 new_res['ix'].append(j)
                 if includeRaw:
@@ -172,6 +174,8 @@ def agglomerate_days(res, condition, first_day, last_day):
             temp_res__ = reduce_by_concat(filtered_res, 'lick_baseline', rank_keys=['day', 'ix'])
             temp_res___ = reduce_by_concat(filtered_res, 'time_first_lick', rank_keys=['day', 'ix'])
             temp_res____ = reduce_by_concat(filtered_res, 'time_first_lick_collection', rank_keys=['day', 'ix'])
+            temp_res_____ = reduce_by_concat(filtered_res, 'lick_5s', rank_keys=['day', 'ix'])
+            temp_res['lick_5s'] = temp_res_____['lick_5s']
             temp_res['time_first_lick_collection'] = temp_res____['time_first_lick_collection']
             temp_res['time_first_lick'] = temp_res___['time_first_lick']
             temp_res['lick_baseline'] = temp_res__['lick_baseline']

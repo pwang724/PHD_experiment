@@ -9,13 +9,33 @@ from plot import _easy_save
 from collections import defaultdict
 import plot
 from format import *
+from statistics.count_methods.power import _power, _max_dff
+import copy
 
-def lick_onset_vs_neural_onset(neural_res, behavior_res, start, end, figure_path):
+def behavior_vs_neural_power(neural_res, behavior_res, start, end, figure_path, neural_arg ='power', behavior_arg ='onset'):
+    neural_res = copy.copy(neural_res)
+
+    neural_key = 'neural'
+    behavior_key = 'behavior'
+    if behavior_arg == 'onset':
+        behavior_data_key = 'time_first_lick_raw'
+    elif behavior_arg == 'magnitude':
+        behavior_data_key = 'lick_5s'
+    else:
+        raise ValueError('bad key')
+    neural_data_key = 'max_power'
+
+    _power(neural_res, excitatory=True)
+    for i, p in enumerate(neural_res['Power']):
+        s, e = neural_res['DAQ_O_ON_F'][i], neural_res['DAQ_W_ON_F'][i]
+        mp = np.max(p[s:e]) - np.mean(p[:s])
+        neural_res[neural_data_key].append(mp)
+    neural_res[neural_data_key] = np.array(neural_res[neural_data_key])
+
     list_of_days = [np.arange(s, e+1) for s, e in zip(start,end)]
     neural_res_filtered = filter.filter_days_per_mouse(neural_res, days_per_mouse=list_of_days)
     neural_res_filtered = filter.filter(neural_res_filtered, filter_dict={'odor_valence':'CS+'})
     behavior_res_filtered = filter.filter(behavior_res, filter_dict={'odor_valence':'CS+'})
-    mice = np.unique(neural_res_filtered['mouse'])
 
     names_neu, ixs_neu = filter.retrieve_unique_entries(neural_res_filtered, ['mouse','day','odor_standard'])
     out = defaultdict(list)
@@ -25,63 +45,158 @@ def lick_onset_vs_neural_onset(neural_res, behavior_res, start, end, figure_path
         odor_standard = names[2]
 
         assert len(ix) == 1
-        neural_onset = neural_res_filtered['onset'][ix[0]]
-        neural_onset = neural_onset[neural_onset > -1] * .229
+        neural = neural_res_filtered[neural_data_key][ix[0]]
 
         temp = filter.filter(behavior_res_filtered, {'mouse': mouse, 'odor_standard': odor_standard})
-        assert len(temp['time_first_lick']) == 1
+        assert len(temp[behavior_data_key]) == 1
         ix_day = [x == day for x in temp['day'][0]]
-        lick_onset = temp['time_first_lick_raw'][0][ix_day]
-        lick_onset = lick_onset[lick_onset>-1]
+        lick = temp[behavior_data_key][0][ix_day]
+        lick = lick[lick>-1]
 
         out['mouse'].append(mouse)
         out['day'].append(day)
         out['odor_standard'].append(odor_standard)
-        out['neural_onset'].append(np.mean(neural_onset))
-        out['lick_onset'].append(np.mean(lick_onset))
-        out['neural_onset_raw'].append(neural_onset)
-        out['lick_onset_raw'].append(lick_onset)
+        out[neural_key + neural_arg].append(np.mean(neural))
+        out[behavior_key + behavior_arg].append(np.mean(lick))
+        out['neural_raw'].append(neural)
+        out['lick_raw'].append(lick)
 
     for k, v in out.items():
         out[k] = np.array(v)
 
-    all_neural = np.concatenate(out['neural_onset_raw'])
-    all_licks = np.concatenate(out['lick_onset_raw'])
+    ## versus
+    if behavior_arg == 'onset':
+        xlim = [0, 4]
+        xticks = [0, 2, 4]
+        xticklabels = ['ON', 'OFF', '4 s']
+    else:
+        xlim = [0, 35]
+        xticks = [0, 10, 20, 30]
+        xticklabels = [0, 10, 20, 30]
 
+    ax_args = {'xlim': xlim, 'ylim': [0, .06], 'xticks': xticks, 'yticks': [0, .025, .05],
+               'xticklabels': xticklabels}
+    path, name = plot.plot_results(out, x_key=behavior_key + behavior_arg, y_key=neural_key + neural_arg,
+                                   loop_keys='mouse',
+                                   plot_function=plt.scatter,
+                                   plot_args=scatter_args,
+                                   ax_args=ax_args,
+                                   colormap='jet',
+                                   path=figure_path,
+                                   save=False)
+
+    res = out
+    from sklearn import linear_model
+    from sklearn.metrics import mean_squared_error, r2_score
+    regr = linear_model.LinearRegression()
+    x = res[behavior_key + behavior_arg].reshape(-1, 1)
+    y = res[neural_key + neural_arg].reshape(-1, 1)
+    regr.fit(x, y)
+
+    y_pred = regr.predict(x)
+    score = regr.score(x, y)
+
+    xlim = plt.xlim()
+    ylim = plt.ylim()
+    plt.text(xlim[1], ylim[1], 'R = {:.2f}'.format(score))
+    name += '_' + behavior_arg
+    plot._easy_save(path, name)
+
+
+
+
+def behavior_vs_neural_onset(neural_res, behavior_res, start, end, figure_path, neural_arg ='onset', behavior_arg ='onset'):
+    neural_key = 'neural'
+    behavior_key = 'behavior'
+    
+    if behavior_arg == 'onset':
+        behavior_data_key = 'time_first_lick_raw'
+    elif behavior_arg == 'magnitude':
+        behavior_data_key = 'lick_5s'
+    else:
+        raise ValueError('bad key')
+    
+    if neural_arg == 'onset':
+        neural_data_key = 'onset'
+    elif neural_arg == 'magnitude':
+        neural_data_key = 'dff'
+    else:
+        raise ValueError('bad key')
+    
+    list_of_days = [np.arange(s, e+1) for s, e in zip(start,end)]
+    neural_res_filtered = filter.filter_days_per_mouse(neural_res, days_per_mouse=list_of_days)
+    neural_res_filtered = filter.filter(neural_res_filtered, filter_dict={'odor_valence':'CS+'})
+    behavior_res_filtered = filter.filter(behavior_res, filter_dict={'odor_valence':'CS+'})
+
+    names_neu, ixs_neu = filter.retrieve_unique_entries(neural_res_filtered, ['mouse','day','odor_standard'])
+    out = defaultdict(list)
+    for ix, names in zip(ixs_neu, names_neu):
+        mouse = names[0]
+        day = names[1]
+        odor_standard = names[2]
+
+        assert len(ix) == 1
+        neural = neural_res_filtered[neural_data_key][ix[0]]
+        neural = neural[neural > -1] * .229
+
+        temp = filter.filter(behavior_res_filtered, {'mouse': mouse, 'odor_standard': odor_standard})
+        assert len(temp[behavior_data_key]) == 1
+        ix_day = [x == day for x in temp['day'][0]]
+        lick = temp[behavior_data_key][0][ix_day]
+        lick = lick[lick>-1]
+
+        out['mouse'].append(mouse)
+        out['day'].append(day)
+        out['odor_standard'].append(odor_standard)
+        out[neural_key + neural_arg].append(np.mean(neural))
+        out[behavior_key + behavior_arg].append(np.mean(lick))
+        out['neural_raw'].append(neural)
+        out['lick_raw'].append(lick)
+
+    for k, v in out.items():
+        out[k] = np.array(v)
+
+    ## distribution
     def _helper(real, label, bin, range, ax):
         density, bins = np.histogram(real, bins=bin, density=True, range= range)
         unity_density = density / density.sum()
         widths = bins[:-1] - bins[1:]
         ax.bar(bins[1:], unity_density, width=widths, alpha=.5, label=label)
 
+    all_neural = np.concatenate(out['neural_raw'])
+    all_licks = np.concatenate(out['lick_raw'])
     bins = 20
     range = [0, 5]
     xticks = [0, 2, 5]
     xticklabels = ['Odor ON', 'Odor OFF', 'US']
-
     fig = plt.figure(figsize=(2, 1.5))
     ax = fig.add_axes([0.2, 0.2, 0.7, 0.7])
-    _helper(all_neural, 'Neural Onset', bins, range, ax)
-    _helper(all_licks, 'Lick Onset', bins, range, ax)
-
+    _helper(all_neural, neural_key + neural_arg, bins, range, ax)
+    _helper(all_licks, behavior_key + behavior_arg, bins, range, ax)
     plt.xticks(xticks, xticklabels)
     plt.xlim([range[0]-0.5, range[1] + .5])
-
-
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-
     folder = 'onset_distribution_lick_neural_'
-    name = ','.join([str(x) for x in start]) + '_' + ','.join([str(x) for x in end])
-
+    name = behavior_arg + '_' + ','.join([str(x) for x in start]) + '_' + ','.join([str(x) for x in end])
     plt.legend(frameon=False)
     _easy_save(os.path.join(figure_path, folder), name, dpi=300, pdf=True)
 
-    ax_args = {'xlim':[0, 3.5], 'ylim':[0, 3.5], 'xticks':[0, 2, 4], 'yticks':[0, 2, 4],
-               'xticklabels':['ON','OFF','4 s'], 'yticklabels':['ON','OFF', '4 s']}
-    path, name = plot.plot_results(out, x_key='lick_onset', y_key='neural_onset', loop_keys='mouse',
+    ## versus
+    if behavior_arg == 'onset':
+        xlim = [0, 4]
+        xticks = [0, 2, 4]
+        xticklabels = ['ON','OFF', '4 s']
+    else:
+        xlim = [0, 35]
+        xticks = [0, 10, 20, 30]
+        xticklabels = [0, 10, 20, 30]
+
+    ax_args = {'xlim':xlim, 'ylim':[0, 3.5], 'xticks':xticks, 'yticks':[0, 2, 4],
+               'xticklabels':xticklabels, 'yticklabels': ['ON','OFF','4 s']}
+    path, name = plot.plot_results(out, x_key=behavior_key + behavior_arg, y_key=neural_key + neural_arg, loop_keys='mouse',
                       plot_function=plt.scatter,
                       plot_args= scatter_args,
                                    ax_args=ax_args,
@@ -93,8 +208,8 @@ def lick_onset_vs_neural_onset(neural_res, behavior_res, start, end, figure_path
     from sklearn import linear_model
     from sklearn.metrics import mean_squared_error, r2_score
     regr = linear_model.LinearRegression()
-    x = res['lick_onset'].reshape(-1,1)
-    y = res['neural_onset'].reshape(-1,1)
+    x = res[behavior_key + behavior_arg].reshape(-1,1)
+    y = res[neural_key + neural_arg].reshape(-1,1)
     regr.fit(x, y)
 
     y_pred = regr.predict(x)
@@ -103,6 +218,7 @@ def lick_onset_vs_neural_onset(neural_res, behavior_res, start, end, figure_path
     xlim = plt.xlim()
     ylim = plt.ylim()
     plt.text(xlim[1] - .5, ylim[1]-.5, 'R = {:.2f}'.format(score))
+    name += '_' + behavior_arg
     plot._easy_save(path, name)
 
 

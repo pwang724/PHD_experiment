@@ -48,28 +48,33 @@ if condition.name == 'OFC' or condition.name == 'BLA':
 
     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)
 
-    naive_config = statistics.analyze.OFC_LONGTERM_Config()
-    data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
-    save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
-    res_naive = statistics.analyze.analyze_data(save_path_, condition_config, m_threshold=0.04)
-    res_naive = filter.exclude(res_naive, {'mouse': 3})
-    res_naive['mouse'] += 5
-    temp_res_naive = behavior.behavior_analysis.analyze_behavior(data_path_, naive_config.condition)
-    temp_res_naive = filter.filter(temp_res_naive, {'odor_valence': ['CS+']})
-    temp_res_naive = filter.exclude(temp_res_naive, {'mouse': 3})
-    temp_res_naive['mouse'] += 5
-    res = filter.exclude(res, {'day': 0})
-    reduce.chain_defaultdicts(res, res_naive)
-    reduce.chain_defaultdicts(temp_res, temp_res_naive)
-    learned_days_combined = [5, 5, 3, 4, 4, 3, 2, 2]
-    last_days_combined = [5, 5, 3, 4, 4, 8, 7, 5]
+    # naive_config = statistics.analyze.OFC_LONGTERM_Config()
+    # data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
+    # save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
+    # res_naive = statistics.analyze.analyze_data(save_path_, condition_config, m_threshold=0.04)
+    # res_naive = filter.exclude(res_naive, {'mouse': 3})
+    # res_naive['mouse'] += 5
+    # temp_res_naive = behavior.behavior_analysis.analyze_behavior(data_path_, naive_config.condition)
+    # temp_res_naive = filter.filter(temp_res_naive, {'odor_valence': ['CS+']})
+    # temp_res_naive = filter.exclude(temp_res_naive, {'mouse': 3})
+    # temp_res_naive['mouse'] += 5
+    # res = filter.exclude(res, {'day': 0})
+    # reduce.chain_defaultdicts(res, res_naive)
+    # reduce.chain_defaultdicts(temp_res, temp_res_naive)
+    # learned_days_combined = [3, 3, 2, 3, 3, 3, 2, 2]
+    # last_days_combined = [5, 5, 3, 4, 4, 8, 7, 5]
+    # learned_days_combined = [3, 3, 2, 3, 3]
+    # last_days_combined = [5, 5, 3, 4, 4]
     # cory.main(res, temp_res, figure_path, excitatory=True,valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=False,valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=True,valence='CS-')
     # cory.main(res, temp_res, figure_path, excitatory=False,valence='CS-')
 
-    waveform.lick_onset_vs_neural_onset(res, temp_res, learned_days_combined, last_days_combined, figure_path)
 
+    # waveform.behavior_vs_neural_onset(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='onset')
+    # waveform.behavior_vs_neural_onset(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='magnitude')
+    # waveform.behavior_vs_neural_power(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='magnitude')
+    # waveform.behavior_vs_neural_power(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='onset')
 
     # excitatory = [True, False]
     # thresholds = [0.04, -0.04]
@@ -138,9 +143,9 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     #                                          figure_path = figure_path,
     #                                          reuse=False, save=True, analyze=False, plot_bool=True)
     #
-    # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
-    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
-    #                  excitatory=True, ylim = [-0.01, .1])
+    power.plot_power(res, training_start_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
+                     colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+                     excitatory=True, ylim = [-0.01, .1])
     #
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
@@ -164,9 +169,9 @@ if condition.name == 'OFC_LONGTERM':
     #fully learned thres 70%
     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= 0.04)
     res.pop('data')
-    start_day = np.array([0,0,0,0])
-    learned_day_per_mouse = np.array([3, 2, 2, 3])
-    last_day_per_mouse = np.array([8, 7, 5, 5])
+    # start_day = np.array([0,0,0,0])
+    # learned_day_per_mouse = np.array([3, 2, 2, 3])
+    # last_day_per_mouse = np.array([8, 7, 5, 5])
 
     res = filter.exclude(res, {'mouse': 3})
     temp_res = filter.exclude(temp_res, {'mouse': 3})
@@ -181,7 +186,11 @@ if condition.name == 'OFC_LONGTERM':
     #     ranksums(onset_learned,onset_late)[-1]))
 
 
-    waveform.lick_onset_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path)
+    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
+    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
+
+    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
+    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
 
     # excitatory = [True, False]
     # thresholds = [0.04, -0.04]

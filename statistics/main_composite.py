@@ -60,16 +60,16 @@ if condition.name == 'OFC_COMPOSITE':
     pt_res_['odor_standard'][ix] = ['PT CS+'] * np.sum(ix)
     pt_res_['day'][ix] = [0] * np.sum(ix)
 
-    excitatory = [True, False]
-    thresholds = [0.04, -0.04]
-    for i, sign in enumerate(excitatory):
-        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
-        responsive.plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=False, excitatory=sign,
-                                                 figure_path = figure_path, save=False)
-        responsive.plot_summary_odor(res, dt_learned, dt_end, figure_path=figure_path, excitatory=sign, reuse=True)
+    # excitatory = [True, False]
+    # thresholds = [0.04, -0.04]
+    # for i, sign in enumerate(excitatory):
+    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+    #     responsive.plot_summary_odor_pretraining(res, pt_start, pt_learned, arg_naive=False, excitatory=sign,
+    #                                              figure_path = figure_path, save=False)
+    #     responsive.plot_summary_odor(res, dt_learned, dt_end, figure_path=figure_path, excitatory=sign, reuse=True)
 
 
-    # cory.main(pt_res_, temp_res, figure_path, excitatory=True, valence='PT CS+')
+    cory.main(pt_res_, temp_res, figure_path, excitatory=True, valence='PT CS+')
     # cory.main(pt_res_, temp_res, figure_path, excitatory=False, valence='PT CS+')
     # cory.main(res, temp_res, figure_path, excitatory=True, valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=True, valence='CS-')

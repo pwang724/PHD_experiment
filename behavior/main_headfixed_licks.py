@@ -26,24 +26,24 @@ experiments = [
     # 'licks_per_day'
     # 'individual',
     # 'summary',
-    # 'mean_sem',
+    'mean_sem',
     # 'trials_to_criterion',
     # 'roc',
     # 'cdf',
-    'bar'
+    # 'bar'
 ]
 
 conditions = [
-    experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
-    # experimental_conditions.PIR,
+    experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
@@ -99,8 +99,8 @@ color_dict_valence = {'PT CS+': 'C1', 'CS+': 'green', 'CS-': 'red'}
 color_dict_condition = {'HALO': 'C1', 'JAWS':'red','YFP':'black'}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
                 'xlim': [0, 200]}
-ax_args_mush = {'yticks': [0, 5, 10], 'ylim': [-1, 12],'xticks': [0, 50, 100],'xlim': [0, 100]}
-bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 100], 'xlim': [0, 100]}
+ax_args_mush = {'yticks': [0, 5], 'ylim': [-1, 8],'xticks': [0, 25, 50, 75],'xlim': [0, 75]}
+bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 25, 50, 75, 100], 'xlim': [0, 75]}
 ax_args_dt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],'xticks': [0, 50],'xlim': [0, 50]}
 bool_ax_args_dt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50], 'xlim': [0, 50]}
 ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12], 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]}
@@ -259,6 +259,7 @@ if 'mean_sem' in experiments:
     valences = np.unique(all_res['odor_valence'])
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
+    valences = [['CS+','CS-']]
     for valence in valences:
         color = [color_dict_valence[x] for x in valence]
         for i in range(len(color)):
@@ -275,22 +276,13 @@ if 'mean_sem' in experiments:
             bool_ax_args = bool_ax_args_mush
 
         path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed,
-                          loop_keys= 'condition',
+                          loop_keys= ['condition','odor_valence'],
                           colors=color, select_dict={'odor_valence':valence},
                           ax_args=bool_ax_args, plot_args=line_args_copy,
                           save=False,
                           path=save_path)
 
-        plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, error_key='boolean_smoothed_sem',
-                          loop_keys= 'condition',
-                          colors= color, select_dict={'odor_valence':valence},
-                          ax_args=bool_ax_args, plot_args= fill_args,
-                          save = False, reuse=True,
-                          plot_function= plt.fill_between,
-                          path=save_path)
-
         c = behavior.behavior_config.behaviorConfig()
-
         if 'CS+' in valence or 'PT CS+' in valence:
             y = c.fully_learned_threshold_up
             plt.plot(plt.xlim(), [y, y], '--', color = 'gray', linewidth =.5)
@@ -298,17 +290,24 @@ if 'mean_sem' in experiments:
         if 'CS-' in valence:
             y = c.fully_learned_threshold_down
             plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
-        plot._easy_save(path=path, name=name + '_mean_sem')
+
+        plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, error_key='boolean_smoothed_sem',
+                          loop_keys= ['condition','odor_valence'],
+                          colors= color, select_dict={'odor_valence':valence},
+                          ax_args=bool_ax_args, plot_args= fill_args,
+                          reuse=True,
+                          plot_function= plt.fill_between,
+                          path=save_path, name_str='_mean_sem')
 
         path, name = plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed,
-                          loop_keys= 'condition',
+                          loop_keys= ['condition','odor_valence'],
                           colors=color, select_dict={'odor_valence':valence},
                           ax_args=ax_args, plot_args=line_args_copy,
                           save=False,
                           path=save_path)
 
         plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key='lick_smoothed_sem',
-                          loop_keys= 'condition',
+                          loop_keys= ['condition','odor_valence'],
                           colors= color, select_dict={'odor_valence':valence},
                           ax_args=ax_args, plot_args= fill_args,
                           save = True, reuse=True,

@@ -9,10 +9,10 @@ import numpy as np
 import analysis
 from matplotlib.colors import LinearSegmentedColormap
 
-condition = experimental_conditions.BEHAVIOR_OFC_MUSH_HALO
-mouse = 2
+condition = experimental_conditions.PIR
+mouse = 0
 
-data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_BEHAVIOR_FOLDER, condition.name)
+data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'BEHAVIOR',  condition.name, 'RAW_LICKS')
 
 res = analysis.load_all_cons(data_path)
@@ -37,7 +37,7 @@ for i, odor_standard in enumerate(odors_standard):
 
     #inputs
     odor_name = odor_names[i]
-    odor_colors = ['green', 'red']
+    odor_colors = ['lime', 'darkgreen', 'red', 'magenta']
     data = odor_res['lick_raw_data'] > .1
     trials_per_day = np.unique(odor_res['day'], return_counts=True)[1]
     cumulative_trials = np.cumsum(trials_per_day)
@@ -55,11 +55,11 @@ for i, odor_standard in enumerate(odors_standard):
 
     if odor_res['odor_valence'][0] =='CS+':
         plt.plot([water_on, water_on], ylim, '-', linewidth=1, color='turquoise')
-        color = odor_colors[0]
+        color = odor_colors[i]
         xticks = [odor_on, odor_off, water_on]
         xticklabels = ['ON', 'OFF', 'US']
     elif odor_res['odor_valence'][0] == 'CS-':
-        color = odor_colors[1]
+        color = odor_colors[i]
         xticks = [odor_on, odor_off]
         xticklabels = ['ON', 'OFF']
     else:

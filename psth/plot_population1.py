@@ -94,10 +94,10 @@ class OFC_LONGTERM_Config(Base_Config):
     def __init__(self):
         super(OFC_LONGTERM_Config, self).__init__()
         self.condition = experimental_conditions.OFC_LONGTERM
-        self.mouse = 0
-        self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-        # self.independent_sort = True
-        self.independent_sort = False
+        self.mouse = 2
+        self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8]
+        self.independent_sort = True
+        # self.independent_sort = False
         self.sort_days = 3
         self.vlim = .25
         self.threshold = .03

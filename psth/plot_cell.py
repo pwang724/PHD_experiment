@@ -22,7 +22,9 @@ class PIR_Config(object):
         self.days = [[0, 2], [0,2],[0,2],[0,2]]
         self.cells = [0, 22, 45, 18]
         self.ylim = [-.1, 1]
-        self.colors = ['blue', 'cyan', 'lime', 'magenta']
+        self.colors = ['lime', 'darkgreen', 'red', 'magenta']
+        self.include_water = False
+        self.name='standard'
 
 class OFC_Config(object):
     def __init__(self):
@@ -77,7 +79,7 @@ class BLA_Config(object):
         self.name = 'odor'
 
 config = PSTHConfig()
-condition_config = OFC_Config()
+condition_config = PIR_Config()
 condition = condition_config.condition
 mouse = condition_config.mouse
 days = condition_config.days
