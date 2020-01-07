@@ -25,17 +25,17 @@ mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     'summary_raw',
-    # 'summary_line'
+    'summary_line'
 ]
 
 conditions = [
-    # experimental_conditions.OFC_COMPOSITE,
-    # experimental_conditions.MPFC_COMPOSITE,
+    experimental_conditions.OFC_COMPOSITE,
+    experimental_conditions.MPFC_COMPOSITE,
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
@@ -104,17 +104,32 @@ bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-collection = False
-if collection:
-    reduce_key = 'time_first_lick_collection_smoothed'
-    xkey = 'time_first_lick_collection_trial'
-    ax_args_local = {'yticks': [0, 1], 'ylim': [-.1, 1.5], 'xlabel': 'Time',
-                     'xticks': [0, 50, 100], 'xlim': [0, 130]}
+arg = 'com' #first, com
+
+if arg == 'first':
+    collection = False
+    if collection:
+        reduce_key_raw = 'time_first_lick_collection'
+        reduce_key = 'time_first_lick_collection_smoothed'
+        xkey = 'time_first_lick_collection_trial'
+        ax_args_local = {'yticks': [0, 1], 'ylim': [-.1, 1.5], 'xlabel': 'Time',
+                         'xticks': [0, 50, 100], 'xlim': [0, 130]}
+    else:
+        reduce_key_raw = 'time_first_lick'
+        reduce_key = 'time_first_lick_smoothed'
+        xkey = 'time_first_lick_trial'
+        ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['odor on', 'odor off', 'US'],
+                         'xlabel': 'Time', 'xticks': [0, 50, 100], 'xlim': [0, 130]}
+elif arg == 'com':
+    reduce_key_raw = 'lick_com'
+    reduce_key = 'lick_com_smoothed'
+    xkey = 'lick_com_trial'
+    ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['odor on', 'odor off', 'US'],
+                     'xlabel': 'Time','xticks': [0, 50, 100], 'xlim': [0, 130]}
 else:
-    reduce_key = 'time_first_lick_smoothed'
-    xkey = 'time_first_lick_trial'
-    ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['odor on', 'odor off', 'US'], 'xlabel': 'Time',
-                     'xticks': [0, 50, 100], 'xlim': [0, 130]}
+    raise ValueError('wtf')
+
+
 
 if 'summary_raw' in experiments:
     line_args_local = line_args.copy()
@@ -169,16 +184,18 @@ if 'summary_raw' in experiments:
 if 'summary_line' in experiments:
     r = defaultdict(list)
     duration = 20
-    for i, x in enumerate(all_res['time_first_lick']):
-        all_res['first_lick_A'].append(np.mean(x[:duration]))
-        all_res['first_lick_B'].append(np.mean(x[-duration:]))
+    before_key = reduce_key_raw + '_A'
+    after_key = reduce_key_raw + '_B'
+    for i, x in enumerate(all_res[reduce_key_raw]):
+        all_res[before_key].append(np.mean(x[:duration]))
+        all_res[after_key].append(np.mean(x[-duration:]))
     for k, v in all_res.items():
         all_res[k] = np.array(v)
     all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence', 'mouse'],
-                                            reduce_key='first_lick_A')
+                                            reduce_key=before_key)
     _ = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence', 'mouse'],
-                                            reduce_key='first_lick_B')
-    all_res_lick['first_lick_B'] = _['first_lick_B']
+                                            reduce_key=after_key)
+    all_res_lick[after_key] = _[after_key]
 
     res_use = all_res
     valences = np.unique(all_res['odor_valence'])
@@ -188,7 +205,7 @@ if 'summary_line' in experiments:
                   'xticklabels':['ON', 'OFF', 'US'], 'yticklabels':['ON', 'OFF', 'US']}
     for valence in valences:
         color = color_dict_valence[valence]
-        path, name = plot.plot_results(res_use, x_key='first_lick_A', y_key='first_lick_B',
+        path, name = plot.plot_results(res_use, x_key=before_key, y_key=after_key,
                           select_dict={'odor_valence':valence},
                           rect=(.3, .2, .6, .6),
                           plot_function=plt.scatter,
@@ -201,7 +218,7 @@ if 'summary_line' in experiments:
 
         try:
             stat_res = filter.filter(res_use, {'odor_valence':valence})
-            a, b = stat_res['first_lick_A'], stat_res['first_lick_B']
+            a, b = stat_res[before_key], stat_res[after_key]
             stat = wilcoxon(a, b)[-1]
             ylim = plt.gca().get_ylim()
             sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=stat)

@@ -44,17 +44,51 @@ class Base_Config(object):
         self.plot_big_naive = None #if plotting big, whether to use water ticks on odors
         self.delete_nonselective = False
 
+        self.filter_ix = None #filter odor ix
+
 class PIR_Config(Base_Config):
     def __init__(self):
         super(PIR_Config, self).__init__()
         self.condition = experimental_conditions.PIR
         self.mouse = 1
-        self.days = [2]
+        self.days = [0, 1, 2]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
         self.delete_nonselective = True
-        self.include_water = False
+        self.independent_sort = False
+        self.sort_days = self.days[-1]
+        self.include_water = True
+
+class PIR_PIN_Config(Base_Config):
+    def __init__(self):
+        super(PIR_PIN_Config, self).__init__()
+        self.condition = experimental_conditions.PIR
+        self.mouse = 1
+        self.days = [0, 1, 2]
+        self.sort_day_ix = 0
+        self.threshold = .1
+        self.sort_method = 'selectivity'
+        self.delete_nonselective = True
+        self.independent_sort = False
+        self.sort_days = self.days[-1]
+        self.include_water = True
+        self.filter_ix = 0
+
+class PIR_LIM_Config(Base_Config):
+    def __init__(self):
+        super(PIR_LIM_Config, self).__init__()
+        self.condition = experimental_conditions.PIR
+        self.mouse = 1
+        self.days = [0, 1, 2]
+        self.sort_day_ix = 0
+        self.threshold = .1
+        self.sort_method = 'selectivity'
+        self.delete_nonselective = True
+        self.independent_sort = False
+        self.sort_days = self.days[-1]
+        self.include_water = True
+        self.filter_ix = 3
 
 class PIR_CONTEXT_Config(Base_Config):
     def __init__(self):
@@ -391,7 +425,10 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         if condition_config.period == 'pt':
             odor_on_lines = odor_on_lines_raw
         else:
-            water_on_lines = water_on_lines[[0, 1]]
+            if condition_config.filter_ix is None:
+                water_on_lines = water_on_lines[[0, 1]]
+            else:
+                water_on_lines = water_on_lines[[0]]
             odor_on_lines = odor_on_lines_raw
 
     if not naive:
@@ -400,7 +437,15 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         xticks = np.concatenate((odor_on_lines, odor_on_lines + 8))
 
     plt.xticks(xticks, '')
-    plt.yticks(np.arange(0, image.shape[0], 50))
+    range = image.shape[0]
+    if range > 100:
+        interval = 50
+    else:
+        interval = 25
+    plt.yticks(np.arange(0, range, interval))
+
+    for line in xticks:
+        plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.25, alpha=0.5)
 
     for line in condition_lines:
         plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.5)
@@ -430,6 +475,9 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         if not condition_config.independent_sort:
             name += '_sorted_to_' + str(condition_config.sort_days)
 
+    if condition_config.filter_ix is not None:
+        name += '_odor_' + str(condition_config.filter_ix)
+
     plt.sca(ax)
     plt.title(name)
     plot._easy_save(save_path, name)
@@ -450,7 +498,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = OFC_LONGTERM_Config()
+condition_config = PIR_LIM_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -513,8 +561,16 @@ else:
         else:
             list_of_psth = [x[ixs, :] for x in list_of_psth]
 
+        #filter
+        filter_ix = condition_config.filter_ix
+        if filter_ix is not None:
+            list_of_psth = [list_of_psth[filter_ix]]
+            odor_names = [odor_names[filter_ix]]
+
+
         image = np.concatenate(list_of_psth, axis=1)
-        naive = day > condition_config.condition.training_start_day[mouse]
+
+        naive = day < condition_config.condition.training_start_day[mouse]
         name_str = '_day_' + str(day)
         plotter(image, odor_on, water_on, odor_names, condition_config, save_path, name_str=name_str)
 

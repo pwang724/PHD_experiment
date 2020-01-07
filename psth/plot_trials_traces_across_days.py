@@ -41,7 +41,7 @@ class PIR_Config(object):
         self.condition = experimental_conditions.PIR
         self.mouse = 1
         self.days = [[0, 1, 2]]
-        self.cells = [18]
+        self.cells = [22]
         self.ylim = .6
         self.title = ['Naive', 'Learning', 'Learned']
 
@@ -55,7 +55,7 @@ class MPFC_Config(object):
         # self.ylim = .4
         # self.title = ['Naive', 'Learning', 'Learned']
 
-condition_config = OFC_Config()
+condition_config = PIR_Config()
 
 condition = condition_config.condition
 mouse = condition_config.mouse

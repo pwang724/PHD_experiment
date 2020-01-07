@@ -8,6 +8,8 @@ import reduce
 from scipy.signal import savgol_filter
 from reduce import append_defaultdicts, reduce_by_concat
 import analysis
+from scipy.ndimage.measurements import center_of_mass
+import matplotlib.pyplot as plt
 
 def _get_days_per_condition(data_path, condition, odor_valence = None):
     res = analysis.load_all_cons(data_path)
@@ -141,6 +143,11 @@ def convert(res, condition, includeRaw = False):
                 n_licks_5s = _get_number_of_licks(lick_data, start_odor, end)
                 n_licks_coll = _get_number_of_licks(lick_data, end, end_coll)
 
+                if n_licks_5s:
+                    n_licks_com = center_of_mass(lick_data[start_odor:end] > .5)[0] / res['DAQ_SAMP'][i]
+                else:
+                    n_licks_com = -1
+
                 new_res['time_first_lick_collection'].append(time_first_lick_collection)
                 new_res['time_first_lick'].append(time_first_lick)
                 new_res['odor'].append(odor)
@@ -148,6 +155,7 @@ def convert(res, condition, includeRaw = False):
                 new_res['lick'].append(n_licks)
                 new_res['lick_5s'].append(n_licks_5s)
                 new_res['lick_collection'].append(n_licks_coll)
+                new_res['lick_com'].append(n_licks_com)
                 new_res['ix'].append(j)
                 if includeRaw:
                     new_res['lick_raw_data'].append(lick_data)
@@ -169,17 +177,14 @@ def agglomerate_days(res, condition, first_day, last_day):
         for odor in odors:
             filter_dict = {'mouse': mouse, 'day': np.arange(first_day[i], last_day[i]+1), 'odor': odor}
             filtered_res = filter.filter(res, filter_dict)
+
+            keys = ['lick', 'lick_collection', 'lick_baseline', 'time_first_lick', 'time_first_lick_collection',
+                    'lick_5s', 'lick_com']
             temp_res = reduce_by_concat(filtered_res, 'lick', rank_keys=['day', 'ix'])
-            temp_res_ = reduce_by_concat(filtered_res, 'lick_collection', rank_keys=['day', 'ix'])
-            temp_res__ = reduce_by_concat(filtered_res, 'lick_baseline', rank_keys=['day', 'ix'])
-            temp_res___ = reduce_by_concat(filtered_res, 'time_first_lick', rank_keys=['day', 'ix'])
-            temp_res____ = reduce_by_concat(filtered_res, 'time_first_lick_collection', rank_keys=['day', 'ix'])
-            temp_res_____ = reduce_by_concat(filtered_res, 'lick_5s', rank_keys=['day', 'ix'])
-            temp_res['lick_5s'] = temp_res_____['lick_5s']
-            temp_res['time_first_lick_collection'] = temp_res____['time_first_lick_collection']
-            temp_res['time_first_lick'] = temp_res___['time_first_lick']
-            temp_res['lick_baseline'] = temp_res__['lick_baseline']
-            temp_res['lick_collection'] = temp_res_['lick_collection']
+            for k in keys:
+                _ = reduce_by_concat(filtered_res, k, rank_keys=['day', 'ix'])
+                temp_res[k] = _[k]
+
             temp_res['day'] = np.array(sorted(filtered_res['day']))
             temp_res['trial'] = np.arange(len(temp_res['lick']))
             if len(temp_res['lick']):
@@ -316,7 +321,17 @@ def add_behavior_stats(res, condition, arg ='normal'):
 
     time_filter = config.smoothing_window_first_lick
     res['time_first_lick_raw'] = np.copy(res['time_first_lick'])
+    res['lick_com_raw'] = np.copy(res['lick_com'])
     for i in range(len(res['time_first_lick'])):
+        v = res['lick_com'][i]
+        res['lick_com'][i] = v[v > -1]
+        res['lick_com_trial'].append(res['trial'][i][v > -1])
+        if len(res['lick_com'][i]) < time_filter:
+            res['lick_com_smoothed'].append(res['lick_com'][i])
+        else:
+            res['lick_com_smoothed'].append(_filter(res['lick_com'][i], time_filter))
+
+
         v = res['time_first_lick'][i]
         res['time_first_lick'][i] = v[v > -1]
         res['time_first_lick_trial'].append(res['trial'][i][v > -1])

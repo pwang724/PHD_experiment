@@ -18,7 +18,7 @@ import statistics.count_methods.correlation as correlation
 import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.PIR_NAIVE_Config()
+condition_config = statistics.analyze.PIR_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -76,16 +76,16 @@ if condition.name == 'PIR':
     # res_naive = fio.load_pickle(os.path.join(save_path_, 'dict.pkl'))
     # learned_day_per_mouse_, last_day_per_mouse_ = get_days_per_mouse(data_path_, naive_config.condition)
     #
-    # res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= .1)
+    res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= .1)
     # statistics.analyze.analyze_data(res_naive, naive_config, m_threshold= .1)
     # res_naive['odor_valence'] = np.array(['Naive'] * len(res_naive['day']))
 
-    excitatory = [True, False]
-    thresholds = [0.1, -0.05]
-    for i, sign in enumerate(excitatory):
-        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
-        responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
-                                           figure_path=figure_path, excitatory= sign)
+    # excitatory = [True, False]
+    # thresholds = [0.1, -0.05]
+    # for i, sign in enumerate(excitatory):
+    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+    #     responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
+    #                                        figure_path=figure_path, excitatory= sign)
 
     # responsive.plot_individual(res, lick_res, figure_path = figure_path)
     # overlap.plot_overlap_odor(res, start_days_per_mouse, learned_day_per_mouse,
@@ -126,12 +126,12 @@ if condition.name == 'PIR':
     #                                                      include_water=False, normalize=False,
     #                                                      figure_path=figure_path, average=False, reuse_arg=True, save_arg=True)
 
-    # odor_end = False
-    # for d in [-1, 0, 1]:
-    #     a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False,
-    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
-    #     b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
-    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
+    odor_end = False
+    for d in [-1, 0, 1]:
+        a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False,
+                                                figure_path = figure_path, odor_end=odor_end, direction=d)
+        b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
+                                                figure_path = figure_path, odor_end=odor_end, direction=d)
     # ac = a['corrcoef']
     # bc = b['corrcoef']
     # ac = ac[a['Odor_A'] != a['Odor_B']]

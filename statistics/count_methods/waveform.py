@@ -21,6 +21,8 @@ def behavior_vs_neural_power(neural_res, behavior_res, start, end, figure_path, 
         behavior_data_key = 'time_first_lick_raw'
     elif behavior_arg == 'magnitude':
         behavior_data_key = 'lick_5s'
+    elif behavior_arg == 'com':
+        behavior_data_key = 'lick_com_raw'
     else:
         raise ValueError('bad key')
     neural_data_key = 'max_power'
@@ -33,6 +35,7 @@ def behavior_vs_neural_power(neural_res, behavior_res, start, end, figure_path, 
     neural_res[neural_data_key] = np.array(neural_res[neural_data_key])
 
     list_of_days = [np.arange(s, e+1) for s, e in zip(start,end)]
+    print(list_of_days)
     neural_res_filtered = filter.filter_days_per_mouse(neural_res, days_per_mouse=list_of_days)
     neural_res_filtered = filter.filter(neural_res_filtered, filter_dict={'odor_valence':'CS+'})
     behavior_res_filtered = filter.filter(behavior_res, filter_dict={'odor_valence':'CS+'})
@@ -65,16 +68,16 @@ def behavior_vs_neural_power(neural_res, behavior_res, start, end, figure_path, 
         out[k] = np.array(v)
 
     ## versus
-    if behavior_arg == 'onset':
-        xlim = [0, 4]
-        xticks = [0, 2, 4]
-        xticklabels = ['ON', 'OFF', '4 s']
+    if behavior_arg in ['onset', 'com']:
+        xlim = [0, 5]
+        xticks = [0, 2, 5]
+        xticklabels = ['ON', 'OFF', 'US']
     else:
         xlim = [0, 35]
         xticks = [0, 10, 20, 30]
         xticklabels = [0, 10, 20, 30]
 
-    ax_args = {'xlim': xlim, 'ylim': [0, .06], 'xticks': xticks, 'yticks': [0, .025, .05],
+    ax_args = {'xlim': xlim, 'ylim': [0, .1], 'xticks': xticks, 'yticks': [0, .05, .1],
                'xticklabels': xticklabels}
     path, name = plot.plot_results(out, x_key=behavior_key + behavior_arg, y_key=neural_key + neural_arg,
                                    loop_keys='mouse',
@@ -113,6 +116,8 @@ def behavior_vs_neural_onset(neural_res, behavior_res, start, end, figure_path, 
         behavior_data_key = 'time_first_lick_raw'
     elif behavior_arg == 'magnitude':
         behavior_data_key = 'lick_5s'
+    elif behavior_arg == 'com':
+        behavior_data_key = 'lick_com_raw'
     else:
         raise ValueError('bad key')
     
@@ -185,17 +190,17 @@ def behavior_vs_neural_onset(neural_res, behavior_res, start, end, figure_path, 
     _easy_save(os.path.join(figure_path, folder), name, dpi=300, pdf=True)
 
     ## versus
-    if behavior_arg == 'onset':
-        xlim = [0, 4]
-        xticks = [0, 2, 4]
-        xticklabels = ['ON','OFF', '4 s']
+    if behavior_arg in ['onset', 'com']:
+        xlim = [0, 5]
+        xticks = [0, 2, 5]
+        xticklabels = ['ON','OFF', 'US']
     else:
         xlim = [0, 35]
         xticks = [0, 10, 20, 30]
         xticklabels = [0, 10, 20, 30]
 
-    ax_args = {'xlim':xlim, 'ylim':[0, 3.5], 'xticks':xticks, 'yticks':[0, 2, 4],
-               'xticklabels':xticklabels, 'yticklabels': ['ON','OFF','4 s']}
+    ax_args = {'xlim':xlim, 'ylim':[0, 3.5], 'xticks':xticks, 'yticks':[0, 2, 5],
+               'xticklabels':xticklabels, 'yticklabels': ['ON','OFF','US']}
     path, name = plot.plot_results(out, x_key=behavior_key + behavior_arg, y_key=neural_key + neural_arg, loop_keys='mouse',
                       plot_function=plt.scatter,
                       plot_args= scatter_args,
