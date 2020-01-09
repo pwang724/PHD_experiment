@@ -177,7 +177,7 @@ def _plot_power_every_mouse(res, figure_path, excitatory, valence):
                       name_str=name_str)
 
 def _plot_power_mean_sem(res, figure_path, excitatory, valence):
-    color = 'green' if excitatory else 'red'
+    color = 'red' if valence == 'CS-' else 'green'
     res.pop('power_sem')
     ax_lim = {'yticks': [0, .5, 1], 'ylim': [0, 1.05]}
     name_str = '_E' if excitatory else '_I'

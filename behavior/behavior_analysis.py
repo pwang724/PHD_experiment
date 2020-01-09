@@ -111,11 +111,13 @@ def convert(res, condition, includeRaw = False):
             relevant_odors = condition.odors[mouse]
             csps = condition.csp[mouse]
             csms = [x for x in relevant_odors if not np.isin(x, csps)]
+            # relevant_odors += ['water']
         elif hasattr(condition, 'dt_csp'):
             #composite
             relevant_odors = condition.dt_odors[mouse] + condition.pt_odors[mouse]
             csps = condition.pt_csp[mouse] + condition.dt_csp[mouse]
             csms = [x for x in relevant_odors if not np.isin(x, csps)]
+            # relevant_odors += ['water']
         else:
             raise ValueError('cannot find odors')
             # relevant_odors = condition.odors[mouse]

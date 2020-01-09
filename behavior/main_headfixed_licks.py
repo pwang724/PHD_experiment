@@ -502,6 +502,11 @@ if 'cdf' in experiments:
             res[k] = np.array(v)
 
 if 'bar' in experiments:
+    reduce_key = 'lick_smoothed'
+    error_key = reduce_key + '_sem'
+    raw_key = 'lick'
+
+
     def windowed_stat(x, y, window):
         def _rolling_window(a, window):
             shape = a.shape[:-1] + (a.shape[-1] - window + 1, window)
@@ -558,12 +563,12 @@ if 'bar' in experiments:
             print('ok')
 
         all_res__ = filter.filter(all_res, {'odor_valence':valence})
-        all_res__ = reduce.new_filter_reduce(all_res__, filter_keys=['condition','mouse','odor_valence'], reduce_key='lick')
-        all_res__.pop('lick_sem')
+        all_res__ = reduce.new_filter_reduce(all_res__, filter_keys=['condition','mouse','odor_valence'], reduce_key=raw_key)
+        all_res__.pop(raw_key + '_sem')
         ctrl = filter.filter(all_res__, {'condition': 'YFP'})
         experimental = filter.exclude(all_res__, {'condition': 'YFP'})
-        ctrl_licks = ctrl['lick']
-        experimental_licks = experimental['lick']
+        ctrl_licks = ctrl[raw_key]
+        experimental_licks = experimental[raw_key]
 
         ctrl_min = np.min([len(x) for x in ctrl_licks])
         channel_min = np.min([len(x) for x in experimental_licks])
@@ -589,7 +594,7 @@ if 'bar' in experiments:
         for interval in intervals:
             plt.plot(interval, [.7 * (ylim[-1] - ylim[0])]* len(interval), '-',color='black',markersize=1)
 
-        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key='lick_smoothed_sem',
+        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key=error_key,
                           loop_keys= 'condition',
                           colors= color, select_dict={'odor_valence':valence},
                           ax_args=ax_args, plot_args= fill_args,

@@ -161,6 +161,56 @@ def _correlation(res, loop_keys, shuffle, odor_end = True, direction = 0):
         corrcoefs[key] = np.array(value)
     return corrcoefs
 
+def plot_correlation(res, start_days, end_days, figure_path, odor_end = True, linestyle = '-', direction = 0,
+                     opposing_valence=False,
+                     save=False, reuse=False, color = 'black'):
+    def _get_ixs(r):
+        A = r['Odor_A']
+        B = r['Odor_B']
+        l = []
+        for i, a in enumerate(A):
+            b = B[i]
+            if a < 2 and b > 1:
+                l.append(i)
+        return np.array(l)
+
+    res_before = filter.filter_days_per_mouse(res, start_days)
+    corr_before = _correlation(res_before, ['mouse'], shuffle=False, odor_end=odor_end, direction=direction)
+    corr_before['day'] = np.array(['A'] * len(corr_before['Odor_A']))
+    res_after = filter.filter_days_per_mouse(res, end_days)
+    corr_after = _correlation(res_after, ['mouse'], shuffle=False, odor_end=odor_end, direction=direction)
+    corr_after['day'] = np.array(['B'] * len(corr_after['Odor_A']))
+    corr = defaultdict(list)
+    reduce.chain_defaultdicts(corr, corr_before)
+    reduce.chain_defaultdicts(corr, corr_after)
+
+    ix_same = np.equal(corr['Odor_A'], corr['Odor_B'])
+    ix_different = np.invert(ix_same)
+    for k, v in corr.items():
+        corr[k] = v[ix_different]
+
+    if opposing_valence:
+        ixs = _get_ixs(corr)
+        for k, v in corr.items():
+            corr[k] = v[ixs]
+
+
+    mouse_corr = reduce.new_filter_reduce(corr, filter_keys=['mouse','day'], reduce_key='corrcoef')
+    average_corr = reduce.new_filter_reduce(mouse_corr, filter_keys=['day'], reduce_key='corrcoef')
+    mouse_corr.pop('corrcoef_sem')
+    mouse_corr.pop('corrcoef_std')
+
+    error_args = {'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .5}
+    error_args.update({'linestyle':linestyle})
+    plot.plot_results(average_corr, x_key='day', y_key='corrcoef', error_key='corrcoef_sem',
+                      plot_args= error_args,
+                      plot_function=plt.errorbar,
+                      colors= color,
+                      ax_args={'ylim':[0, 1], 'xlim':[-.5, 1.5]},
+                      save=save, reuse=reuse,
+                      path = figure_path, name_str=str(direction))
+
+
 def plot_correlation_matrix(res, days, loop_keys, shuffle, figure_path, odor_end = True, direction = 0):
     res = filter.filter_days_per_mouse(res, days)
     res_ = _correlation(res, loop_keys, shuffle, odor_end, direction=direction)

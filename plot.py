@@ -276,7 +276,7 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
     w_plot[y, x] = z
 
     rect = [0.2, 0.2, 0.6, 0.6]
-    rect_cb = [0.82, 0.2, 0.02, 0.65]
+    rect_cb = [0.82, 0.2, 0.02, 0.6]
     fig = plt.figure(figsize=(2.2, 2.2))
     ax = fig.add_axes(rect)
 
@@ -286,14 +286,14 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
         cmap = plt.get_cmap()
         cmap.set_bad('w')  # default value is 'k'
 
-    im = plt.pcolor(np.flipud(w_plot), cmap='jet', vmin=vmin, vmax=vmax)
+    im = plt.pcolor(np.flipud(w_plot), cmap='plasma', vmin=vmin, vmax=vmax)
     # im = plt.imshow(w_plot, cmap='jet', vmin=vmin, vmax=vmax, origin='upper')
 
     def _show_values(pc, fmt="%.2f", **kw):
         pc.update_scalarmappable()
         for p, color, value in zip(pc.get_paths(), pc.get_facecolors(), pc.get_array()):
             x, y = p.vertices[:-2, :].mean(0)
-            if (value - vmin)/(vmax-vmin) > .2:
+            if (value - vmin)/(vmax-vmin) > .5:
                 color = (0.0, 0.0, 0.0)
             else:
                 color = (1.0, 1.0, 1.0)

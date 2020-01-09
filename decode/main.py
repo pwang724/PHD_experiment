@@ -154,7 +154,6 @@ if 'split__ofc' in experiments:
 
     print('magn: {} \n onst: {} \n time: {}'.format(m, o, t))
 
-
 if 'test_fp_fn' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', condition.name)
     save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_fp_fn', condition.name)
@@ -213,7 +212,7 @@ if 'fp_fn__ofc' in experiments:
     summary_res = reduce.new_filter_reduce(res, filter_keys=['odor_valence', 'mouse', 'test_day','shuffle'],
                                            reduce_key='top_score')
 
-    ax_args = {'xlim':[-1, 4], 'ylim':[0, 1.05], 'yticks':[0, .25, .5, .75, 1.0]}
+    ax_args = {'xlim':[-1, 4], 'ylim':[0, 1.05], 'yticks':[0, .5, 1.0]}
     x_key = 'mouse'
     y_key = 'top_score'
     for valence in np.unique(summary_res['odor_valence']):
@@ -225,7 +224,8 @@ if 'fp_fn__ofc' in experiments:
                           select_dict={'odor_valence': valence, 'shuffle':False},
                           plot_function=plt.scatter,
                           plot_args=scatter_args,
-                          ax_args = {'ylim':[0, 1.05], 'yticks':[0, .25, .5, .75, 1.0]},
+                          ax_args = {'ylim':[0, 1.05], 'yticks':[0, .5, 1.0]},
+                          fig_size=[3, 2],
                           path=save_path)
 
     text = []
@@ -249,6 +249,7 @@ if 'fp_fn__ofc' in experiments:
                           ax_args= ax_args,
                           path=save_path,
                           rect=[0.25, 0.25, .6, .6],
+                          fig_size=[2.5, 2],
                           save=False)
 
         for i, t in enumerate(text):
@@ -263,8 +264,6 @@ if 'fp_fn__ofc' in experiments:
                           ax_args= ax_args,
                           path=save_path,
                           reuse= True)
-
-
 
 if 'test_odor_across_days' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_across_days', condition.name)
@@ -303,9 +302,8 @@ if 'test_odor_across_days' in experiments:
                                  save_path=experiment_path)
 
     if ANALYZE:
-        res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
-
         if condition.name == 'OFC_LONGTERM':
+            res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
             res = filter.exclude(res, {'mouse': [3]})
 
             res = filter.filter(res, {'shuffle':False})
@@ -367,30 +365,34 @@ if 'test_odor_across_days' in experiments:
                                   path= save_path,
                                   )
 
+        res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
+        if condition.name == 'OFC_LONGTERM':
+            res = filter.exclude(res, {'mouse': [3]})
 
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day','shuffle'],
+                                               reduce_key='top_score')
+        for style in np.unique(summary_res['decode_style']):
+            temp = filter.filter(summary_res, {'decode_style': style})
+            y_key = 'Test Day'
+            x_key = 'Training Day'
+            val_key = 'top_score'
+            title = 'Decoding ' + style +  ' Across Days'
+            vmax = 1
+            if style == 'csm_identity' or style == 'csp_identity' or style == 'valence':
+                vmin = 0.5
+            elif style == 'identity':
+                vmin = .25
+            else:
+                vmin = 0
 
-        # for style in np.unique(summary_res['decode_style']):
-        #     temp = filter.filter(summary_res, {'decode_style': style})
-        #     y_key = 'Test Day'
-        #     x_key = 'Training Day'
-        #     val_key = 'top_score'
-        #     title = 'Decoding ' + style +  ' Across Days'
-        #     vmax = 1
-        #     if style == 'csm_identity' or style == 'csp_identity' or style == 'valence':
-        #         vmin = 0.5
-        #     elif style == 'identity':
-        #         vmin = .25
-        #     else:
-        #         vmin = 0
-        #
-        #     if condition.name == 'OFC_REVERSAL':
-        #         vmin = 0
-        #
-        #     for shuffle in [False, True]:
-        #         _ = filter.filter(temp, {'shuffle':shuffle})
-        #         text = '_shuffle' if shuffle else '_no_shuffle'
-        #         plot.plot_weight(_, x_key, y_key, val_key, title, vmin, vmax, label= True,
-        #                          save_path=os.path.join(save_path, temp['decode_style'][0]), text=text)
+            if condition.name == 'OFC_REVERSAL':
+                vmin = 0
+
+            for shuffle in [False, True]:
+                _ = filter.filter(temp, {'shuffle':shuffle})
+                text = '_shuffle' if shuffle else '_no_shuffle'
+                plot.plot_weight(_, x_key, y_key, val_key, title, vmin, vmax, label= True,
+                                 save_path=os.path.join(save_path, temp['decode_style'][0]), text=text)
 
             # analysis = filter.filter(res, {'decode_style': style})
             # analysis = reduce.new_filter_reduce(analysis, filter_keys=['decode_style', 'Test Day', 'Training Day','mouse'],

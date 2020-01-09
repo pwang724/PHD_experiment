@@ -11,7 +11,7 @@ import reduce
 from analysis import add_naive_learned
 from format import *
 
-def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, figure_path = None):
+def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, figure_path = None, excitatory=True):
     ax_args_copy = overlap_ax_args.copy()
     res = copy.copy(res)
     res = _get_overlap_odor(res, delete_non_selective)
@@ -25,6 +25,7 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
     filter.assign_composite(start_end_day_res, loop_keys=['condition', 'training_day'])
     odor_list = ['+:+', '-:-','+:-']
     colors = ['Green','Red','Gray']
+    name_str = '_E' if excitatory else '_I'
     ax_args_copy.update({'xlim': [-1, 6]})
     for i, odor in enumerate(odor_list):
         save_arg = False
@@ -36,6 +37,7 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
 
         temp = filter.filter(start_end_day_res, {'condition':odor})
         name = ','.join([str(x) for x in start_days]) + '_' + ','.join([str(x) for x in end_days])
+        name += name_str
         plot.plot_results(temp,
                           x_key='condition_training_day', y_key='Overlap', loop_keys='mouse',
                           colors= [colors[i]]*len(mice),
@@ -59,7 +61,8 @@ def plot_overlap_odor(res, start_days, end_days, delete_non_selective = False, f
                       reuse=False, save=False)
     plot.plot_results(summary_res, x_key='training_day', y_key='Overlap', error_key='Overlap_sem',
                       path=figure_path,
-                      plot_function= plt.errorbar, plot_args= error_args, ax_args = ax_args, save=True, reuse=True)
+                      plot_function= plt.errorbar, plot_args= error_args, ax_args = ax_args, save=True, reuse=True,
+                      name_str=name_str)
 
     before_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'0', 'condition':'+:+'})
     after_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'1', 'condition':'+:+'})
@@ -105,7 +108,7 @@ def plot_overlap_water(res, start_days, end_days, figure_path):
     mean_std_res = reduce.new_filter_reduce(summary_res, filter_keys='Type', reduce_key='Overlap')
     types = np.unique(summary_res['Type'])
     scatter_args_copy = scatter_args.copy()
-    scatter_args_copy.update({'s':8})
+    scatter_args_copy.update({'s':2,'alpha':.6})
     for i, type in enumerate(types):
         reuse_arg = True
         if i == 0:
@@ -124,7 +127,7 @@ def plot_overlap_water(res, start_days, end_days, figure_path):
                       path=figure_path, plot_function=plt.errorbar, plot_args=error_args, ax_args=ax_args,
                       save=True, reuse=True,
                       fig_size=(1.5, 1.5), legend=False)
-    print(mean_std_res)
+    print(mean_std_res['Overlap'])
 
 
 def _overlap(ix1, ix2, arg = 'max'):

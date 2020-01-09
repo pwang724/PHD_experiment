@@ -18,7 +18,7 @@ import statistics.count_methods.correlation as correlation
 import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.PIR_Config()
+condition_config = statistics.analyze.PIR_NAIVE_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -44,7 +44,7 @@ temp_res = filter.filter(temp_res, {'odor_valence': ['CS+']})
 # temp_res = reduce.new_filter_reduce(temp_res, ['odor_valence', 'mouse'], reduce_key='boolean_smoothed')
 
 if condition.name == 'PIR_CONTEXT':
-    statistics.analyze.analyze_data(res, condition_config)
+    res = statistics.analyze.analyze_data(save_path, condition_config)
 
     # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
     #                          arg='all', valence='CS+', more_stats=False, figure_path= figure_path)
@@ -132,6 +132,17 @@ if condition.name == 'PIR':
                                                 figure_path = figure_path, odor_end=odor_end, direction=d)
         b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
                                                 figure_path = figure_path, odor_end=odor_end, direction=d)
+
+    correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
+                                 odor_end=odor_end,
+                                 direction=1, color='green', save=False, reuse=False)
+    correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
+                                 odor_end=odor_end,
+                                 direction=-1, color='red', save=False, reuse=True)
+    correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
+                                 odor_end=odor_end, linestyle='--',
+                                 direction=0, color='black', save=True, reuse=True)
+
     # ac = a['corrcoef']
     # bc = b['corrcoef']
     # ac = ac[a['Odor_A'] != a['Odor_B']]
@@ -179,12 +190,12 @@ if condition.name == 'PIR_NAIVE':
     days = [3, 3, 2, 2]
     res = statistics.analyze.analyze_data(save_path, condition_config)
 
-    excitatory = [True, False]
-    thresholds = [0.1, -0.05]
-    for i, sign in enumerate(excitatory):
-        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
-        responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
-                                           figure_path=figure_path, excitatory= sign)
+    # excitatory = [True, False]
+    # thresholds = [0.1, -0.05]
+    # for i, sign in enumerate(excitatory):
+    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+    #     responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
+    #                                        figure_path=figure_path, excitatory= sign)
     #
     # ac = a['corrcoef']
     # bc = b['corrcoef']
@@ -205,12 +216,19 @@ if condition.name == 'PIR_NAIVE':
     # cory.main(res, temp_res, figure_path, excitatory=True, valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=False)
 
-    # odor_end = False
-    # for d in [-1, 0, 1]:
-    #     a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False,
-    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
-    #     b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
-    #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
+    odor_end = False
+    for d in [-1, 0, 1]:
+        a = correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=False,
+                                                figure_path = figure_path, odor_end=odor_end, direction=d)
+        b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
+                                                figure_path = figure_path, odor_end=odor_end, direction=d)
+
+    correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path, odor_end=odor_end,
+                                 direction=1, color='green', save=False, reuse=False)
+    correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path, odor_end=odor_end,
+                                 direction=-1, color='red', save=False, reuse=True)
+    correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path, odor_end=odor_end,
+                                 direction=0, color='black', save=True, reuse=True, linestyle='--',)
 
 
     # res['odor_valence'] = np.array(['CS'] * np.size(res['odor_valence']))

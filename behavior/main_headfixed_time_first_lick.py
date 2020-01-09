@@ -24,21 +24,22 @@ mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
-    'summary_raw',
-    'summary_line'
+    # 'summary_raw',
+    # 'summary_line',
+    'summary_hist'
 ]
 
 conditions = [
-    experimental_conditions.OFC_COMPOSITE,
-    experimental_conditions.MPFC_COMPOSITE,
+    # experimental_conditions.OFC_COMPOSITE,
+    # experimental_conditions.MPFC_COMPOSITE,
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -104,10 +105,10 @@ bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-arg = 'com' #first, com
+arg = 'lick' #first, com
+collection = False
 
 if arg == 'first':
-    collection = False
     if collection:
         reduce_key_raw = 'time_first_lick_collection'
         reduce_key = 'time_first_lick_collection_smoothed'
@@ -125,6 +126,13 @@ elif arg == 'com':
     reduce_key = 'lick_com_smoothed'
     xkey = 'lick_com_trial'
     ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['odor on', 'odor off', 'US'],
+                     'xlabel': 'Time','xticks': [0, 50, 100], 'xlim': [0, 130]}\
+
+elif arg == 'lick':
+    reduce_key_raw = 'lick'
+    reduce_key = 'lick'
+    xkey = 'trial'
+    ax_args_local = {'yticks': [0, 15, 30], 'ylim': [0, 30],
                      'xlabel': 'Time','xticks': [0, 50, 100], 'xlim': [0, 130]}
 else:
     raise ValueError('wtf')
@@ -162,10 +170,22 @@ if 'summary_raw' in experiments:
         if 'CS+' in valence:
             line_args_mean_sem = {'marker': '.', 'markersize': 0, 'linewidth': .75, 'alpha': .5}
             temp = filter.filter(all_res_,{'odor_valence':valence})
-            mean_sem = reduce.new_filter_reduce(temp, filter_keys=['condition'], reduce_key=reduce_key, regularize='max')
+
+            from scipy import interpolate
+            for i, y in enumerate(temp[reduce_key]):
+                x = temp[xkey][i]
+                f = interpolate.interp1d(x, y, fill_value='extrapolate')
+                newx = np.arange(0, x[-1])
+                newy = f(newx)
+                temp[xkey][i] = newx
+                temp[reduce_key][i] = newy
+
+            mean_sem = reduce.new_filter_reduce(temp, filter_keys=['condition'], reduce_key=reduce_key,
+                                                regularize='max')
 
             path, name = plot.plot_results(mean_sem, x_key=xkey, y_key= reduce_key,
                               loop_keys= composite_arg,
+                               rect = (.3, .2, .6, .6),
                               colors=color, select_dict={'odor_valence':valence},
                               ax_args=ax_args_local, plot_args=line_args_mean_sem,
                               save=False,
@@ -183,7 +203,7 @@ if 'summary_raw' in experiments:
 
 if 'summary_line' in experiments:
     r = defaultdict(list)
-    duration = 20
+    duration = 10
     before_key = reduce_key_raw + '_A'
     after_key = reduce_key_raw + '_B'
     for i, x in enumerate(all_res[reduce_key_raw]):
@@ -228,7 +248,66 @@ if 'summary_line' in experiments:
         except:
             print('no stats')
 
+if 'summary_hist' in experiments:
+    def _helper(real, label, bin, range, ax):
+        density, bins = np.histogram(real, bins=bin, density=True, range= range)
+        unity_density = density / density.sum()
+        widths = bins[:-1] - bins[1:]
+        ax.bar(bins[1:], unity_density, width=widths, alpha=.5, label=label)
 
-    reduce_key = 'time_first_lick_smoothed'
+    duration = 500
+    before_key = reduce_key_raw + '_hist_A'
+    after_key = reduce_key_raw + '_hist_B'
+    for i, x in enumerate(all_res[reduce_key_raw]):
+        all_res[before_key].append(x[:duration])
+        all_res[after_key].append(x[-duration:])
+    for k,v in all_res.items():
+        all_res[k] = np.array(v)
+
+    ctrl_ixs = all_res['condition'] == 'YFP'
+    exp_ixs = np.invert(ctrl_ixs)
+    keys = [before_key, after_key]
+    for k in keys:
+        ctrl_data = np.concatenate(all_res[k][ctrl_ixs])
+        exp_data = np.concatenate(all_res[k][exp_ixs])
+
+        if arg == 'lick':
+            ctrl_data = ctrl_data[ctrl_data>0]
+            exp_data = exp_data[exp_data>0]
+
+        bins = 20
+
+        fig = plt.figure(figsize=(2.5, 2))
+        ax = fig.add_axes([.2, .2, .7, .7])
+
+        if collection and arg == 'first':
+            plt.xticks([0, 2, 4], ['US', '2s', '4s'])
+            range = [0, 5]
+        elif arg == 'lick':
+            plt.xticks([0, 15, 30])
+            range = [0, 30]
+        else:
+            plt.xticks([0, 2, 5], ['Odor ON', 'Odor Off', 'US'])
+            range = [0, 5]
+
+        _helper(ctrl_data, 'YFP', bins, range, ax)
+        _helper(exp_data, 'INH', bins, range, ax)
+        plt.legend(['YFP','INH'], fontsize=5, frameon=False)
+        plt.xlabel('Count')
+        plt.ylabel('Time')
+
+        plt.xlim(range)
+        ax.spines["right"].set_visible(False)
+        ax.spines["top"].set_visible(False)
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
+
+        stat = ranksums(ctrl_data, exp_data)[-1]
+        xlim = plt.xlim()
+        ylim = plt.ylim()
+        plot.significance_str(xlim[1] * .5, ylim[1] * .9, stat)
+        ax.set_title(reduce_key_raw)
+
+        plot._easy_save(os.path.join(save_path, reduce_key_raw + '_hist'), k)
 
 

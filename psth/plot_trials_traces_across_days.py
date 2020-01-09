@@ -55,6 +55,7 @@ class MPFC_Config(object):
         # self.ylim = .4
         # self.title = ['Naive', 'Learning', 'Learned']
 
+plot_licks = False
 condition_config = PIR_Config()
 
 condition = condition_config.condition
@@ -68,6 +69,7 @@ save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'PSTH',  condition.n
 res = analysis.load_data(data_path)
 analysis.add_indices(res)
 analysis.add_time(res)
+analysis.add_odor_value(res, condition)
 res_mouse = filter.filter(res, filter_dict={'mouse': mouse, 'day':days})
 
 i = 0
@@ -123,7 +125,8 @@ for i,_ in enumerate(cell_days):
         plt.sca(axs[o])
         for j, y in enumerate(psth):
             y_lick = licks[j] * condition_config.ylim/ (8) + cur_y
-            plt.step(cur_x_lick,y_lick, 'b', linewidth=.15)
+            if plot_licks:
+                plt.step(cur_x_lick,y_lick, 'b', linewidth=.15)
 
             y = y + cur_y
             plt.plot(cur_x,y, 'k', linewidth=.5)
@@ -151,7 +154,8 @@ for i,_ in enumerate(cell_days):
             xticklabels.append('US')
 
         plt.title(odors[o].upper())
-        plt.xticks(xticks, xticklabels, fontsize=5)
+        # plt.xticks(xticks, xticklabels, fontsize=5)
+        plt.xticks([])
         plt.yticks([])
         plt.tick_params(direction='out', length=0)
         ax = axs[o]

@@ -228,13 +228,13 @@ class OFC_BIG_Config(Base_Config):
         self.threshold = 0.04
         self.vlim = .25
         self.plot_big_days = [4,4,3,3,3]
-        self.sort_days = [3, 3, 2, 2, 2]
+        # self.sort_days = [3, 3, 2, 2, 2]
         self.sort_day_ix = 0
         self.plot_big_naive = False
         self.include_water = True
         self.sort_method = 'plus_minus'
 
-        # self.plot_big_days = [0,0,-1,0,0]
+        # self.plot_big_days = [0,0,0,0,0]
         # self.plot_big_naive = True
         # self.include_water = False
 
@@ -337,6 +337,27 @@ class BLA_BIG_Config(Base_Config):
         self.plot_big_naive = False
 
 def helper(res, mouse, day, condition_config):
+    def _pad(data, diff):
+        newp = np.zeros_like(data)
+        if diff > 0:
+            newp[:, :diff] = np.repeat(data[:,-1].reshape(-1,1), diff, axis= 1)
+            newp[:, diff:] = data[:, :-diff]
+            print('early odor time. mouse: {}, day: {}'.format(res_mouse['mouse'][0], res_mouse['day'][0]))
+        else:
+            newp[:,:diff] = data[:,-diff:]
+            newp[:,diff:] = np.repeat(data[:,-1].reshape(-1,1), -diff, axis= 1)
+            print('late odor time. mouse: {}, day: {}'.format(res_mouse['mouse'][0], res_mouse['day'][0]))
+        return newp
+
+    def _align(data, diff):
+        newp = np.zeros([data.shape[0], data.shape[1] + diff])
+        newp[:, :data.shape[1]] = data
+        newp[:,data.shape[1]:] = np.repeat(data[:,-1].reshape(-1,1), diff, axis= 1)
+        print('pad frames. mouse: {}, day: {}'.format(res_mouse['mouse'][0], res_mouse['day'][0]))
+        return newp
+
+    right_frame = np.max(res['TRIAL_FRAMES'])
+    right_on = np.median(res['DAQ_O_ON_F'])
     res_mouse = filter.filter(res, filter_dict={'mouse': mouse, 'day': day})
 
     if hasattr(condition, 'odors'):
@@ -366,6 +387,15 @@ def helper(res, mouse, day, condition_config):
         for k, cell in enumerate(cur_data):
             cur_data[k, :, :] = subtract_baseline(cell, config.baseline_start, odor_on - config.baseline_end)
         mean = np.mean(cur_data, axis=1)
+
+        if np.abs(odor_on - right_on) > 2:
+            diff = (right_on - odor_on).astype(int)
+            mean = _pad(mean, diff)
+
+        if frames_per_trial < right_frame:
+            diff = right_frame - frames_per_trial
+            mean = _align(mean, diff)
+
         list_of_psth.append(mean)
     return list_of_psth, odor_on, water_on, odors_copy
 
@@ -498,7 +528,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = PIR_LIM_Config()
+condition_config = OFC_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -542,7 +572,7 @@ if condition_config.plot_big:
     # if condition_config.include_water:
     #     list_of_odor_names[0].append('water')
 
-    plotter(image, odor_on, water_on, odor_names, condition_config, save_path)
+    plotter(image, odor_on-1, water_on, odor_names, condition_config, save_path)
 else:
     mouse = condition_config.mouse
     days = condition_config.days
@@ -572,7 +602,7 @@ else:
 
         naive = day < condition_config.condition.training_start_day[mouse]
         name_str = '_day_' + str(day)
-        plotter(image, odor_on, water_on, odor_names, condition_config, save_path, name_str=name_str)
+        plotter(image, odor_on-1, water_on, odor_names, condition_config, save_path, name_str=name_str)
 
 
     # if condition_config.across_days:

@@ -62,9 +62,15 @@ for i, odor_standard in enumerate(odors_standard):
         color = odor_colors[i]
         xticks = [odor_on, odor_off]
         xticklabels = ['ON', 'OFF']
+    elif odor_res['odor_valence'][0] == 'US':
+        plt.plot([water_on, water_on], ylim, '-', linewidth=1, color='turquoise')
+        xticks = [water_on]
+        xticklabels = ['US']
     else:
         raise ValueError('unrecognized odor valence for plotting')
-    plt.fill_between([odor_on, odor_off], ylim[0],ylim[1], alpha = .7, facecolor=color)
+
+    if odor_res['odor_valence'][0] != 'US':
+        plt.fill_between([odor_on, odor_off], ylim[0],ylim[1], alpha = .7, facecolor=color)
 
     # plt.xticks(xticks, xticklabels)
     plt.xticks([])

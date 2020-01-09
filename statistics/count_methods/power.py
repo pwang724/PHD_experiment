@@ -16,9 +16,42 @@ def plot_power(res, start_days, end_days, figure_path,
                odor_valence = ('CS+'), naive = False,
                colors_before = {'CS+':'Green','CS-':'Red'},
                colors_after = {'CS+':'Green','CS-':'Red'},
-               ylim = [0, .1]):
+               ylim = [0, .1], align=True, pad = True):
     res = copy.copy(res)
     _power(res, excitatory)
+
+    if pad:
+        right_on = np.median(res['DAQ_O_ON_F'])
+        for i, odor_on in enumerate(res['DAQ_O_ON_F']):
+            if np.abs(odor_on - right_on) > 2:
+                diff = (right_on - odor_on).astype(int)
+                if diff > 0:
+                    p = res['Power'][i]
+                    newp = np.zeros_like(p)
+                    newp[:diff] = p[0]
+                    newp[diff:] = p[:-diff]
+                    res['Power'][i] = newp
+                    print('early odor time. mouse: {}, day: {}'.format(res['mouse'][i], res['day'][i]))
+                else:
+                    p = res['Power'][i]
+                    newp = np.zeros_like(p)
+                    newp[:diff] = p[-diff:]
+                    newp[diff:] = p[-1]
+                    res['Power'][i] = newp
+                    print('late odor time. mouse: {}, day: {}'.format(res['mouse'][i], res['day'][i]))
+
+    if align:
+        nF = [len(x) for x in res['Power']]
+        max_frame = np.max(nF)
+        for i, p in enumerate(res['Power']):
+            if len(p) < max_frame:
+                newp = np.zeros(max_frame)
+                newp[:len(p)] = p
+                newp[len(p):] = p[-1]
+                res['Power'][i] = newp
+                res['Time'][i] = np.arange(0, max_frame)
+                print('pad frames. mouse: {}, day: {}'.format(res['mouse'][i], res['day'][i]))
+
 
     list_of_days = list(zip(start_days, end_days))
     start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
@@ -29,6 +62,7 @@ def plot_power(res, start_days, end_days, figure_path,
         start_end_day_res['odor_valence'][ix] = 'PT CS+'
     start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['training_day', 'odor_valence'],
                                                  reduce_key='Power')
+
 
     ax_args_copy = trace_ax_args.copy()
     if excitatory:
