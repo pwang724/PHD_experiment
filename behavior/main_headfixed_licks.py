@@ -26,8 +26,8 @@ experiments = [
     # 'licks_per_day'
     # 'individual',
     # 'summary',
-    'mean_sem',
-    # 'trials_to_criterion',
+    # 'mean_sem',
+    'trials_to_criterion',
     # 'roc',
     # 'cdf',
     # 'bar'
@@ -37,13 +37,13 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
-    experimental_conditions.PIR,
+    # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
@@ -96,7 +96,7 @@ for res, condition in zip(list_of_res, conditions):
     reduce.chain_defaultdicts(all_res, res)
 
 color_dict_valence = {'PT CS+': 'C1', 'CS+': 'green', 'CS-': 'red'}
-color_dict_condition = {'HALO': 'C1', 'JAWS':'red','YFP':'black'}
+color_dict_condition = {'HALO': 'C1', 'JAWS':'red','YFP':'black', 'INH':'red'}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
                 'xlim': [0, 200]}
 ax_args_mush = {'yticks': [0, 5], 'ylim': [-1, 8],'xticks': [0, 25, 50, 75],'xlim': [0, 75]}
@@ -360,9 +360,12 @@ if 'roc' in experiments:
                       path=save_path)
 
 if 'trials_to_criterion' in experiments:
+    do_collapse = True
+
     reduce_key = 'criterion'
     all_res = reduce.new_filter_reduce(all_res, filter_keys=['mouse', 'odor_valence', 'condition'], reduce_key=reduce_key)
-    # _collapse_conditions(all_res, control_condition='YFP', str = collapse_arg)
+    if do_collapse:
+        _collapse_conditions(all_res, control_condition='YFP', str = collapse_arg)
     all_res.pop(reduce_key + '_std')
     all_res.pop(reduce_key + '_sem')
 
@@ -373,7 +376,7 @@ if 'trials_to_criterion' in experiments:
     scatter_args_copy = scatter_args.copy()
     scatter_args_copy.update({'marker': '.', 'alpha': .3, 's': 10})
     error_args_copy = error_args.copy()
-    error_args_copy.update({'elinewidth': .5, 'markeredgewidth': .5, 'markersize': 0})
+    error_args_copy.update({'elinewidth': 1, 'markeredgewidth': 1, 'markersize': 0, 'alpha':.5})
     xlim_1 = np.unique(all_res[collapse_arg]).size
     ax_args_pt_ = {'yticks': [0, 50, 100, 150], 'ylim': [-10, 160], 'xlim':[-1, xlim_1]}
     ax_args_dt_ = {'yticks': [0, 25, 50], 'ylim': [-5, 55], 'xlim':[-1, xlim_1]}
@@ -389,20 +392,19 @@ if 'trials_to_criterion' in experiments:
             ax_args = ax_args_mush_
 
         swarm_args_copy = swarm_args.copy()
-        swarm_args_copy.update({'palette':[color_dict_valence[valence], 'black'], 'size':5})
         colors = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
+        swarm_args_copy.update({'palette': colors, 'size':5})
 
         path, name = plot.plot_results(all_res, x_key=collapse_arg, y_key= reduce_key,
                                        select_dict={'odor_valence': valence},
-                                       loop_keys='condition',
                                        ax_args=ax_args,
-                                       plot_function= plt.scatter,
+                                       # loop_keys='condition',
+                                       # plot_function= plt.scatter,
+                                       # plot_args=scatter_args_copy,
                                        colors = colors,
-                                       plot_args=scatter_args_copy,
-                                       # xjitter=.05,
-                                       # plot_function= sns.stripplot,
-                                       # plot_args= swarm_args_copy,
-                                       # sort=True,
+                                       plot_function= sns.stripplot,
+                                       plot_args= swarm_args_copy,
+                                       sort=True,
                                        fig_size=[2, 1.5],
                                        path=save_path, reuse=False, save=False)
 
@@ -410,7 +412,7 @@ if 'trials_to_criterion' in experiments:
                           select_dict={'odor_valence': valence},
                           ax_args=ax_args,
                           plot_function= plt.errorbar,
-                          plot_args= error_args,
+                          plot_args= error_args_copy,
                           fig_size=[2, 1.5],
                           path=save_path, reuse=True, save=False)
         # plt.xlim(-1, 2)
@@ -428,6 +430,9 @@ if 'trials_to_criterion' in experiments:
         rs = ranksums(y_yfp, y_combined)[-1]
         ylim = plt.gca().get_ylim()
         sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=rs)
+
+        name_str = '_collapsed' if do_collapse else '_not_collapsed'
+        name += name_str
         plot._easy_save(path, name, pdf=True)
 
         # dunns test

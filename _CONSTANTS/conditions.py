@@ -423,8 +423,10 @@ class BEHAVIOR_OFC_MUSH_YFP:
         'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_YFP\PN10',
         'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_YFP\M400_MUSH_YFP',
         'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_YFP\M402_MUSH_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\SINGLE_PHASE_OFC_YFP\M418_OFC_MUSH_YFP'
     ]
     odors = [
+        ['pin', 'msy', 'euy', 'lim'],
         ['pin', 'msy', 'euy', 'lim'],
         ['pin', 'msy', 'euy', 'lim'],
         ['pin', 'msy', 'euy', 'lim'],
@@ -433,6 +435,7 @@ class BEHAVIOR_OFC_MUSH_YFP:
         ['pin', 'msy', 'euy', 'lim']
     ]
     csp = [
+        ['pin', 'msy'],
         ['pin', 'msy'],
         ['pin', 'msy'],
         ['pin', 'msy'],
@@ -619,27 +622,37 @@ class BEHAVIOR_OFC_JAWS_PRETRAINING:
 class BEHAVIOR_OFC_HALO_PRETRAINING:
     name = 'BEHAVIOR_OFC_HALO_PRETRAINING'
     paths = [
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PERTRAINING_OFC_HALO\M412_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PERTRAINING_OFC_HALO\M414_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M412_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M414_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M416_OFC_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M417_OFC_PT_HALO',
     ]
     dt_odors = [
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
         ['msy', 'pin', 'euy', 'lim'],
         ['msy', 'pin', 'euy', 'lim'],
     ]
     dt_csp = [
         ['pin', 'msy'],
         ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
     ]
     pt_odors = [
+        ['oct'],
+        ['oct'],
         ['oct'],
         ['oct'],
     ]
     pt_csp = [
         ['oct'],
         ['oct'],
+        ['oct'],
+        ['oct'],
     ]
-    timing_override = [True, True]
-    training_start_day = [0, 0]
+    timing_override = [True, True, True, True]
+    training_start_day = [0, 0, 0, 0]
     # last_pt_day = [4, 3, 3, 1, 2, 2]
 
 class BEHAVIOR_OFC_YFP_DISCRIMINATION:
