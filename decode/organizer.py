@@ -1,7 +1,8 @@
 import glob
 import os
 import time
-
+import filter
+import reduce
 import numpy as np
 
 from _CONSTANTS.config import Config
@@ -151,6 +152,8 @@ def organizer_test_fp_fn(condition, decodeConfig, data_path, save_path):
         raise ValueError("res has {0:d} mice, but filter has {1:d} mice".
                          format(mouse_names.size, len(condition.paths)))
 
+    import copy
+    counting_res = copy.copy(decodeConfig.res_counting)
     start_days = decodeConfig.start_day
     end_days = decodeConfig.end_day
 
@@ -158,7 +161,6 @@ def organizer_test_fp_fn(condition, decodeConfig, data_path, save_path):
     for x, y in zip(start_days, end_days):
         days_per_mouse.append(np.arange(x, y+1))
     print(days_per_mouse)
-
 
     for i, mouse_name in enumerate(mouse_names):
         start_time = time.time()
@@ -171,6 +173,13 @@ def organizer_test_fp_fn(condition, decodeConfig, data_path, save_path):
         if len(days_per_mouse[i]):
             list_of_cons = list_of_cons_[days_per_mouse[i]]
             list_of_data = list_of_data_[days_per_mouse[i]]
+
+            if counting_res is not None:
+                temp = filter.filter(counting_res, {'mouse': i, 'odor_valence': 'US'})
+                temp = filter.filter_days_per_mouse(temp, days_per_mouse = [days_per_mouse[i]])
+                list_of_neural_ixs = temp['sig']
+            else:
+                list_of_neural_ixs = None
 
             cons = list_of_cons[0]
             cons_dict = cons.__dict__
@@ -196,9 +205,12 @@ def organizer_test_fp_fn(condition, decodeConfig, data_path, save_path):
                 else:
                     csp = condition.dt_csp[i]
 
-            scores_res = decoding.test_fp_fn(list_of_cons, list_of_data, odor, csp, decodeConfig)
+            scores_res = decoding.test_fp_fn(list_of_cons, list_of_data, odor, csp, decodeConfig, list_of_neural_ixs)
             name = cons.NAME_MOUSE
-            fio.save_json(save_path=save_path, save_name=name, config=decodeConfig)
+
+            save_config = copy.copy(decodeConfig)
+            save_config.res_counting = ''
+            fio.save_json(save_path=save_path, save_name=name, config=save_config)
             fio.save_pickle(save_path=save_path, save_name=name, data=scores_res)
             print("Analyzed: {0:s} in {1:.2f} seconds".format(name, time.time() - start_time))
 

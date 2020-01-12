@@ -24,10 +24,11 @@ import scikit_posthocs
 experiments = [
     # 'vary_neuron_odor',
     # 'vary_decoding_style_odor',
-    'test_odor_across_days',
+    # 'test_odor_across_days',
     # 'test_split',
     # 'split__ofc',
-    # 'test_fp_fn',
+    'test_fp_fn',
+    # 'test_us_fp_fn',
     # 'fp_fn__ofc',
     # 'vary_decoding_style_days',
     # 'plot_vary_neuron_pir_ofc_bla'
@@ -39,7 +40,7 @@ ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.OFC_LONGTERM
+condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -50,7 +51,96 @@ error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 0, 'alpha
 fill_args = {'zorder': 0, 'lw': 0, 'alpha': 0.3}
 line_args = {'alpha': 1, 'linewidth': .5, 'marker': 'o', 'markersize': 1.5}
 bar_args = {'alpha': .6, 'fill': False}
-ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05]}
+ax_args = {'yticks': [0, .2, .4, .6, .8, 1.0], 'ylim': [-.05, 1.05], 'xlim':[-.5, 1.5]}
+
+if 'test_us_fp_fn' in experiments:
+    import statistics.analyze
+
+    #ofc specific
+    save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
+    condition_config = statistics.analyze.OFC_Config()
+    res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)
+
+    experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_us_fp_fn', condition.name)
+    save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'DECODING', 'decoding_test_us_fp_fn', condition.name)
+
+    neurons = 40
+    no_end_time = False
+    style = ['valence']
+
+    if EXPERIMENT:
+        if condition.name == 'OFC':
+            learned_days = np.array([5, 4, 3, 4, 5])
+            last_days = np.array([5, 5, 3, 4, 5])
+
+        experiment_tools.perform(experiment=decode.organizer.organizer_test_fp_fn,
+                                 condition=condition,
+                                 experiment_configs=experiment_configs.test_fp_fn(
+                                argTest=argTest, neurons=neurons, style = style, no_end_time=no_end_time,
+                                 start_day=learned_days,end_day=last_days, res_counting= res),
+                                 data_path=data_path,
+                                 save_path=experiment_path)
+
+    if ANALYZE:
+        res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
+        summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'odor_valence', 'mouse','test_day','shuffle'],
+                                               reduce_key='top_score')
+
+        for valence in np.unique(summary_res['odor_valence']):
+            x_key = 'mouse'
+            y_key = 'top_score'
+            title = 'Decoding ' + valence
+            vmax = 1
+            vmin = 0
+
+            plot.plot_results(summary_res, x_key=x_key, y_key=y_key, loop_keys='shuffle',
+                              select_dict={'odor_valence': valence},
+                              plot_function=plt.scatter,
+                              plot_args=scatter_args,
+                              colors=['red','black'],
+                              path=save_path)
+
+        filter.assign_composite(summary_res, ['odor_valence', 'shuffle'])
+        summary_res_ = reduce.new_filter_reduce(summary_res, filter_keys=['odor_valence', 'mouse', 'shuffle'],
+                                                reduce_key='top_score')
+        summary_res_.pop(y_key + '_sem')
+        summary_res_.pop(y_key + '_std')
+        summary_res__ = reduce.new_filter_reduce(summary_res_, filter_keys=['odor_valence', 'shuffle'],
+                                                 reduce_key='top_score')
+
+        text = []
+        stats = filter.filter(summary_res, {'shuffle': False})
+        for i, valence in enumerate(np.unique(summary_res['odor_valence'])):
+            temp = filter.filter(stats, {'odor_valence': valence})
+            text.append(' {} trials: {}'.format(valence, np.sum(temp['n'])))
+
+        for i, valence in enumerate([['CS+'], ['CS-']]):
+            if valence == ['CS+']:
+                color = 'green'
+            else:
+                color = 'red'
+            plot.plot_results(summary_res_, x_key='odor_valence_shuffle', y_key=y_key, loop_keys='odor_valence_shuffle',
+                              select_dict={'odor_valence': valence},
+                              plot_function=plt.scatter,
+                              plot_args=scatter_args,
+                              colors=[color,'black'],
+                              ax_args=ax_args,
+                              path=save_path,
+                              rect=[0.25, 0.25, .6, .6],
+                              fig_size=[2.5, 2],
+                              save=False)
+
+            plt.text(0, 1, text[i], fontdict={'fontsize': 5})
+
+            plot.plot_results(summary_res__, x_key='odor_valence_shuffle', y_key=y_key, error_key=y_key + '_sem',
+                              loop_keys='odor_valence_shuffle',
+                              select_dict={'odor_valence': valence},
+                              plot_function=plt.errorbar,
+                              colors=[color,'black'],
+                              plot_args=error_args,
+                              ax_args=ax_args,
+                              path=save_path,
+                              reuse=True)
 
 if 'test_split' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_split', condition.name)
@@ -197,6 +287,48 @@ if 'test_fp_fn' in experiments:
                               plot_args=scatter_args,
                               colors=['red','black'],
                               path=save_path)
+
+        filter.assign_composite(summary_res, ['odor_valence', 'shuffle'])
+        summary_res_ = reduce.new_filter_reduce(summary_res, filter_keys=['odor_valence', 'mouse', 'shuffle'],
+                                                reduce_key='top_score')
+        summary_res_.pop(y_key + '_sem')
+        summary_res_.pop(y_key + '_std')
+        summary_res__ = reduce.new_filter_reduce(summary_res_, filter_keys=['odor_valence', 'shuffle'],
+                                                 reduce_key='top_score')
+
+        text = []
+        stats = filter.filter(summary_res, {'shuffle': False})
+        for i, valence in enumerate(np.unique(summary_res['odor_valence'])):
+            temp = filter.filter(stats, {'odor_valence': valence})
+            text.append(' {} trials: {}'.format(valence, np.sum(temp['n'])))
+
+        for i, valence in enumerate([['CS+'], ['CS-']]):
+            if valence == ['CS+']:
+                color = 'green'
+            else:
+                color = 'red'
+            plot.plot_results(summary_res_, x_key='odor_valence_shuffle', y_key=y_key, loop_keys='odor_valence_shuffle',
+                              select_dict={'odor_valence': valence},
+                              plot_function=plt.scatter,
+                              plot_args=scatter_args,
+                              colors=[color,'black'],
+                              ax_args=ax_args,
+                              path=save_path,
+                              rect=[0.25, 0.25, .6, .6],
+                              fig_size=[2.5, 2],
+                              save=False)
+
+            plt.text(0, 1, text[i], fontdict={'fontsize': 5})
+
+            plot.plot_results(summary_res__, x_key='odor_valence_shuffle', y_key=y_key, error_key=y_key + '_sem',
+                              loop_keys='odor_valence_shuffle',
+                              select_dict={'odor_valence': valence},
+                              plot_function=plt.errorbar,
+                              colors=[color,'black'],
+                              plot_args=error_args,
+                              ax_args=ax_args,
+                              path=save_path,
+                              reuse=True)
 
 if 'fp_fn__ofc' in experiments:
     experiment_path_ofc = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', 'OFC')

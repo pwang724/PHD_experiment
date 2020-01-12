@@ -159,7 +159,7 @@ def test_split(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_confi
         res[key] = np.array(val)
     return res
 
-def test_fp_fn(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config):
+def test_fp_fn(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_config, list_of_ixs = None):
     def _helper(cons, traces):
         list_of_masks = _get_odor_masks(cons, chosen_odors, csp_odors, decode_style)
         data_trial_cell_time = utils.reshape_data(traces, trial_axis=0, cell_axis=1, time_axis=2,
@@ -192,14 +192,27 @@ def test_fp_fn(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_confi
         return train_data, train_labels, test_data, test_labels
 
     decode_style = decode_config.decode_style
-    decode_neurons = decode_config.neurons
     decode_shuffle = decode_config.shuffle
     decode_repeat = decode_config.repeat
     average_time = decode_config.average_time
+    minimum_cell_number = 7
+    if list_of_ixs is None:
+        decode_neurons = decode_config.neurons
+    else:
+        decode_neurons = minimum_cell_number
 
     res = defaultdict(list)
     for day, _ in enumerate(list_of_cons):
         train_data, train_labels, test_data, test_labels = _helper(list_of_cons[day], list_of_data[day])
+        if list_of_ixs is not None:
+            ixs = list_of_ixs[day].astype(np.bool)
+            train_data = train_data[:,ixs,:]
+            test_data = test_data[:,ixs,:]
+            print('number of US responsive neurons: {}'.format(np.sum(ixs)))
+            # assert decode_neurons <= np.sum(ixs), print('number of US responsive neurons: {}'.format(np.sum(ixs)))
+            if decode_neurons > np.sum(ixs):
+                continue
+
         arg = ['CS+','CS-']
         for i, current_label in enumerate([1,2]):
             ix = test_labels == current_label
@@ -209,13 +222,13 @@ def test_fp_fn(list_of_cons, list_of_data, chosen_odors, csp_odors, decode_confi
             if len(labels):
                 for r in range(decode_repeat):
                     if decode_shuffle:
-                        scores = decode_odors_time_bin(train_data, train_labels,
-                                                       number_of_cells=decode_neurons, cv=5)
+                        scores = decode_odors_time_bin(train_data, train_labels, number_of_cells=decode_neurons, cv=5)
                         scores = np.mean(scores)
                     else:
                         nCells = train_data.shape[1]
                         cell_ixs = np.random.choice(nCells, size=decode_neurons, replace=False)
-                        models = model_odors_time_bin(train_data[:, cell_ixs, :], train_labels, shuffle=False)
+                        subset_of_train_data = train_data[:, cell_ixs, :]
+                        models = model_odors_time_bin(subset_of_train_data, train_labels, shuffle=False)
                         scores = test_odors_time_bin(data[:, cell_ixs, :], labels, models)
                     res['test_day'].append(day)
                     res['scores'].append(scores)

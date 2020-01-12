@@ -25,7 +25,8 @@ def test_split(argTest = True, neurons = 40, style = ('csp_identity'), no_end_ti
         decodeConfig.repeat = 50
     return decodeConfig, hp_ranges
 
-def test_fp_fn(argTest = True, neurons = 40, style = ('valence'), no_end_time=False, start_day = [], end_day = []):
+def test_fp_fn(argTest = True, neurons = 40, style = ('valence'), no_end_time=False, start_day = [], end_day = [],
+               res_counting = None):
     decodeConfig = decode_config.DecodeConfig()
     decodeConfig.repeat = 100
     decodeConfig.neurons = neurons
@@ -33,6 +34,7 @@ def test_fp_fn(argTest = True, neurons = 40, style = ('valence'), no_end_time=Fa
     decodeConfig.no_end_time = no_end_time
     decodeConfig.start_day = start_day
     decodeConfig.end_day = end_day
+    decodeConfig.res_counting = res_counting
     hp_ranges = OrderedDict()
     hp_ranges['decode_style'] = style
     hp_ranges['shuffle'] = [False, True]
