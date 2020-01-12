@@ -128,7 +128,7 @@ class OFC_LONGTERM_Config(Base_Config):
     def __init__(self):
         super(OFC_LONGTERM_Config, self).__init__()
         self.condition = experimental_conditions.OFC_LONGTERM
-        self.mouse = 2
+        self.mouse = 0
         self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         self.independent_sort = True
         # self.independent_sort = False
@@ -528,7 +528,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = OFC_BIG_Config()
+condition_config = OFC_LONGTERM_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

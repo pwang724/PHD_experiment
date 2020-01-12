@@ -20,7 +20,7 @@ import statistics.count_methods.cory as cory
 import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.OFC_Config()
+condition_config = statistics.analyze.OFC_LONGTERM_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -181,15 +181,16 @@ if condition.name == 'OFC' or condition.name == 'BLA':
 if condition.name == 'OFC_LONGTERM':
     #fully learned thres 70%
     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= 0.04)
-    res.pop('data')
+    # res.pop('data')
     # start_day = np.array([0,0,0,0])
     # learned_day_per_mouse = np.array([3, 2, 2, 3])
     # last_day_per_mouse = np.array([8, 7, 5, 5])
 
     res = filter.exclude(res, {'mouse': 3})
     temp_res = filter.exclude(temp_res, {'mouse': 3})
+    start_day_per_mouse = [1,0,0]
     learned_day_per_mouse = np.array([3, 2, 2])
-    last_day_per_mouse = np.array([8, 7, 5])
+    last_day_per_mouse = np.array([8, 7, 7])
 
     # onset_learned = waveform.distribution(res, start=learned_day_per_mouse, end=learned_day_per_mouse + 1, data_arg='onset',
     #                       figure_path=figure_path, save = False)
@@ -198,22 +199,22 @@ if condition.name == 'OFC_LONGTERM':
     # print('ranksum between distributions of odor onsets early and late in learning {}'.format(
     #     ranksums(onset_learned,onset_late)[-1]))
 
-    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
-    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
-    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
+    # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
+    # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
+    # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
 
-    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
-    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
-    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
+    # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
+    # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
+    # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
 
-    # excitatory = [True, False]
-    # thresholds = [0.04, -0.04]
-    # for i, sign in enumerate(excitatory):
-    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
-    #     res = filter.exclude(res, {'mouse': 3})
-    #     responsive.plot_summary_odor(res, start_day, last_day_per_mouse, figure_path=figure_path, excitatory=sign)
-    #     responsive.plot_summary_odor(res, learned_day_per_mouse, last_day_per_mouse,
-    #                                  figure_path=figure_path, excitatory=sign)
+    excitatory = [True, False]
+    thresholds = [0.04, -0.04]
+    for i, sign in enumerate(excitatory):
+        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+        res = filter.exclude(res, {'mouse': 3})
+        responsive.plot_summary_odor(res, start_day_per_mouse, last_day_per_mouse, figure_path=figure_path, excitatory=sign)
+        responsive.plot_summary_odor(res, learned_day_per_mouse, last_day_per_mouse,
+                                     figure_path=figure_path, excitatory=sign)
 
     # cory.main(res, temp_res, figure_path, excitatory=True)
     # cory.main(res, temp_res, figure_path, excitatory=False)
@@ -241,10 +242,16 @@ if condition.name == 'OFC_LONGTERM':
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=.05)
 
+    # start_day_per_mouse = [1, 0, 0]
     # signs = [True, False]
-    # ylims = [[-0.01, 0.06], [-.05, 0.01]]
+    # ylims = [[-.005, 0.06], [-.05, 0.01]]
     # for sign, ylim in zip(signs, ylims):
-    #     power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+    #     power.plot_power(res, learned_day_per_mouse, start_day_per_mouse, figure_path, odor_valence=['CS+'],
     #                      colors_before = {'CS+':'Green'}, colors_after = {'CS+':'Black'}, ylim=ylim, excitatory=sign)
-    #     power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
-    #                      colors_before = {'CS-':'Red'}, colors_after = {'CS-':'Black'}, ylim=ylim, excitatory=sign)
+        # power.plot_power(res, learned_day_per_mouse, start_days_per_mouse, figure_path, odor_valence=['CS-'],
+        #                  colors_before = {'CS-':'Red'}, colors_after = {'CS-':'Black'}, ylim=ylim, excitatory=sign)
+        #
+        # power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+        #                  colors_before = {'CS+':'Green'}, colors_after = {'CS+':'Black'}, ylim=ylim, excitatory=sign)
+        # power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
+        #                  colors_before = {'CS-':'Red'}, colors_after = {'CS-':'Black'}, ylim=ylim, excitatory=sign)

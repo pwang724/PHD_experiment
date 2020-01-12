@@ -305,13 +305,13 @@ if 'test_odor_across_days' in experiments:
         if condition.name == 'OFC_LONGTERM':
             res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
             res = filter.exclude(res, {'mouse': [3]})
-
             res = filter.filter(res, {'shuffle':False})
-            days_learned = [[3,4,5],[3,4,5],[2,3]]
-            days_end = [[6,7,8],[6,7,8],[5,6]]
+            days_learned = [[3,4,5],[3,4,5],[3,4,5]]
+            days_end = [[6,7,8],[6,7,8],[6,7]]
             summary_res = reduce.new_filter_reduce(res, filter_keys=['decode_style', 'Test Day', 'Training Day', 'mouse'],
                                                    reduce_key='top_score')
-
+            line_args = {'alpha': 1, 'linewidth': .5, 'marker': 'o', 'markersize': 1.5, 'linestyle': '--'}
+            #within day decoding
             res_learned = defaultdict(list)
             res_end = defaultdict(list)
             res_overall = defaultdict(list)
@@ -343,27 +343,85 @@ if 'test_odor_across_days' in experiments:
                 y_key = 'Test Day'
                 x_key = 'Training Day'
                 val_key = 'top_score'
-                ax_args = {'xlim': [-.5, 1.5], 'xticks':[0, 1], 'ylim': [0, 1.05], 'yticks': [0, .25, .5, .75, 1.0]}
+                ax_args = {'xlim': [-.5, 1.5], 'xticks':[0, 1], 'ylim': [0.5, 1.00], 'yticks': [.5, .75, 1.0]}
 
-                plot.plot_results(res_overall_mean, x_key='day', y_key='top_score',
-                                  plot_function=plt.scatter,
-                                  plot_args=scatter_args,
+                plot.plot_results(res_overall_mean, x_key='day', y_key='top_score', loop_keys='mouse',
+                                  plot_args=line_args,
                                   ax_args= ax_args,
-                                  colors = 'black',
+                                  colors = ['black']*100,
                                   select_dict={'decode_style': style},
-                                  save=False,
-                                  path= save_path,
+                                  path= save_path, name_str= '_same_day',
+                                  legend=False,
+                                  )
+                #
+                # plot.plot_results(res_overall_mean_, x_key='day', y_key='top_score', error_key='top_score_sem',
+                #                   plot_function=plt.errorbar,
+                #                   plot_args=error_args,
+                #                   ax_args= ax_args,
+                #                   colors = 'black',
+                #                   select_dict={'decode_style': style},
+                #                   reuse=True,
+                #                   path= save_path, name_str= '_same_day'
+                #                   )
+
+            #across day decoding
+            res_learned = defaultdict(list)
+            res_end = defaultdict(list)
+            res_overall = defaultdict(list)
+            for i in range(len(days_learned)):
+                mouse_day_learned = days_learned[i]
+                mouse_day_end = days_end[i]
+                temp_learned = filter.filter(summary_res, {'mouse': i, 'Test Day': mouse_day_learned, 'Training Day': mouse_day_learned})
+                ix = np.abs(temp_learned['Test Day'] - temp_learned['Training Day']) == 1
+                for k, v in temp_learned.items():
+                    temp_learned[k] = v[ix]
+                reduce.chain_defaultdicts(res_learned, temp_learned)
+
+                temp_end = filter.filter(summary_res, {'mouse': i, 'Test Day': mouse_day_end, 'Training Day': mouse_day_end})
+                ix = np.abs(temp_end['Test Day'] - temp_end['Training Day']) == 1
+                for k, v in temp_end.items():
+                    temp_end[k] = v[ix]
+                reduce.chain_defaultdicts(res_end, temp_end)
+            res_learned['day'] = np.array([0] * len(res_learned['mouse']))
+            res_end['day'] = np.array([1] * len(res_end['mouse']))
+            reduce.chain_defaultdicts(res_overall, res_learned)
+            reduce.chain_defaultdicts(res_overall, res_end)
+
+            res_overall_mean = reduce.new_filter_reduce(res_overall,
+                                                        filter_keys=['decode_style', 'mouse','day'],
+                                                        reduce_key='top_score')
+            res_overall_mean.pop('top_score_sem')
+            res_overall_mean.pop('top_score_std')
+            res_overall_mean_ = reduce.new_filter_reduce(res_overall_mean,
+                                                        filter_keys=['decode_style','day'],
+                                                        reduce_key='top_score')
+
+            for style in np.unique(res_overall['decode_style']):
+                y_key = 'Test Day'
+                x_key = 'Training Day'
+                val_key = 'top_score'
+                ax_args = {'xlim': [-.5, 1.5], 'xticks':[0, 1], 'ylim': [0.5, 1.00], 'yticks': [.5, .75, 1.0]}
+
+                plot.plot_results(res_overall_mean, x_key='day', y_key='top_score', loop_keys='mouse',
+                                  plot_function=plt.plot,
+                                  plot_args=line_args,
+                                  ax_args= ax_args,
+                                  colors = ['black']*100,
+                                  select_dict={'decode_style': style},
+                                  path= save_path, name_str= '_across_day',
+                                  legend=False
                                   )
 
-                plot.plot_results(res_overall_mean_, x_key='day', y_key='top_score', error_key='top_score_sem',
-                                  plot_function=plt.errorbar,
-                                  plot_args=error_args,
-                                  ax_args= ax_args,
-                                  colors = 'black',
-                                  select_dict={'decode_style': style},
-                                  reuse=True,
-                                  path= save_path,
-                                  )
+                # plot.plot_results(res_overall_mean_, x_key='day', y_key='top_score', error_key='top_score_sem',
+                #                   plot_function=plt.errorbar,
+                #                   plot_args=error_args,
+                #                   ax_args= ax_args,
+                #                   colors = 'black',
+                #                   select_dict={'decode_style': style},
+                #                   reuse=True,
+                #                   path= save_path, name_str= '_across_day'
+                #                   )
+
 
         res = decode.decode_analysis.load_results_train_test_scores(experiment_path)
         if condition.name == 'OFC_LONGTERM':

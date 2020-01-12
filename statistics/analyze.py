@@ -292,7 +292,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = OFC_Config()
+    condition_config = OFC_LONGTERM_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -304,7 +304,7 @@ if __name__ == '__main__':
     analysis.add_time(res)
     odor_res = convert(res, condition_config)
     analysis.add_odor_value(odor_res, condition_config.condition)
-    parse_data(odor_res, excitatory=False)
+    parse_data(odor_res, excitatory=True)
 
     # odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict_backup.pkl'))
     # analyze_data(odor_res, condition_config)
