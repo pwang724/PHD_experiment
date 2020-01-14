@@ -244,8 +244,8 @@ class OFC_LT_BIG_Config(Base_Config):
         self.condition = experimental_conditions.OFC_LONGTERM
         self.plot_big = True
         self.threshold = 0.03
-        self.vlim = .25
-        # self.plot_big_days = [8, 7, 5, -1]
+        self.vlim = .3
+        # self.plot_big_days = [8, 7, 7, -1]
         self.plot_big_days = [3, 2, 2, -1]
         self.sort_day_ix = 0
         self.plot_big_naive = False
@@ -528,7 +528,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = OFC_LONGTERM_Config()
+condition_config = OFC_LT_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

@@ -26,8 +26,8 @@ experiments = [
     # 'licks_per_day'
     # 'individual',
     # 'summary',
-    # 'mean_sem',
-    'trials_to_criterion',
+    'mean_sem',
+    # 'trials_to_criterion',
     # 'roc',
     # 'cdf',
     # 'bar'
@@ -37,11 +37,11 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -110,7 +110,7 @@ bool_ax_args_output = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-collection = False
+collection = True
 if collection:
     lick = 'lick_collection'
     lick_smoothed = 'lick_collection_smoothed'
@@ -259,7 +259,6 @@ if 'mean_sem' in experiments:
     valences = np.unique(all_res['odor_valence'])
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
-    valences = [['CS+','CS-']]
     for valence in valences:
         color = [color_dict_valence[x] for x in valence]
         for i in range(len(color)):
@@ -291,7 +290,7 @@ if 'mean_sem' in experiments:
             y = c.fully_learned_threshold_down
             plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
 
-        plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, error_key='boolean_smoothed_sem',
+        plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, error_key=boolean_sem,
                           loop_keys= ['condition','odor_valence'],
                           colors= color, select_dict={'odor_valence':valence},
                           ax_args=bool_ax_args, plot_args= fill_args,
@@ -306,7 +305,7 @@ if 'mean_sem' in experiments:
                           save=False,
                           path=save_path)
 
-        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key='lick_smoothed_sem',
+        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key=lick_sem,
                           loop_keys= ['condition','odor_valence'],
                           colors= color, select_dict={'odor_valence':valence},
                           ax_args=ax_args, plot_args= fill_args,

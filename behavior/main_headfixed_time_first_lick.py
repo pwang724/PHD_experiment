@@ -24,9 +24,9 @@ mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
-    # 'summary_raw',
-    # 'summary_line',
-    'summary_hist'
+    'summary_raw',
+    'summary_line',
+    # 'summary_hist'
 ]
 
 conditions = [
@@ -37,12 +37,12 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
-    # experimental_conditions.OFC_LONGTERM,
+    experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
@@ -105,7 +105,7 @@ bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-arg = 'lick' #first, com
+arg = 'first' #first, com
 collection = False
 
 if arg == 'first':
@@ -132,7 +132,7 @@ elif arg == 'lick':
     reduce_key_raw = 'lick'
     reduce_key = 'lick'
     xkey = 'trial'
-    ax_args_local = {'yticks': [0, 15, 30], 'ylim': [0, 30],
+    ax_args_local = {'yticks': [0, 15, 35], 'ylim': [0, 35],
                      'xlabel': 'Time','xticks': [0, 50, 100], 'xlim': [0, 130]}
 else:
     raise ValueError('wtf')
@@ -277,15 +277,16 @@ if 'summary_hist' in experiments:
 
         bins = 20
 
-        fig = plt.figure(figsize=(2.5, 2))
+        fig = plt.figure(figsize=(2, 1.5))
         ax = fig.add_axes([.2, .2, .7, .7])
 
         if collection and arg == 'first':
             plt.xticks([0, 2, 4], ['US', '2s', '4s'])
             range = [0, 5]
         elif arg == 'lick':
-            plt.xticks([0, 15, 30])
-            range = [0, 30]
+            plt.xticks([0, 5, 10])
+            range = [0, 15]
+            bins=15
         else:
             plt.xticks([0, 2, 5], ['Odor ON', 'Odor Off', 'US'])
             range = [0, 5]
@@ -293,8 +294,17 @@ if 'summary_hist' in experiments:
         _helper(ctrl_data, 'YFP', bins, range, ax)
         _helper(exp_data, 'INH', bins, range, ax)
         plt.legend(['YFP','INH'], fontsize=5, frameon=False)
-        plt.xlabel('Count')
-        plt.ylabel('Time')
+        plt.ylabel('Count')
+
+        if arg == 'lick':
+            xlabel = 'Number of licks'
+        elif arg == 'com':
+            xlabel = 'First moment of licking'
+        elif arg == 'first':
+            xlabel = 'Time of first lick'
+        else:
+            raise ValueError('what')
+        plt.xlabel(xlabel)
 
         plt.xlim(range)
         ax.spines["right"].set_visible(False)

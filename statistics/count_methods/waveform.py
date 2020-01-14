@@ -318,7 +318,6 @@ def distribution(res, start, end, data_arg, figure_path, save):
         odor = np.sum(real < 2) / real.size
         delay = np.sum(real > 2) / real.size
         print('Fraction of cells with onset during odor presentation: {}'.format(odor))
-        print('Fraction of cells with onset during delay: {}'.format(delay))
     return real
 
 

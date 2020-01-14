@@ -63,7 +63,7 @@ plt.tick_params(axis='both', which='major', labelsize=7)
 plt.axis('tight')
 plot._easy_save(os.path.join(save_path, 'matrix', mouse), 'across_correlation_matrix')
 
-
+res = filter.exclude(res, {'mouse':'M241_ofc'})
 list = ['PIR','OFC','OFC_LONGTERM','OFC_COMPOSITE','MPFC_COMPOSITE']
 scatter_args = {'marker':'.', 's':8, 'alpha': .5}
 error_args = {'fmt': '', 'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .5}
@@ -71,6 +71,7 @@ reduce_keys = ['within_day_crisp_average', 'across_day_mean_corrs_average']
 xkey = 'experiment'
 for reduce_key in reduce_keys:
     res_reduce = reduce.new_filter_reduce(res, filter_keys=['experiment'], reduce_key= reduce_key)
+
     for i, element in enumerate(list):
         reuse = True if i > 0 else False
         save = False if i != len(list)-1 else True

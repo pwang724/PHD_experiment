@@ -20,7 +20,7 @@ import statistics.count_methods.cory as cory
 import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.OFC_Config()
+condition_config = statistics.analyze.OFC_LONGTERM_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -48,7 +48,7 @@ if condition.name == 'OFC' or condition.name == 'BLA':
 
     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)
 
-    naive_config = statistics.analyze.OFC_LONGTERM_Config()
+    # naive_config = statistics.analyze.OFC_LONGTERM_Config()
     # data_path_ = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, naive_config.condition.name)
     # save_path_ = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', naive_config.condition.name)
     # res_naive = statistics.analyze.analyze_data(save_path_, condition_config, m_threshold=0.04)
@@ -156,13 +156,13 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     #                                          figure_path = figure_path,
     #                                          reuse=False, save=True, analyze=False, plot_bool=True)
     #
-    power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
-                     colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
-                     excitatory=True, ylim = [-0.01, .1])
+    # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
+    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+    #                  excitatory=True, ylim = [-0.01, .1])
     #
-    power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
-                     colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
-                     excitatory=False, ylim= [-.06, 0.01])
+    # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
+    #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+    #                  excitatory=False, ylim= [-.06, 0.01])
 
 
     # power.plot_max_dff_days(res, [start_days_per_mouse, last_day_per_mouse], ['CS+', 'CS+'], normalize= True,
@@ -199,14 +199,14 @@ if condition.name == 'OFC_LONGTERM':
     # print('ranksum between distributions of odor onsets early and late in learning {}'.format(
     #     ranksums(onset_learned,onset_late)[-1]))
 
-    # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
-    # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
-    # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
-
-    # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
-    # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
-    # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
-
+    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
+    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
+    waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
+    #
+    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
+    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
+    waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
+    #
     # excitatory = [True, False]
     # thresholds = [0.04, -0.04]
     # for i, sign in enumerate(excitatory):

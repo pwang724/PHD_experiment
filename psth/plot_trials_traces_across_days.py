@@ -23,7 +23,8 @@ class OFC_Config(object):
         # self.days = [[1,2,3,4,5]]
         # self.cells = [31]
         self.days = [[1, 2, 3, 4, 5]]
-        self.cells = [4]
+        # self.cells = [40]
+        self.cells = [1]
         self.ylim = 1.25
         self.title = ['Naive','Learning','Learning','Learned','Learned']
 
@@ -55,8 +56,9 @@ class MPFC_Config(object):
         # self.ylim = .4
         # self.title = ['Naive', 'Learning', 'Learned']
 
-plot_licks = False
-condition_config = PIR_Config()
+csp_only = False
+plot_licks = True
+condition_config = OFC_Config()
 
 condition = condition_config.condition
 mouse = condition_config.mouse
@@ -69,7 +71,6 @@ save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'PSTH',  condition.n
 res = analysis.load_data(data_path)
 analysis.add_indices(res)
 analysis.add_time(res)
-analysis.add_odor_value(res, condition)
 res_mouse = filter.filter(res, filter_dict={'mouse': mouse, 'day':days})
 
 i = 0
@@ -78,15 +79,23 @@ cell = cells[i]
 
 gap = 0
 colors = ['lime', 'darkgreen', 'red', 'magenta']
+if csp_only:
+    us_ix = 2
+else:
+    us_ix = 4
 
 for i,_ in enumerate(cell_days):
     odors = copy.copy(condition.odors[mouse])
+
+    if csp_only:
+        odors = odors[:2]
     if cell_days[i] >= condition.training_start_day[mouse]:
         odors.append('water')
 
     odor_on = res_mouse['DAQ_O_ON_F'][i]
     odor_off = res_mouse['DAQ_O_OFF_F'][i]
     water_on = res_mouse['DAQ_W_ON_F'][i]
+    print(odor_on,water_on)
     odor_trials = res_mouse['ODOR_TRIALS'][i]
     frames_per_trial = res_mouse['TRIAL_FRAMES'][i]
     trial_period = res_mouse['TRIAL_PERIOD'][i]
@@ -111,7 +120,7 @@ for i,_ in enumerate(cell_days):
     list_of_psths = [x[:min_trial,:] for x in list_of_psths]
     list_of_licks = [x[:min_trial, :] for x in list_of_licks]
 
-    fig, axs = plt.subplots(1, 5, figsize=(3, 3))
+    fig, axs = plt.subplots(1, us_ix + 1, figsize=(4, 3))
 
     space_x = frames_per_trial
     space_y = gap + condition_config.ylim
@@ -124,9 +133,9 @@ for i,_ in enumerate(cell_days):
         cur_y = total_y - space_y
         plt.sca(axs[o])
         for j, y in enumerate(psth):
-            y_lick = licks[j] * condition_config.ylim/ (8) + cur_y
+            y_lick = licks[j] * condition_config.ylim/ 6 + cur_y
             if plot_licks:
-                plt.step(cur_x_lick,y_lick, 'b', linewidth=.15)
+                plt.step(cur_x_lick,y_lick, 'r', linewidth=.25, alpha=1)
 
             y = y + cur_y
             plt.plot(cur_x,y, 'k', linewidth=.5)
@@ -142,22 +151,24 @@ for i,_ in enumerate(cell_days):
 
         xticks = []
         xticklabels = []
-        if o != 4:
+
+
+        if o != us_ix:
             a, b = -space_y/5, total_y
             plt.fill_between([odor_on, odor_off], [a, a], [b, b], color=colors[o], alpha=.5, linewidth=0)
             xticks.append((odor_on + odor_off)/2)
             xticklabels.append('Odor')
 
-        if o in [0, 1, 4] and cell_days[i] >= condition.training_start_day[mouse]:
+        if o in [0, 1, us_ix] and cell_days[i] >= condition.training_start_day[mouse]:
             plt.plot([water_on, water_on], [-space_y/5, total_y], '--', color='grey', linewidth=.5)
             xticks.append(water_on)
             xticklabels.append('US')
 
         plt.title(odors[o].upper())
-        # plt.xticks(xticks, xticklabels, fontsize=5)
         plt.xticks([])
-        plt.yticks([])
         plt.tick_params(direction='out', length=0)
+        # plt.xticks(xticks, xticklabels, fontsize=5)
+        plt.yticks([])
         ax = axs[o]
         ax.spines['top'].set_visible(False)
         ax.spines['right'].set_visible(False)
@@ -168,15 +179,15 @@ for i,_ in enumerate(cell_days):
     time_bar = 5
     time_frames = time_bar / trial_period
     time_coordinates = [frames_per_trial-time_frames, frames_per_trial]
-    axs[4].plot(time_coordinates, [-space_y/2, -space_y/2], linewidth=1.5, color='black')
-    axs[4].text(time_coordinates[0], -space_y, '{} s'.format(time_bar), fontsize=7)
+    axs[us_ix].plot(time_coordinates, [-space_y/2, -space_y/2], linewidth=1.5, color='black')
+    axs[us_ix].text(time_coordinates[0], -space_y, '{} s'.format(time_bar), fontsize=7)
 
     df_bar = 0.5
     df_coordinates = [0, df_bar]
-    axs[4].plot([frames_per_trial-5, frames_per_trial-5], df_coordinates, linewidth=1.5, color='black')
-    axs[4].text(frames_per_trial+5, df_bar, '{} DF/F'.format(df_bar), fontsize=7)
+    axs[us_ix].plot([frames_per_trial-5, frames_per_trial-5], df_coordinates, linewidth=1.5, color='black')
+    axs[us_ix].text(frames_per_trial+5, df_bar, '{} DF/F'.format(df_bar), fontsize=7)
 
-    axs[4].plot([])
+    axs[us_ix].plot([])
     plot._easy_save(save_path,
                     'mouse_' + str(mouse) +
                     '_cell_' + str(cell) +
