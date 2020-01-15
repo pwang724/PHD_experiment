@@ -11,8 +11,8 @@ class behaviorConfig(object):
         self.rules_output_boolean = {'PT CS+': 39}
         self.rules_single_phase_lick = {'CS+': 19, 'CS-': 19}
         self.rules_single_phase_boolean = {'CS+': 19, 'CS-': 19}
-        self.rules_two_phase_lick = {'PT CS+': 11, 'PT Naive':11, 'CS+': 11, 'CS-': 11}
-        self.rules_two_phase_boolean = {'PT CS+': 11, 'PT Naive':11, 'CS+': 11, 'CS-': 11}
+        self.rules_two_phase_lick = {'PT CS+': 19, 'PT Naive':19, 'CS+': 11, 'CS-': 11}
+        self.rules_two_phase_boolean = {'PT CS+': 19, 'PT Naive':19, 'CS+': 11, 'CS-': 11}
 
         self.halfmax_up_threshold = 50
         self.halfmax_down_threshold = 50

@@ -142,13 +142,16 @@ class OFC_COMPOSITE_PT_Config(Base_Config):
         super(OFC_COMPOSITE_PT_Config, self).__init__()
         self.condition = experimental_conditions.OFC_COMPOSITE
         self.mouse = 1
-        self.days = [1,4]
+        self.days = [0,1,2,3,4,5,6,7,8,9]
+        # self.days = [1,2,3,4]
+        # self.days = [0,1,2,3,4,5,6,7,8,9]
         self.sort_day_ix = 0
-        self.vlim = .3
+        self.vlim = .25
         self.threshold = .03
         self.independent_sort = True
         self.include_water = False
-        self.period = 'pt'
+        self.period = 'ptdt'
+        self.sort_days = 4
 
         self.across_days = True
         self.across_days_titles = ['Naive', 'Learned','c','d']
@@ -158,26 +161,28 @@ class OFC_COMPOSITE_DT_Config(Base_Config):
         super(OFC_COMPOSITE_DT_Config, self).__init__()
         self.condition = experimental_conditions.OFC_COMPOSITE
         self.mouse = 1
-        self.days = [0, 4, 5, 6, 7, 8, 9]
+        self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.sort_day_ix = 0
-        self.vlim = .3
+        self.vlim = .25
         self.threshold = .03
         self.independent_sort = True
+        self.sort_days = 4
         self.include_water = False
-        self.period = 'dt'
+        self.period = 'ptdt'
 
 class MPFC_COMPOSITE_PT_Config(Base_Config):
     def __init__(self):
         super(MPFC_COMPOSITE_PT_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
         self.mouse = 0
-        self.days = [1,3]
+        self.days = [0,3,4,5,6,7,8]
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .02
-        self.independent_sort = True
+        self.independent_sort = False
         self.include_water = False
-        self.period = 'pt'
+        self.period = 'dt'
+        self.sort_days = 8
 
         self.across_days = True
         self.across_days_titles = ['Naive', 'Learned']
@@ -187,13 +192,14 @@ class MPFC_COMPOSITE_DT_Config(Base_Config):
         super(MPFC_COMPOSITE_DT_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
         self.mouse = 0
-        self.days = [0, 4, 5, 6, 7, 8]
+        self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .02
         self.independent_sort = True
+        self.sort_days = 8
         self.include_water = False
-        self.period = 'dt'
+        self.period = 'ptdt'
         self.sort_method = 'plus_minus'
 
 
@@ -290,15 +296,17 @@ class OFC_COMPOSITE_BIG_Config(Base_Config):
         self.vlim = .3
         self.sort_day_ix = 0
 
-        # self.plot_big_days = [0, 0, 0, 0]
         # self.plot_big_days = [1,1,1,1]
-        # self.plot_big_days = [3,4,4,4]
+        self.plot_big_days = [3,4,4,4]
+        self.period = 'pt'
+
+        # self.plot_big_days = [0, 0, 0, 0]
         # self.plot_big_days = [4,4,6,4]
         # self.plot_big_days = [5,5,9,5]
-        self.plot_big_days = [8,9,10,8]
+        # self.plot_big_days = [8,9,10,8]
+        # self.period = 'dt'
         self.plot_big_naive = False
         self.include_water = False
-        self.period = 'dt'
 
 class MPFC_COMPOSITE_BIG_Config(Base_Config):
     def __init__(self):
@@ -311,17 +319,18 @@ class MPFC_COMPOSITE_BIG_Config(Base_Config):
         # self.sort_method = 'selectivity'
         self.plot_big = True
 
+        # self.period = 'pt'
+        # self.plot_big_days = [1, 1, 1, 1]
+        # self.plot_big_days = [3, 3, 3, 3]
+
         self.period = 'dt'
-        self.plot_big_days = [8,8,5,8]
+        self.plot_big_days = [0, 0, 0, 0]
+        self.plot_big_days = [3, 3, 4, 4]
+        self.plot_big_days = [4, 4, 5, 5]
+        self.plot_big_days = [8, 8, 5, 8]
+
         self.plot_big_naive = False
         self.include_water = False
-
-        # pt_start = [1, 1, 1, 1]
-        # pt_learned = [3, 3, 3, 3]
-        # dt_naive = [0, 0, 0, 0]
-        # dt_start = [3, 3, 4, 4]
-        # dt_learned = [4, 4, 5, 5]
-        # dt_end = [8, 8, 5, 8]
 
 class BLA_BIG_Config(Base_Config):
     def __init__(self):
@@ -363,9 +372,11 @@ def helper(res, mouse, day, condition_config):
     if hasattr(condition, 'odors'):
         odors = condition.odors[mouse]
     elif condition_config.period == 'pt':
-        odors = condition.pt_csp[mouse]
+        odors = condition.pt_csp[mouse] + ['naive']
     elif condition_config.period == 'dt':
         odors = condition.dt_odors[mouse]
+    elif condition_config.period == 'ptdt':
+        odors = condition.pt_csp[mouse] + condition.dt_odors[mouse] + ['naive']
     else:
         raise ValueError('odor condition not recognized')
 
@@ -381,23 +392,32 @@ def helper(res, mouse, day, condition_config):
     data = utils.reshape_data(res_mouse['data'][0], nFrames=frames_per_trial,
                               cell_axis=0, trial_axis=1, time_axis=2)
     list_of_psth = []
+    odors_out = []
     for odor in odors_copy:
         ix = odor == odor_trials
-        cur_data = data[:, ix, :]
-        for k, cell in enumerate(cur_data):
-            cur_data[k, :, :] = subtract_baseline(cell, config.baseline_start, odor_on - config.baseline_end)
-        mean = np.mean(cur_data, axis=1)
+        if np.any(ix):
+            cur_data = data[:, ix, :]
+            for k, cell in enumerate(cur_data):
+                cur_data[k, :, :] = subtract_baseline(cell, config.baseline_start, odor_on - config.baseline_end)
+            mean = np.mean(cur_data, axis=1)
 
-        if np.abs(odor_on - right_on) > 2:
-            diff = (right_on - odor_on).astype(int)
-            mean = _pad(mean, diff)
+            if np.abs(odor_on - right_on) > 2:
+                diff = (right_on - odor_on).astype(int)
+                mean = _pad(mean, diff)
 
-        if frames_per_trial < right_frame:
-            diff = right_frame - frames_per_trial
-            mean = _align(mean, diff)
+            if frames_per_trial < right_frame:
+                diff = right_frame - frames_per_trial
+                mean = _align(mean, diff)
 
-        list_of_psth.append(mean)
-    return list_of_psth, odor_on, water_on, odors_copy
+            list_of_psth.append(mean)
+            odors_out.append(odor)
+
+    if 'naive' in odors_out:
+        ix = odors_out.index('oct')
+        odors_out.pop(ix)
+        list_of_psth.pop(ix)
+
+    return list_of_psth, odor_on, water_on, odors_out
 
 def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, name_str = ''):
     if black:
@@ -456,7 +476,7 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
             odor_on_lines = odor_on_lines_raw
         else:
             if condition_config.filter_ix is None:
-                water_on_lines = water_on_lines[[0, 1]]
+                water_on_lines = water_on_lines[:2]
             else:
                 water_on_lines = water_on_lines[[0]]
             odor_on_lines = odor_on_lines_raw
@@ -519,16 +539,22 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
     elif condition_config.sort_method == 'onset':
         ixs = sort.sort_by_onset(list_of_psth, odor_on, water_on, condition_config)
     elif condition_config.sort_method == 'plus_minus':
-        ixs = sort.sort_by_plus_minus(list_of_psth, odor_on, water_on, condition_config)
+        if len(list_of_psth) == 5:
+            ixs = sort.sort_by_plus_minus(list_of_psth[1:], odor_on, water_on, condition_config)
+        elif len(list_of_psth) == 1:
+            ixs = sort.sort_by_onset(list_of_psth, odor_on, water_on, condition_config)
+        else:
+            ixs = sort.sort_by_plus_minus(list_of_psth, odor_on, water_on, condition_config)
     else:
         raise ValueError('sorting method is not recognized')
+
     list_of_psth = [x[ixs, :] for x in list_of_psth]
     return list_of_psth, ixs
 
 
 black = False
 config = PSTHConfig()
-condition_config = OFC_LT_BIG_Config()
+condition_config = MPFC_COMPOSITE_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -602,6 +628,8 @@ else:
 
         naive = day < condition_config.condition.training_start_day[mouse]
         name_str = '_day_' + str(day)
+        if condition_config.period == 'pt' or condition_config.period == 'ptdt':
+            name_str += '_' + condition_config.period
         plotter(image, odor_on-1, water_on, odor_names, condition_config, save_path, name_str=name_str)
 
 

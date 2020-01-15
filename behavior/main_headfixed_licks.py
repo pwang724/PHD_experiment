@@ -99,8 +99,8 @@ color_dict_valence = {'PT CS+': 'C1', 'CS+': 'green', 'CS-': 'red'}
 color_dict_condition = {'HALO': 'C1', 'JAWS':'red','YFP':'black', 'INH':'red'}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
                 'xlim': [0, 200]}
-ax_args_mush = {'yticks': [0, 5], 'ylim': [-1, 8],'xticks': [0, 25, 50, 75],'xlim': [0, 75]}
-bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 25, 50, 75, 100], 'xlim': [0, 75]}
+ax_args_mush = {'yticks': [0, 5], 'ylim': [-1, 8],'xticks': [0, 50, 100, 150],'xlim': [0, 125]}
+bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150], 'xlim': [0, 125]}
 ax_args_dt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],'xticks': [0, 50],'xlim': [0, 50]}
 bool_ax_args_dt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50], 'xlim': [0, 50]}
 ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12], 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]}
@@ -202,9 +202,10 @@ if 'summary' in experiments:
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
     for valence in valences:
-        color = [color_dict_valence[x] for x in valence]
-        for i in range(len(color)):
-            color.append('black')
+        # color = [color_dict_valence[x] for x in valence]
+        # for i in range(len(color)):
+        #     color.append('black')
+        color = [color_dict_condition[x] for x in np.unique(all_res_lick['condition'])]
 
         if 'PT CS+' in valence or 'PT Naive' in valence:
             ax_args = ax_args_pt
@@ -260,7 +261,8 @@ if 'mean_sem' in experiments:
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
     for valence in valences:
-        color = [color_dict_valence[x] for x in valence]
+        # color = [color_dict_valence[x] for x in valence]
+        color = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
         for i in range(len(color)):
             color.append('black')
 
@@ -335,28 +337,47 @@ if 'roc' in experiments:
                      'xlim': [0, 125]}
     line_args_local = {'alpha': .5, 'linewidth': 1, 'marker': '.', 'markersize': 0}
 
-    ctrl_res = filter.filter(all_res, {'odor_valence':'CS+', collapse_arg:'YFP'})
+    ctrl_res = filter.filter(all_res, {'odor_valence':'CS+'})
     summary = reduce.new_filter_reduce(ctrl_res, filter_keys=['odor_valence', collapse_arg],
                                        reduce_key=y, regularize='max')
-    summary[y_yfp] = np.arange(summary[y_yfp].size).reshape(1, -1)
+    # summary[y_yfp] = np.arange(summary[y_yfp].size).reshape(1, -1)
 
-    plot.plot_results(all_res, x_key=y_yfp, y_key=y,
-                      select_dict={'odor_valence': 'CS+', collapse_arg: 'YFP'},
-                      loop_keys=['mouse'],
+    plot.plot_results(summary, x_key=y_yfp, y_key=y,
+                      select_dict={'odor_valence':'CS+'},
+                      loop_keys= collapse_arg,
                       ax_args=ax_args_local,
                       plot_args=line_args_local,
-                      colors = ['black']*20, reuse=False, save=False,
-                      path=save_path)
+                      colors = ['red', 'black'],
+                      path = save_path, save= False
+                      )
 
-    plot.plot_results(all_res, x_key=y_yfp, y_key=y,
-                      select_dict={'odor_valence':'CS+', collapse_arg:'INH'},
-                      loop_keys=['mouse'],
-                      colors=['green'] * 20,
+    plot.plot_results(summary, x_key=y_yfp, y_key=y, error_key=y + '_sem',
+                      select_dict={'odor_valence':'CS+'},
+                      loop_keys= collapse_arg,
                       ax_args=ax_args_local,
-                      plot_args=line_args_local,
-                      reuse =True, save = True,
-                      legend=False,
-                      path=save_path)
+                      plot_args=fill_args,
+                      plot_function=plt.fill_between,
+                      colors = ['red', 'black'],
+                      path = save_path, reuse=True
+                      )
+
+    # plot.plot_results(all_res, x_key=y_yfp, y_key=y,
+    #                   select_dict={'odor_valence': 'CS+', collapse_arg:'YFP'},
+    #                   loop_keys=['mouse'],
+    #                   ax_args=ax_args_local,
+    #                   plot_args=line_args_local,
+    #                   colors = ['black']*20, reuse=False, save=False,
+    #                   path=save_path)
+    #
+    # plot.plot_results(all_res, x_key=y_yfp, y_key=y,
+    #                   select_dict={'odor_valence':'CS+', collapse_arg:'INH'},
+    #                   loop_keys=['mouse'],
+    #                   colors=['green'] * 20,
+    #                   ax_args=ax_args_local,
+    #                   plot_args=line_args_local,
+    #                   reuse =True, save = True,
+    #                   legend=False,
+    #                   path=save_path)
 
 if 'trials_to_criterion' in experiments:
     do_collapse = True
@@ -391,6 +412,10 @@ if 'trials_to_criterion' in experiments:
             ax_args = ax_args_mush_
 
         swarm_args_copy = swarm_args.copy()
+
+        # if do_collapse:
+        #     colors = [color_dict_valence[valence], 'black']
+        # else:
         colors = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
         swarm_args_copy.update({'palette': colors, 'size':5})
 

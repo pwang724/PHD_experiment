@@ -24,10 +24,10 @@ import scikit_posthocs
 experiments = [
     # 'vary_neuron_odor',
     # 'vary_decoding_style_odor',
-    # 'test_odor_across_days',
+    'test_odor_across_days',
     # 'test_split',
     # 'split__ofc',
-    'test_fp_fn',
+    # 'test_fp_fn',
     # 'test_us_fp_fn',
     # 'fp_fn__ofc',
     # 'vary_decoding_style_days',
@@ -35,12 +35,12 @@ experiments = [
 ]
 # EXPERIMENT = True
 # ANALYZE = False
-EXPERIMENT = False
+EXPERIMENT = True
 ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.OFC
+condition = experimental_conditions.MPFC_COMPOSITE
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab

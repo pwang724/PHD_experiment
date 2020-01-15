@@ -52,10 +52,11 @@ def sort_by_onset(list_of_psths, odor_on, water_on, condition_config):
             list_of_ixs.append((ixs[:cutoff]))
 
     if condition_config.sort_onset_style == 'CS+':
-        if condition_config.period == 'pt':
-            number_of_odors = 1
-        else:
-            number_of_odors = 2
+        if condition_config.period == 'pt' or condition_config.period =='ptdt':
+            if len(list_of_psths) == 1 or len(list_of_psths) == 5:
+                number_of_odors = 1
+            else:
+                number_of_odors = 2
         argmax = np.mean(list_of_argmax[0:number_of_odors], axis=0)
         ixs = np.argsort(argmax)
         cutoff = np.argmax(argmax[ixs] > cutoff_ix)

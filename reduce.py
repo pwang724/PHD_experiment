@@ -37,7 +37,11 @@ def _regularize_length_cristian_data(res, key):
                         elif len(x) < length:
                             temp = np.zeros(length)
                             temp[:len(x)] = x
-                            temp[len(x):] = x[-1]
+
+                            if 'trial' in k:
+                                temp[len(x):] = np.arange(len(x), length)
+                            else:
+                                temp[len(x):] = x[-1]
 
                             if k == 'days':
                                 temp = np.arange(1, length+1)

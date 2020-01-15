@@ -24,17 +24,17 @@ mpl.rcParams['font.size'] = 5
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
-    'summary_raw',
-    'summary_line',
-    # 'summary_hist'
+    # 'summary_raw',
+    # 'summary_line',
+    'summary_hist'
 ]
 
 conditions = [
     # experimental_conditions.OFC_COMPOSITE,
     # experimental_conditions.MPFC_COMPOSITE,
-    # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
+    experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
+    experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
@@ -42,7 +42,7 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
-    experimental_conditions.OFC_LONGTERM,
+    # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
@@ -105,7 +105,7 @@ bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-arg = 'first' #first, com
+arg = 'lick' #first, com
 collection = False
 
 if arg == 'first':
@@ -253,71 +253,77 @@ if 'summary_hist' in experiments:
         density, bins = np.histogram(real, bins=bin, density=True, range= range)
         unity_density = density / density.sum()
         widths = bins[:-1] - bins[1:]
-        ax.bar(bins[1:], unity_density, width=widths, alpha=.5, label=label)
+        ax.bar(bins[:-1], unity_density, width=widths, alpha=.5, label=label)
 
     duration = 500
     before_key = reduce_key_raw + '_hist_A'
     after_key = reduce_key_raw + '_hist_B'
-    for i, x in enumerate(all_res[reduce_key_raw]):
-        all_res[before_key].append(x[:duration])
-        all_res[after_key].append(x[-duration:])
-    for k,v in all_res.items():
-        all_res[k] = np.array(v)
 
-    ctrl_ixs = all_res['condition'] == 'YFP'
-    exp_ixs = np.invert(ctrl_ixs)
-    keys = [before_key, after_key]
-    for k in keys:
-        ctrl_data = np.concatenate(all_res[k][ctrl_ixs])
-        exp_data = np.concatenate(all_res[k][exp_ixs])
+    valences = np.unique(all_res['odor_valence'])
+    for valence in valences:
+        temp = filter.filter(all_res, {'odor_valence': valence})
 
-        if arg == 'lick':
-            ctrl_data = ctrl_data[ctrl_data>0]
-            exp_data = exp_data[exp_data>0]
 
-        bins = 20
+        for i, x in enumerate(temp[reduce_key_raw]):
+            temp[before_key].append(x[:duration])
+            temp[after_key].append(x[-duration:])
+        for k,v in temp.items():
+            temp[k] = np.array(v)
 
-        fig = plt.figure(figsize=(2, 1.5))
-        ax = fig.add_axes([.2, .2, .7, .7])
+        ctrl_ixs = temp['condition'] == 'YFP'
+        exp_ixs = np.invert(ctrl_ixs)
+        keys = [before_key, after_key]
+        for k in keys:
+            ctrl_data = np.concatenate(temp[k][ctrl_ixs])
+            exp_data = np.concatenate(temp[k][exp_ixs])
 
-        if collection and arg == 'first':
-            plt.xticks([0, 2, 4], ['US', '2s', '4s'])
-            range = [0, 5]
-        elif arg == 'lick':
-            plt.xticks([0, 5, 10])
-            range = [0, 15]
-            bins=15
-        else:
-            plt.xticks([0, 2, 5], ['Odor ON', 'Odor Off', 'US'])
-            range = [0, 5]
+            if arg == 'lick':
+                ctrl_data = ctrl_data[ctrl_data>0]
+                exp_data = exp_data[exp_data>0]
 
-        _helper(ctrl_data, 'YFP', bins, range, ax)
-        _helper(exp_data, 'INH', bins, range, ax)
-        plt.legend(['YFP','INH'], fontsize=5, frameon=False)
-        plt.ylabel('Count')
+            bins = 20
 
-        if arg == 'lick':
-            xlabel = 'Number of licks'
-        elif arg == 'com':
-            xlabel = 'First moment of licking'
-        elif arg == 'first':
-            xlabel = 'Time of first lick'
-        else:
-            raise ValueError('what')
-        plt.xlabel(xlabel)
+            fig = plt.figure(figsize=(2, 1.5))
+            ax = fig.add_axes([.2, .2, .7, .7])
 
-        plt.xlim(range)
-        ax.spines["right"].set_visible(False)
-        ax.spines["top"].set_visible(False)
-        ax.xaxis.set_ticks_position('bottom')
-        ax.yaxis.set_ticks_position('left')
+            if collection and arg == 'first':
+                plt.xticks([0, 2, 4], ['US', '2s', '4s'])
+                range = [0, 5]
+            elif arg == 'lick':
+                plt.xticks([0, 5, 10])
+                range = [0, 15]
+                bins=15
+            else:
+                plt.xticks([0, 2, 5], ['Odor ON', 'Odor Off', 'US'])
+                range = [0, 5]
 
-        stat = ranksums(ctrl_data, exp_data)[-1]
-        xlim = plt.xlim()
-        ylim = plt.ylim()
-        plot.significance_str(xlim[1] * .5, ylim[1] * .9, stat)
-        ax.set_title(reduce_key_raw)
+            _helper(ctrl_data, 'YFP', bins, range, ax)
+            _helper(exp_data, 'INH', bins, range, ax)
+            plt.legend(['YFP','INH'], fontsize=5, frameon=False)
+            plt.ylabel('Count')
 
-        plot._easy_save(os.path.join(save_path, reduce_key_raw + '_hist'), k)
+            if arg == 'lick':
+                xlabel = 'Number of licks'
+            elif arg == 'com':
+                xlabel = 'First moment of licking'
+            elif arg == 'first':
+                xlabel = 'Time of first lick'
+            else:
+                raise ValueError('what')
+            plt.xlabel(xlabel)
+
+            plt.xlim([range[0]-.5, range[1]])
+            ax.spines["right"].set_visible(False)
+            ax.spines["top"].set_visible(False)
+            ax.xaxis.set_ticks_position('bottom')
+            ax.yaxis.set_ticks_position('left')
+
+            stat = ranksums(ctrl_data, exp_data)[-1]
+            xlim = plt.xlim()
+            ylim = plt.ylim()
+            plot.significance_str(xlim[1] * .5, ylim[1] * .9, stat)
+            ax.set_title(reduce_key_raw)
+
+            plot._easy_save(os.path.join(save_path, reduce_key_raw + '_hist' + '_' + valence), k)
 
 

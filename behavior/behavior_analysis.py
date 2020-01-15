@@ -216,7 +216,7 @@ def get_roc(res):
     key = 'lick'
     print_key = 'roc'
     x_key = 'roc_trial'
-    window = 20
+    window = 10
     res[print_key] = np.copy(res[key])
     res[x_key] = np.copy(res['trial'])
 
@@ -360,6 +360,7 @@ def add_behavior_stats(res, condition, arg ='normal'):
         res['boolean_smoothed'].append(_filter(boolean, smoothing_window_boolean))
         lick_collection = res['lick_collection'][i]
         boolean_collection = 100 * (lick_collection > 0)
+        res['boolean_collection'].append(boolean_collection)
         res['lick_collection_smoothed'].append(_filter(lick_collection, smoothing_window_lick))
         res['boolean_collection_smoothed'].append(_filter(boolean_collection, smoothing_window_boolean))
 

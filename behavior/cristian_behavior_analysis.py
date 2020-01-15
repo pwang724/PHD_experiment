@@ -40,9 +40,11 @@ class Analysis_Config():
     def __init__(self):
         indices = Indices()
         self.anticipatory_bins = [indices.bin_ant_2, indices.bin_ant_3]
-        self.filter_window = 21
+        self.pt_filter_window = 41
+        self.pt_criterion_filter_window = 41
+        self.dt_filter_window = 41
+        self.dt_criterion_filter_window = 41
         self.filter_order = 0
-        self.criterion_filter_window = 21
         self.criterion_threshold = .8
         self.half_max_threshold = .5
 
@@ -210,15 +212,23 @@ def analyze(res):
                 #     print([res['mouse'][i], res['phase'][i], valence])
 
                 #smooth
-                _smooth(vector, analysis_config.filter_window, key + '_smooth')
+                if res['phase'][i] == 'Pretraining':
+                    bool_filter = analysis_config.pt_criterion_filter_window
+                    lick_filter = analysis_config.pt_filter_window
+                else:
+                    bool_filter = analysis_config.dt_criterion_filter_window
+                    lick_filter = analysis_config.dt_filter_window
+
+
+                _smooth(vector, lick_filter, key + '_smooth')
 
                 #boolean
                 bool_vector = vector > 0
-                _smooth(bool_vector * 100, analysis_config.filter_window, key + '_boolean')
+                _smooth(bool_vector * 100, bool_filter, key + '_boolean')
 
                 #criterion
                 bool_vector = vector > 0
-                vector_criterion = _smooth(bool_vector, analysis_config.criterion_filter_window, key + '_boolean_criterion')
+                vector_criterion = _smooth(bool_vector, bool_filter, key + '_boolean_criterion')
 
                 #passed criterion
                 _pass_criterion(vector_criterion, analysis_config.criterion_threshold, valence, key + '_trials_to_criterion')

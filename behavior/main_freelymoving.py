@@ -25,28 +25,29 @@ ax_args_copy.update({'ylim':[-5, 65], 'yticks':[0, 30, 60]})
 bool_ax_args_copy = ax_args.copy()
 bool_ax_args_copy.update({'ylim':[-5, 105], 'yticks':[0, 50, 100]})
 
+d = 'L:\MANUSCRIPT_DATA\FREELY MOVING'
 class OFC_PT_Config():
-    path = r'C:\Users\P\Desktop\MANUSCRIPT_DATA\Nikki Data\OFC Pretraining'
+    path = os.path.join(d,'OFC Pretraining')
     name = 'OFC_PT'
 
 class OFC_PT_ZERO_TRIALS_Config():
-    path = r'C:\Users\P\Desktop\MANUSCRIPT_DATA\Nikki Data\OFC Pretraining\Pretraining_zero_trials'
+    path = os.path.join(d, 'OFC Pretraining', 'Pretraining_zero_trials')
     name = 'OFC_PT_ZERO_TRIALS'
 
 class OFC_PT_ZERO_TRIALS_RELEASED_Config():
-    path = r'C:\Users\P\Desktop\MANUSCRIPT_DATA\Nikki Data\OFC Pretraining\Pretraining_zero_trials_Laser OFF'
+    path = os.path.join(d, 'OFC Pretraining', 'Pretraining_zero_trials_Laser OFF')
     name = 'OFC_PT_ZERO_TRIALS_RELEASED'
 
 class OFC_DT_Config():
-    path = r'C:\Users\P\Desktop\MANUSCRIPT_DATA\Nikki Data\OFC Discrim'
+    path = os.path.join(d,'OFC Discrim')
     name = 'OFC_DT'
 
 class MPFC_PT_Config():
-    path = r'C:\Users\P\Desktop\MANUSCRIPT_DATA\Nikki Data\mPFC Pretraining'
+    path = os.path.join(d,'mPFC Pretraining')
     name = 'MPFC_PT'
 
 class MPFC_DT_Config():
-    path = r'C:\Users\P\Desktop\MANUSCRIPT_DATA\Nikki Data\mPFC Discrim'
+    path = os.path.join(d,'mPFC Discrim')
     name = 'MPFC_DT'
 
 indices = analysis.Indices()
@@ -54,10 +55,9 @@ constants = analysis.Constants()
 config = Config()
 
 # experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
-experiments = [MPFC_DT_Config]
-
+experiments = [MPFC_PT_Config]
 # experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
-collapse_arg = 'MPFC_DT'
+collapse_arg = None
 plotting = [
     # 'individual_separate',
     # 'individual_together',
@@ -70,7 +70,7 @@ plotting = [
 ]
 
 # plt.style.use('dark_background')
-names = ','.join([x.name for x in experiments]) + '__' + collapse_arg
+names = ','.join([x.name for x in experiments])
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'BEHAVIOR_CRISTIAN', names)
 directories = [constants.pretraining_directory, constants.discrimination_directory]
 
@@ -198,14 +198,14 @@ if 'trials_to_criterion' in plotting:
             ax_args_cur.update({'xlim': [-1, 1], 'ylim': [-10, 225], 'yticks': [0, 100, 200]})
 
         swarm_args_copy = swarm_args.copy()
-        swarm_args_copy.update({'palette':[color_dict[phase],'black'], 'size':5})
+        swarm_args_copy.update({'palette':['red','black'], 'size':5})
 
         path, name = plot.plot_results(res_, x_key='odor_valence_condition', y_key= keyword,
                           select_dict={'phase_odor_valence':phase},
                           ax_args=ax_args_cur,
                           plot_function= sns.stripplot,
                             plot_args= swarm_args_copy,
-                            colors = [color_dict[phase],'black'],
+                            colors = ['red','black'],
                           fig_size=[2, 1.5],
                            path=save_path, reuse=False, save=False)
 
@@ -242,17 +242,18 @@ if 'trials_per_day' in plotting:
     phase_odor_valence = np.unique(res['phase_odor_valence'])
     y_key = 'trials_per_day'
     for phase in phase_odor_valence:
-        plot.plot_results(res, x_key='days', y_key=y_key,
-                          select_dict={'phase_odor_valence':phase, 'condition':'H'},
-                          colors= color_dict[phase], plot_args=line_args_copy, ax_args=ax_args_cur,
-                          fig_size=[2, 1.5],
-                          path=save_path, reuse=False, save=False)
+        # plot.plot_results(res, x_key='days', y_key=y_key,
+        #                   select_dict={'phase_odor_valence':phase, 'condition':'H'},
+        #                   colors= 'red', plot_args=line_args_copy, ax_args=ax_args_cur,
+        #                   fig_size=[2, 1.5],
+        #                   path=save_path, reuse=False, save=False)
 
-        plot.plot_results(res, x_key='days', y_key=y_key,
-                          select_dict={'phase_odor_valence':phase, 'condition':'Y'},
-                          colors= 'black', plot_args=line_args_copy, ax_args=ax_args_cur,
+        plot.plot_results(res, x_key='days', y_key=y_key, loop_keys= 'condition',
+                          select_dict={'phase_odor_valence':phase},
+                          colors= ['red','black'],
+                          plot_args=line_args_copy, ax_args=ax_args_cur,
                           fig_size=[2, 1.5],
-                          path=save_path, reuse=True, save=True)
+                          path=save_path)
 
         # summary = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'], reduce_key=y_key,
         #                                    regularize='max')
@@ -336,10 +337,10 @@ if 'summary' in plotting:
             #                   path=save_path)
 
             #fill bool plot
-            plot.plot_results(res, x_key='trials', y_key=y_key_bool,
-                              select_dict={'phase_odor_valence': phase, 'condition':'H'},
+            path, name = plot.plot_results(res, x_key='trials', y_key=y_key_bool, loop_keys='condition',
+                              select_dict={'phase_odor_valence': phase},
                               ax_args=ax_args_bool_cur, plot_args=trace_args_copy,
-                              colors=color,
+                              colors=['red','black'],
                               save=False,
                               path=save_path)
 
@@ -352,41 +353,12 @@ if 'summary' in plotting:
                 y = c.fully_learned_threshold_down
                 plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
 
-            summary = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'], reduce_key=y_key_bool,
-                                               regularize='max')
-            plot.plot_results(summary, x_key='trials', y_key=y_key_bool,
-                              select_dict={'phase_odor_valence': phase, 'condition':'Y'},
-                              ax_args=ax_args_bool_cur,
-                              plot_args=line_args,
-                              colors= 'black', reuse=True, save=False,
-                              path=save_path)
-            plot.plot_results(summary, x_key='trials', y_key=y_key_bool, error_key= y_key_bool + '_sem',
-                              select_dict={'phase_odor_valence': phase, 'condition':'Y'},
-                              ax_args=ax_args_bool_cur,
-                              plot_function=plt.fill_between, plot_args=fill_args,
-                              colors= 'black', reuse=True,
-                              path=save_path)
+            plot._easy_save(path, name)
 
-            plot.plot_results(res, x_key='trials', y_key=y_key,
-                              select_dict={'phase_odor_valence': phase, 'condition':'H'},
+            plot.plot_results(res, x_key='trials', y_key=y_key, loop_keys='condition',
+                              select_dict={'phase_odor_valence': phase},
                               ax_args=ax_args_cur, plot_args=trace_args_copy,
-                              colors=color,
-                              save=False,
-                              path=save_path)
-
-            summary = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'], reduce_key=y_key,
-                                               regularize='max')
-            plot.plot_results(summary, x_key='trials', y_key=y_key,
-                              select_dict={'phase_odor_valence': phase, 'condition':'Y'},
-                              ax_args=ax_args_cur,
-                              plot_args=line_args,
-                              colors= 'black', reuse=True, save=False,
-                              path=save_path)
-            plot.plot_results(summary, x_key='trials', y_key=y_key, error_key= y_key + '_sem',
-                              select_dict={'phase_odor_valence': phase, 'condition':'Y'},
-                              ax_args=ax_args_cur,
-                              plot_function=plt.fill_between, plot_args=fill_args,
-                              colors= 'black', reuse=True,
+                              colors=['red','black'],
                               path=save_path)
 
 #summary
