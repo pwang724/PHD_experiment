@@ -274,8 +274,8 @@ class MPFC_COMPOSITE:
     ]
 
     pt_odors = [
-        ['oct'],
-        ['oct'],
+        ['naive','oct'],
+        ['naive','oct'],
         ['naive','oct'],
         ['naive','oct'],
     ]
@@ -288,7 +288,7 @@ class MPFC_COMPOSITE:
     timing_override = [True, True, True, True]
     training_start_day = [1, 1, 1, 1]
     naive_dt_day = [0, 0, 0, 0]
-    naive_pt_day = [None, None, 1, 1]
+    naive_pt_day = [1, 1, 1, 1]
     last_pt_day = [2, 2, 3, 3]
     first_dt_day = [3, 3, 4, 4]
     min_neurons = 49

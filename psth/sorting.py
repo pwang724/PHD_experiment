@@ -57,6 +57,9 @@ def sort_by_onset(list_of_psths, odor_on, water_on, condition_config):
                 number_of_odors = 1
             else:
                 number_of_odors = 2
+        else:
+            number_of_odors = 2
+
         argmax = np.mean(list_of_argmax[0:number_of_odors], axis=0)
         ixs = np.argsort(argmax)
         cutoff = np.argmax(argmax[ixs] > cutoff_ix)

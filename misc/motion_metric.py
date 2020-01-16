@@ -34,7 +34,7 @@ test = True
 
 #TODO: have not analyzed piriform naive, ofc reversal
 
-condition = conditions.OFC_COMPOSITE
+condition = conditions.MPFC_COMPOSITE
 
 X_exclude, Y_exclude = 15, 15
 

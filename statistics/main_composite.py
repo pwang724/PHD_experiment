@@ -19,7 +19,7 @@ import statistics.count_methods.responsive as responsive
 import statistics.count_methods.cory as cory
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.MPFC_COMPOSITE_Config()
+condition_config = statistics.analyze.OFC_COMPOSITE_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)

@@ -103,8 +103,8 @@ if __name__ == '__main__':
     # example_path = 'E:/IMPORTANT _DATA/DATA_2P/M187_ofc/7-19-2016/420'
     # mat, config = load_single_from_matlab(example_path)
 
-    condition = 'OFC_LONGTERM'
-    path = r'I:\IMPORTANT DATA\DATA_2P\M239_ofc\training_LONGTERM'
+    condition = 'MPFC_COMPOSITE'
+    path = r'I:\IMPORTANT DATA\DATA_2P\M3_MPFC\training'
     load_timepoint_from_matlab(path, condition, timing_override=True)
 
     # for condition in conditions.all_conditions():

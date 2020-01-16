@@ -50,22 +50,23 @@ class PIR_Config(Base_Config):
     def __init__(self):
         super(PIR_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 1
-        self.days = [0, 1, 2]
+        self.mouse = 0
+        self.days = [0, 1, 2, 3]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
         self.delete_nonselective = True
         self.independent_sort = False
         self.sort_days = self.days[-1]
+        self.vlim = .35
         self.include_water = True
 
 class PIR_PIN_Config(Base_Config):
     def __init__(self):
         super(PIR_PIN_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 1
-        self.days = [0, 1, 2]
+        self.mouse = 0
+        self.days = [0, 1, 2, 3]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -73,14 +74,15 @@ class PIR_PIN_Config(Base_Config):
         self.independent_sort = False
         self.sort_days = self.days[-1]
         self.include_water = True
+        self.vlim = .35
         self.filter_ix = 0
 
 class PIR_LIM_Config(Base_Config):
     def __init__(self):
         super(PIR_LIM_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 1
-        self.days = [0, 1, 2]
+        self.mouse = 0
+        self.days = [0, 1, 2, 3]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -88,6 +90,7 @@ class PIR_LIM_Config(Base_Config):
         self.independent_sort = False
         self.sort_days = self.days[-1]
         self.include_water = True
+        self.vlim = .35
         self.filter_ix = 3
 
 class PIR_CONTEXT_Config(Base_Config):
@@ -111,7 +114,8 @@ class OFC_Config(Base_Config):
         self.vlim = .25
         self.sort_day_ix = 1
         self.include_water = False
-        self.independent_sort = True
+        self.independent_sort = False
+        self.sort_days = 5
 
 class BLA_Config(Base_Config):
     def __init__(self):
@@ -165,7 +169,7 @@ class OFC_COMPOSITE_DT_Config(Base_Config):
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .03
-        self.independent_sort = True
+        self.independent_sort = False
         self.sort_days = 4
         self.include_water = False
         self.period = 'ptdt'
@@ -191,12 +195,12 @@ class MPFC_COMPOSITE_DT_Config(Base_Config):
     def __init__(self):
         super(MPFC_COMPOSITE_DT_Config, self).__init__()
         self.condition = experimental_conditions.MPFC_COMPOSITE
-        self.mouse = 0
+        self.mouse = 1
         self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8]
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .02
-        self.independent_sort = True
+        self.independent_sort = False
         self.sort_days = 8
         self.include_water = False
         self.period = 'ptdt'
@@ -372,11 +376,11 @@ def helper(res, mouse, day, condition_config):
     if hasattr(condition, 'odors'):
         odors = condition.odors[mouse]
     elif condition_config.period == 'pt':
-        odors = condition.pt_csp[mouse] + ['naive']
+        odors = ['naive'] + condition.pt_csp[mouse]
     elif condition_config.period == 'dt':
         odors = condition.dt_odors[mouse]
     elif condition_config.period == 'ptdt':
-        odors = condition.pt_csp[mouse] + condition.dt_odors[mouse] + ['naive']
+        odors = ['naive'] + condition.pt_csp[mouse] + condition.dt_odors[mouse]
     else:
         raise ValueError('odor condition not recognized')
 
@@ -412,10 +416,10 @@ def helper(res, mouse, day, condition_config):
             list_of_psth.append(mean)
             odors_out.append(odor)
 
-    if 'naive' in odors_out:
-        ix = odors_out.index('oct')
-        odors_out.pop(ix)
-        list_of_psth.pop(ix)
+    # if 'naive' in odors_out:
+    #     ix = odors_out.index('oct')
+    #     odors_out.pop(ix)
+    #     list_of_psth.pop(ix)
 
     return list_of_psth, odor_on, water_on, odors_out
 
@@ -541,7 +545,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
     elif condition_config.sort_method == 'plus_minus':
         if len(list_of_psth) == 5:
             ixs = sort.sort_by_plus_minus(list_of_psth[1:], odor_on, water_on, condition_config)
-        elif len(list_of_psth) == 1:
+        elif len(list_of_psth) < 4:
             ixs = sort.sort_by_onset(list_of_psth, odor_on, water_on, condition_config)
         else:
             ixs = sort.sort_by_plus_minus(list_of_psth, odor_on, water_on, condition_config)
@@ -554,7 +558,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = MPFC_COMPOSITE_BIG_Config()
+condition_config = PIR_LIM_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
