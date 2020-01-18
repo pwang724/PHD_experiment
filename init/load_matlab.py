@@ -1,5 +1,5 @@
 from init.cons import Cons
-import matlab.engine
+# import matlab.engine
 import matlab
 import time
 import numpy as np
@@ -103,9 +103,9 @@ if __name__ == '__main__':
     # example_path = 'E:/IMPORTANT _DATA/DATA_2P/M187_ofc/7-19-2016/420'
     # mat, config = load_single_from_matlab(example_path)
 
-    condition = 'MPFC_COMPOSITE'
-    path = r'I:\IMPORTANT DATA\DATA_2P\M3_MPFC\training'
-    load_timepoint_from_matlab(path, condition, timing_override=True)
+    # condition = 'MPFC_COMPOSITE'
+    # path = r'I:\IMPORTANT DATA\DATA_2P\M3_MPFC\training'
+    # load_timepoint_from_matlab(path, condition, timing_override=True)
 
     # for condition in conditions.all_conditions():
     #     load_condition(condition)
@@ -113,8 +113,8 @@ if __name__ == '__main__':
     # condition = conditions.PIR_CONTEXT
     # load_condition(condition)
 
-    # condition = conditions.BEHAVIOR_OFC_MUSH_YFP
-    # load_condition(condition, arg = 'behavior')
+    condition = conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION
+    load_condition(condition, arg = 'behavior')
 
     # condition = conditions.BEHAVIOR_OFC_MUSH_JAWS_HALO
     # condition.paths = [condition.paths[0]]

@@ -837,5 +837,180 @@ class BEHAVIOR_OFC_OUTPUT_YFP:
     timing_override = [True, True, True, True, True, True]
     training_start_day = [0, 0, 0, 0, 0, 0]
 
+class BEHAVIOR_MPFC_HALO_DISCRIMINATION:
+    name = 'BEHAVIOR_MPFC_HALO_DISCRIMINATION'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_HALO\AH45_MPFC_DT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_HALO\AH46_MPFC_DT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_HALO\AH51_MPFC_DT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_HALO\AH52_MPFC_DT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_HALO\AH53_MPFC_DT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_HALO\AH54_MPFC_DT_HALO',
+    ]
+    pt_odors = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    pt_csp = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    dt_odors = [
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+    ]
+    dt_csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+    ]
+    timing_override = [True, True, True, True, True, True]
+    training_start_day = [0, 0, 0, 0, 0, 0]
+
+class BEHAVIOR_MPFC_YFP_DISCRIMINATION:
+    name = 'BEHAVIOR_MPFC_YFP_DISCRIMINATION'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_YFP\AH58_MPFC_DT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_YFP\AH59_MPFC_DT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_YFP\AH60_MPFC_DT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_YFP\AH62_MPFC_DT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_DISCRIMINATION_MPFC_YFP\AH64_MPFC_DT_YFP',
+    ]
+    pt_odors = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    pt_csp = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    dt_odors = [
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+    ]
+    dt_csp = [
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+    ]
+    timing_override = [True, True, True, True, True]
+    training_start_day = [0, 0, 0, 0, 0]
+
+class BEHAVIOR_MPFC_HALO_PRETRAINING:
+    name = 'BEHAVIOR_MPFC_HALO_PRETRAINING'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH42_MPFC_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH43_MPFC_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH44_MPFC_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH50_MPFC_PT_HALO',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH55_MPFC_PT_HALO',
+    ]
+    pt_odors = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    pt_csp = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    dt_odors = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    dt_csp = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    timing_override = [True] * 5
+    training_start_day = [0] * 5
+
+class BEHAVIOR_MPFC_YFP_PRETRAINING:
+    name = 'BEHAVIOR_MPFC_YFP_PRETRAINING'
+    paths = [
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH57_MPFC_PT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH65_MPFC_PT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH66_MPFC_PT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH67_MPFC_PT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH68_MPFC_PT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH69_MPFC_PT_YFP',
+        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH70_MPFC_PT_YFP',
+    ]
+    pt_odors = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    pt_csp = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+    ]
+    dt_odors = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    dt_csp = [
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+    ]
+    timing_override = [True] * 7
+    training_start_day = [0] * 7
+
 
 

@@ -116,35 +116,35 @@ if condition.name == 'OFC_COMPOSITE':
     #                ['PT CS+', 'PT CS+', 'CS-', 'CS-', 'CS-'],
     #                day_pad=1, save=True, reuse=True, figure_path=figure_path)
 
-    # power.plot_power(pt_res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=True, ylim=[-0.01, .1],
-    #                  colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'})
-    # power.plot_power(pt_res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=True,
-    #                  colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'}, excitatory=False,
-    #                  ylim=[-.06, 0.01])
-    #
-    # combos = [[dt_naive, dt_start], [dt_naive, dt_learned], [dt_naive, dt_end]]
-    # for combo in combos:
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'], ylim=[-0.01, .1],
-    #                      colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'})
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'],
-    #                      colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'}, excitatory=False, ylim=[-.06, .01])
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'], ylim=[-0.01, .1],
-    #                      colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'})
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'],
-    #                      colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'}, excitatory=False, ylim=[-.06, .01])
+    power.plot_power(pt_res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=True, ylim=[-0.01, .1],
+                     colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'})
+    power.plot_power(pt_res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=True,
+                     colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'}, excitatory=False,
+                     ylim=[-.06, 0.01])
 
-    # days = [dt_naive, dt_start, dt_learned, dt_end]
-    # correlations = []
-    # for direction in [-1, 0, 1]:
-    #     for day in days:
-    #         a = correlation.plot_correlation_matrix(dt_res, day, loop_keys=['mouse'], shuffle=False,
-    #                                                 figure_path = figure_path, direction=direction)
-    #         correlations.append(a)
+    combos = [[dt_naive, dt_start], [dt_naive, dt_learned], [dt_naive, dt_end]]
+    for combo in combos:
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'], ylim=[-0.01, .1],
+                         colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'})
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'],
+                         colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'}, excitatory=False, ylim=[-.06, .01])
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'], ylim=[-0.01, .1],
+                         colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'})
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'],
+                         colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'}, excitatory=False, ylim=[-.06, .01])
 
-    # a = correlation.plot_correlation_matrix(dt_res, dt_naive, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
-    # b = correlation.plot_correlation_matrix(dt_res, dt_start, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
-    # c = correlation.plot_correlation_matrix(dt_res, dt_learned, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
-    # d = correlation.plot_correlation_matrix(dt_res, dt_end, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    days = [dt_naive, dt_start, dt_learned, dt_end]
+    correlations = []
+    for direction in [-1, 0, 1]:
+        for day in days:
+            a = correlation.plot_correlation_matrix(dt_res, day, loop_keys=['mouse'], shuffle=False,
+                                                    figure_path = figure_path, direction=direction)
+            correlations.append(a)
+
+    a = correlation.plot_correlation_matrix(dt_res, dt_naive, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    b = correlation.plot_correlation_matrix(dt_res, dt_start, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    c = correlation.plot_correlation_matrix(dt_res, dt_learned, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
+    d = correlation.plot_correlation_matrix(dt_res, dt_end, loop_keys=['mouse'], shuffle=False, figure_path = figure_path)
 
     # def _get_ixs(r):
     #     A = r['Odor_A']
@@ -231,21 +231,21 @@ if condition.name == 'MPFC_COMPOSITE':
     #                ['PT CS+', 'PT CS+', 'CS-', 'CS-', 'CS-'],
     #                day_pad=1, save=True, reuse=True, figure_path=figure_path)
 
-    # power.plot_power(res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=False, ylim=[-0.01, .1],
-    #                  colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'})
-    # power.plot_power(res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=False,
-    #                  colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'}, excitatory=False,
-    #                  ylim=[-.06, 0.01])
-    # combos = [[dt_naive, dt_start], [dt_naive, dt_learned], [dt_naive, dt_end]]
-    # for combo in combos:
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'], ylim=[-0.01, .1],
-    #                      colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'})
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'],
-    #                      colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'}, excitatory=False, ylim=[-.06, .01])
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'], ylim=[-0.01, .1],
-    #                      colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'})
-    #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'],
-    #                      colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'}, excitatory=False, ylim=[-.06, .01])
+    power.plot_power(res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=False, ylim=[-0.01, .1],
+                     colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'})
+    power.plot_power(res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=False,
+                     colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'}, excitatory=False,
+                     ylim=[-.06, 0.01])
+    combos = [[dt_naive, dt_start], [dt_naive, dt_learned], [dt_naive, dt_end]]
+    for combo in combos:
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'], ylim=[-0.01, .1],
+                         colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'})
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'],
+                         colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'}, excitatory=False, ylim=[-.06, .01])
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'], ylim=[-0.01, .1],
+                         colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'})
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'],
+                         colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'}, excitatory=False, ylim=[-.06, .01])
 
     days = [dt_naive, dt_start, dt_learned, dt_end]
     correlations = []
