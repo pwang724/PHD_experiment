@@ -50,7 +50,7 @@ class Analysis_Config():
 
         #smoothing window = 21 (lick) /41 (criterion) for freely moving two-phase discrimination controls
 
-def parse(files, experiment, condition, phase):
+def parse(files, experiment, condition, phase, add_raw = False):
     def _names(f, is_csp):
         if is_csp:
             prefix = constants.csp_file_prefix
@@ -58,7 +58,11 @@ def parse(files, experiment, condition, phase):
             prefix = constants.csm_file_prefix
 
         mouse = os.path.split(f)[1]
-        if mouse[-2:].isdigit():
+        if mouse[-3:].isdigit():
+            data_name = prefix + mouse[:-3] + mouse[-1] + '.npy'
+            detail_name = constants.detail_file_prefix + mouse[:-3] + mouse[-1] + '.npy'
+            raw_name = constants.raw_file_prefix + mouse[:-3] + mouse[-1]
+        elif mouse[-2:].isdigit():
             data_name = prefix + mouse[:-2] + mouse[-1] + '.npy'
             detail_name = constants.detail_file_prefix + mouse[:-2] + mouse[-1] + '.npy'
             raw_name = constants.raw_file_prefix + mouse[:-2] + mouse[-1]
@@ -80,7 +84,7 @@ def parse(files, experiment, condition, phase):
         res['session_date'].append(dates)
         res['session_time'].append(time)
 
-    def _add_data(res, data_name, raw_name, is_csp):
+    def _add_data(res, data_name, raw_name, is_csp, add_raw = False):
         data = np.load(data_name)
         indices_dict = indices.__dict__
         for k, v in indices_dict.items():
@@ -94,14 +98,15 @@ def parse(files, experiment, condition, phase):
             valence = 'CS-'
         res['odor_valence'].append(valence)
 
-        if os.path.isfile(raw_name):
-            trials = data[:,indices.trials].astype(int) - 1
-            raw_res = tools.file_io.load_pickle(raw_name)
+        if add_raw:
+            if os.path.isfile(raw_name):
+                trials = data[:,indices.trials].astype(int) - 1
+                raw_res = tools.file_io.load_pickle(raw_name)
 
-            for k, v in raw_res.items():
-                v = np.array(v)
-                v_ = v[trials,:]
-                res[k + '_raw'].append(v_)
+                for k, v in raw_res.items():
+                    v = np.array(v)
+                    v_ = v[trials,:]
+                    res[k + '_raw'].append(v_)
 
     def _fix_trials(res):
         import filter
@@ -121,7 +126,7 @@ def parse(files, experiment, condition, phase):
         for csp in is_csp:
             mouse, data_name, detail_name, raw_name = _names(f, is_csp=csp)
             _add_details(res, detail_name)
-            _add_data(res, data_name, raw_name, csp)
+            _add_data(res, data_name, raw_name, csp, add_raw)
     for k, v in res.items():
         res[k] = np.array(v)
     _fix_trials(res)

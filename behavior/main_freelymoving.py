@@ -25,7 +25,7 @@ ax_args_copy.update({'ylim':[-5, 65], 'yticks':[0, 30, 60]})
 bool_ax_args_copy = ax_args.copy()
 bool_ax_args_copy.update({'ylim':[-5, 105], 'yticks':[0, 50, 100]})
 
-d = 'L:\MANUSCRIPT_DATA\FREELY MOVING'
+d = '/Users/pwang/Desktop/FREELY_MOVING'
 class OFC_PT_Config():
     path = os.path.join(d,'OFC Pretraining')
     name = 'OFC_PT'
@@ -53,15 +53,16 @@ class MPFC_DT_Config():
 indices = analysis.Indices()
 constants = analysis.Constants()
 config = Config()
+add_raw = False
 
 # experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
-experiments = [MPFC_PT_Config]
+experiments = [OFC_PT_Config]
 # experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
 collapse_arg = None
 plotting = [
     # 'individual_separate',
     # 'individual_together',
-    'trials_to_criterion',
+    # 'trials_to_criterion',
     # 'trials_per_day',
     'summary',
     # 'control',
@@ -80,9 +81,11 @@ for experiment in experiments:
     for directory in directories:
         halo_files = sorted(glob.glob(os.path.join(experiment.path, directory, constants.halo + '*')))
         yfp_files = sorted(glob.glob(os.path.join(experiment.path, directory, constants.yfp + '*')))
-        res1 = analysis.parse(halo_files, experiment=experiment, condition=constants.halo, phase = directory)
+        res1 = analysis.parse(halo_files, experiment=experiment, condition=constants.halo, phase = directory,
+                              add_raw=False)
         res1['experiment'] = np.array([experiment.name] * len(res1['odor_valence']))
-        res2 = analysis.parse(yfp_files, experiment=experiment, condition=constants.yfp, phase = directory)
+        res2 = analysis.parse(yfp_files, experiment=experiment, condition=constants.yfp, phase = directory,
+                              add_raw=False)
         res2['experiment'] = np.array([experiment.name] * len(res2['odor_valence']))
 
         if experiment.name == 'MPFC_DT':
@@ -93,6 +96,8 @@ for experiment in experiments:
             res2 = filter.exclude(res2, {'mouse': ['Y01']})
         reduce.chain_defaultdicts(res, res1)
         reduce.chain_defaultdicts(res, res2)
+
+print(np.unique(res['mouse']))
 
 if collapse_arg:
     res1 = filter.filter(res, filter_dict={'experiment': collapse_arg, 'condition':'H'})
