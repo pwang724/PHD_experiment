@@ -25,7 +25,7 @@ ax_args_copy.update({'ylim':[-5, 65], 'yticks':[0, 30, 60]})
 bool_ax_args_copy = ax_args.copy()
 bool_ax_args_copy.update({'ylim':[-5, 105], 'yticks':[0, 50, 100]})
 
-d = '/Users/pwang/Desktop/FREELY_MOVING'
+d = 'I:\MANUSCRIPT_DATA\FREELY_MOVING'
 class OFC_PT_Config():
     path = os.path.join(d,'OFC Pretraining')
     name = 'OFC_PT'
@@ -63,12 +63,27 @@ plotting = [
     # 'individual_separate',
     # 'individual_together',
     # 'trials_to_criterion',
-    # 'trials_per_day',
-    'summary',
+    'trials_per_day',
+    # 'summary',
     # 'control',
     # 'fraction_licks_per_day',
     # 'release_of_inhibition'
 ]
+
+
+def scalpel(res2, keys, mouse, sessions, valence='CS+'):
+    temp = filter.filter(res2, {'mouse': mouse, 'odor_valence': valence})
+    print(temp['mouse'].size)
+    assert temp['mouse'].size == 1
+    ix = np.isin(temp['session'][0], sessions)
+    ix = np.invert(ix)
+    for k in keys:
+        temp[k][0] = temp[k][0][ix]
+    _, inverse = np.unique(temp['session'][0], return_inverse=True)
+    temp['session'][0] = inverse
+    res2 = filter.exclude(res2, {'mouse': mouse, 'odor_valence': valence})
+    reduce.chain_defaultdicts(res2, temp)
+    return res2
 
 # plt.style.use('dark_background')
 names = ','.join([x.name for x in experiments])
@@ -94,6 +109,16 @@ for experiment in experiments:
         if experiment.name == 'MPFC_PT':
             res1 = filter.exclude(res1, {'mouse': ['Y01']})
             res2 = filter.exclude(res2, {'mouse': ['Y01']})
+
+        keys = analysis.Indices().__dict__.keys()
+        if experiment.name == 'OFC_PT' and directory == constants.pretraining_directory:
+            mice = ['Y11','Y12','Y13']
+            session_list = [[2,3,4,5,6], [5,7,9,11],[4,5,6]]
+
+            for mouse, sessions in zip(mice, session_list):
+                res2 = scalpel(res2, keys, mouse, sessions)
+                print(np.unique(res2['session'][-1]))
+
         reduce.chain_defaultdicts(res, res1)
         reduce.chain_defaultdicts(res, res2)
 
@@ -240,9 +265,9 @@ if 'trials_to_criterion' in plotting:
 
 if 'trials_per_day' in plotting:
     line_args_copy = line_args.copy()
-    line_args_copy.update({'linestyle':'--', 'linewidth':.5,'markersize':1.5})
+    line_args_copy.update({'linestyle':'--', 'linewidth':.5,'markersize':1, 'alpha':0.5})
     ax_args_cur = ax_args.copy()
-    ax_args_cur.update({'ylim':[-25, 300], 'yticks':[0, 100, 200, 300], 'xticks':[1, 3, 5, 7, 9]})
+    ax_args_cur.update({'ylim':[-25, 350], 'yticks':[0, 100, 200, 300], 'xticks':[1, 3, 5, 7, 9], 'xlim':[1, 8]})
 
     phase_odor_valence = np.unique(res['phase_odor_valence'])
     y_key = 'trials_per_day'
@@ -262,12 +287,12 @@ if 'trials_per_day' in plotting:
 
         # summary = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'], reduce_key=y_key,
         #                                    regularize='max')
-        # plot.plot_results(summary, x_key='days', y_key=y_key,
-        #                   select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
-        #                   ax_args=ax_args_copy,
+        # plot.plot_results(summary, x_key='days', y_key=y_key, loop_keys= 'condition',
+        #                   select_dict={'phase_odor_valence': phase},
+        #                   ax_args=ax_args_cur,
         #                   plot_args=line_args,
-        #                   colors='black', reuse=True, save=False,
-        #                   path=save_path)
+        #                   colors=['red','black'],
+        #                   path=save_path, name_str='mean_sem')
         # plot.plot_results(summary, x_key='days', y_key=y_key, error_key=y_key + '_sem',
         #                   select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
         #                   ax_args=ax_args_copy,

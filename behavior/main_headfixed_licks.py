@@ -25,9 +25,9 @@ mpl.rcParams['font.family'] = 'arial'
 experiments = [
     # 'licks_per_day'
     # 'individual',
-    # 'summary',
-    # 'mean_sem',
-    'trials_to_criterion',
+    'summary',
+    'mean_sem',
+    # 'trials_to_criterion',
     # 'roc',
     # 'cdf',
     # 'bar'
@@ -40,8 +40,8 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -55,8 +55,8 @@ conditions = [
     # experimental_conditions.OFC_REVERSAL,
     # experimental_conditions.OFC_STATE
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
-    experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
+    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
 ]
 
 collapse_arg = 'condition'
@@ -276,7 +276,7 @@ if 'mean_sem' in experiments:
             ax_args = ax_args_mush
             bool_ax_args = bool_ax_args_mush
 
-        if 'INH' in all_res['condition'][0]:
+        if 'OUTPUT' in all_res['condition'][0]:
             ax_args = ax_args_output
             bool_ax_args = bool_ax_args_output
             print('output')
