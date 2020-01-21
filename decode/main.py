@@ -40,7 +40,7 @@ ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.MPFC_COMPOSITE
+condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab

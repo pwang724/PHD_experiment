@@ -53,7 +53,6 @@ all_res = defaultdict(list)
 for res, condition in zip(list_of_res, conditions):
     reduce.chain_defaultdicts(all_res, res)
 
-color_dict = {'PT CS+': 'C1', 'CS+':'green', 'CS-':'red'}
 ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12], 'xticks': [0, 100, 200, 300], 'xlim': [0, 300]}
 bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 100, 200, 300], 'xlim': [0, 300]}
 bar_args = {'alpha': .6, 'fill': False}
@@ -84,7 +83,7 @@ if 'trials_to_criterion' in experiments:
     x_key = collapse_arg
     for valence in np.unique(all_res['odor_valence']):
         swarm_args_copy = swarm_args.copy()
-        swarm_args_copy.update({'palette':[color_dict[valence],'black'], 'size':5})
+        swarm_args_copy.update({'palette':['red','black'], 'size':5, 'jitter':0.01})
 
         path, name = plot.plot_results(all_res, x_key=collapse_arg, y_key= reduce_key,
                                        select_dict={'condition': 'CHANNEL'},
