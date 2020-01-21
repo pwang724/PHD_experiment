@@ -37,8 +37,8 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
@@ -55,8 +55,8 @@ conditions = [
     # experimental_conditions.OFC_REVERSAL,
     # experimental_conditions.OFC_STATE
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
-    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
+    experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
+    experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
 ]
 
 collapse_arg = 'condition'
@@ -110,7 +110,7 @@ bool_ax_args_output = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-collection = True
+collection = False
 if collection:
     lick = 'lick_collection'
     lick_smoothed = 'lick_collection_smoothed'
@@ -220,7 +220,7 @@ if 'summary' in experiments:
         if 'OUTPUT' in all_res['condition'][0]:
             ax_args = ax_args_output
             bool_ax_args = bool_ax_args_output
-            print('ok')
+            print('output')
 
         path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, loop_keys= 'condition',
                           colors=color, select_dict={'odor_valence':valence},
@@ -275,6 +275,11 @@ if 'mean_sem' in experiments:
         else:
             ax_args = ax_args_mush
             bool_ax_args = bool_ax_args_mush
+
+        if 'INH' in all_res['condition'][0]:
+            ax_args = ax_args_output
+            bool_ax_args = bool_ax_args_output
+            print('output')
 
         path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed,
                           loop_keys= ['condition','odor_valence'],
