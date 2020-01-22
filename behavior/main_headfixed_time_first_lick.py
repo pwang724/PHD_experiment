@@ -26,20 +26,21 @@ mpl.rcParams['font.family'] = 'arial'
 experiments = [
     # 'summary_raw',
     # 'summary_line',
-    'summary_hist'
+    # 'summary_hist',
+    'summary_mouse_line'
 ]
 
 conditions = [
     # experimental_conditions.OFC_COMPOSITE,
     # experimental_conditions.MPFC_COMPOSITE,
-    experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -105,7 +106,7 @@ bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-arg = 'lick' #first, com
+arg = 'com' #first, com
 collection = False
 
 if arg == 'first':
@@ -131,6 +132,12 @@ elif arg == 'com':
 elif arg == 'lick':
     reduce_key_raw = 'lick'
     reduce_key = 'lick'
+    xkey = 'trial'
+    ax_args_local = {'yticks': [0, 15, 35], 'ylim': [0, 35],
+                     'xlabel': 'Time','xticks': [0, 50, 100], 'xlim': [0, 130]}
+elif arg == 'lick_5s':
+    reduce_key_raw = 'lick_5s'
+    reduce_key = 'lick_5s'
     xkey = 'trial'
     ax_args_local = {'yticks': [0, 15, 35], 'ylim': [0, 35],
                      'xlabel': 'Time','xticks': [0, 50, 100], 'xlim': [0, 130]}
@@ -247,6 +254,70 @@ if 'summary_line' in experiments:
             print(stat)
         except:
             print('no stats')
+
+if 'summary_mouse_line' in experiments:
+    _collapse_conditions(all_res, control_condition='YFP', str=collapse_arg)
+    ykey = reduce_key_raw + '_mean'
+    for i, v in enumerate(all_res[reduce_key_raw]):
+        all_res[ykey].append(np.mean(v[v>0]))
+    all_res[ykey] = np.array(all_res[ykey])
+
+    res_modified = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'mouse', 'odor_valence'], reduce_key=ykey)
+    res_modified.pop(ykey + '_std')
+    res_modified.pop(ykey + '_sem')
+    mean_std = reduce.new_filter_reduce(res_modified, filter_keys=['condition','odor_valence'], reduce_key = ykey)
+
+    line_args = {'alpha': .5, 'linewidth': 0, 'marker': '.', 'markersize': 2}
+    error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 0, 'alpha': .6}
+    swarm_args = {'marker': '.', 'size': 5, 'facecolors': 'none', 'alpha': .5, 'palette': ['red','black'], 'jitter': .1}
+
+    if arg in ['lick','lick_5s']:
+        ax_args = {'yticks': [0, 10, 20, 30], 'ylim': [0, 30], 'xlim': [-1, 2]}
+    elif arg in ['com', 'first']:
+        ax_args = {'yticks': [0, 1, 2, 3], 'ylim': [0, 3], 'yticklabels': ['Odor ON', '1s', 'Odor OFF','3s'],
+                   'xlim': [-1, 2]}
+
+    for valence in np.unique(res_modified['odor_valence']):
+        path, name = plot.plot_results(res_modified, x_key='condition', y_key= ykey,
+                                       select_dict={'odor_valence': valence},
+                                       ax_args = ax_args,
+                                       plot_function=sns.stripplot,
+                                       plot_args=swarm_args,
+                                       save=False,
+                                       path=save_path)
+
+        plot.plot_results(mean_std, x_key='condition', y_key= ykey, error_key=ykey + '_sem',
+                          select_dict={'odor_valence':valence},
+                          ax_args= ax_args,
+                          plot_function= plt.errorbar,
+                          plot_args= error_args,
+                          path=save_path, reuse=True, save=False)
+
+        test = filter.filter(res_modified, {'odor_valence': valence})
+        ixs = test['condition'] == 'YFP'
+        y_yfp = test[ykey][ixs]
+        y_combined = test[ykey][np.invert(ixs)]
+        rs = ranksums(y_yfp, y_combined)[-1]
+        print(rs)
+        ylim = plt.gca().get_ylim()
+        sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=rs)
+        plot._easy_save(path, name)
+
+
+
+
+        # path, name = plot.plot_results(all_res, x_key=collapse_arg, y_key= reduce_key,
+        #                                select_dict={'odor_valence': valence},
+        #                                ax_args=ax_args,
+        #                                colors = colors,
+        #                                plot_function= sns.stripplot,
+        #                                plot_args= swarm_args_copy,
+        #                                sort=True,
+        #                                fig_size=[2, 1.5],
+        #                                path=save_path, reuse=False, save=False)
+
+
+
 
 if 'summary_hist' in experiments:
     def _helper(real, label, bin, range, ax):
