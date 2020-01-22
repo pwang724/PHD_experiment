@@ -182,6 +182,31 @@ def _average_velocity(res, save_path):
                           ax_args=ax_args,
                           path=save_path)
 
+def _example_velocity(res, save_path):
+    xkey = 'trial'
+    ykey = 'velocity'
+
+    line_args = {'alpha': .5, 'linewidth': .25, 'marker': 'o', 'markersize': 0}
+    mouse = 1
+    odor = 'CS-'
+    temp = filter.filter(res, {'odor_valence': odor, 'mouse': mouse})
+    start = temp['on'][0]
+    off = temp['off'][0]
+    end = temp['end'][0]
+    ax_args = {'xticks': [start, off, end], 'xticklabels': ['ON', 'OFF', 'US'], 'ylim': [-5, 100]}
+
+    for i, v in enumerate(temp[ykey]):
+        v_ = savgol_filter(v, window_length=41, polyorder=0)
+        temp[ykey][i] = v_
+
+    plot.plot_results(temp, x_key=xkey, y_key=ykey, loop_keys= ['day','ix'],
+                      select_dict={'odor_valence': odor, 'mouse': mouse},
+                      colors = ['black'] * 200,
+                      plot_args = line_args,
+                      ax_args=ax_args,
+                      legend=False,
+                      path=save_path)
+
         # mean_res = reduce.new_filter_reduce(temp, filter_keys='mouse', reduce_key= ykey)
         # for i, v in enumerate(mean_res[ykey]):
         #     v_ =savgol_filter(v, window_length=21, polyorder=0)
@@ -218,12 +243,13 @@ behavior.behavior_analysis.add_odor_value(res, condition)
 print(np.unique(res['mouse']))
 
 _angle(res)
-_average_velocity(res, save_path)
+# _average_velocity(res, save_path)
 # _hist(res, save_path)
+_example_velocity(res, save_path)
 
 
 
-print(res.keys())
-print(res['mouse'])
-print(res['day'])
+# print(res.keys())
+# print(res['mouse'])
+# print(res['day'])
 

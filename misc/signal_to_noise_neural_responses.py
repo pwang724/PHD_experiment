@@ -22,7 +22,7 @@ conditions = [
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'MISC', 'SNR')
 out = defaultdict(list)
 
-psth = False
+psth = True
 
 for condition in conditions:
     data_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)

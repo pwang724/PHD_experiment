@@ -36,11 +36,11 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -274,7 +274,7 @@ if 'summary_mouse_line' in experiments:
     if arg in ['lick','lick_5s']:
         ax_args = {'yticks': [0, 10, 20, 30], 'ylim': [0, 30], 'xlim': [-1, 2]}
     elif arg in ['com', 'first']:
-        ax_args = {'yticks': [0, 1, 2, 3], 'ylim': [0, 3], 'yticklabels': ['Odor ON', '1s', 'Odor OFF','3s'],
+        ax_args = {'yticks': [0, 2, 5], 'ylim': [0, 5], 'yticklabels': ['Odor ON', 'Odor OFF', 'US'],
                    'xlim': [-1, 2]}
 
     for valence in np.unique(res_modified['odor_valence']):
@@ -284,6 +284,7 @@ if 'summary_mouse_line' in experiments:
                                        plot_function=sns.stripplot,
                                        plot_args=swarm_args,
                                        save=False,
+                                       rect=(.3, .25, .6, .6),
                                        path=save_path)
 
         plot.plot_results(mean_std, x_key='condition', y_key= ykey, error_key=ykey + '_sem',
