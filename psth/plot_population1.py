@@ -117,6 +117,17 @@ class OFC_Config(Base_Config):
         self.independent_sort = False
         self.sort_days = 5
 
+class OFC_REVERSAL_Config(Base_Config):
+    def __init__(self):
+        super(OFC_REVERSAL_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_REVERSAL
+        self.mouse = 0
+        self.days = [0, 1, 2, 3, 4, 5]
+        self.vlim = .25
+        self.include_water = False
+        self.independent_sort = False
+        self.sort_days = 1
+
 class BLA_Config(Base_Config):
     def __init__(self):
         super(BLA_Config, self).__init__()
@@ -272,10 +283,10 @@ class OFC_REVERSAL_BIG_Config(Base_Config):
         self.plot_big = True
         self.threshold = 0.03
         self.vlim = .25
-        self.plot_big_days = [3,3,3,3,3]
-        self.sort_day_ix = 0
+        self.plot_big_days = [3] * 5
+        self.sort_days = [3] * 5
         self.plot_big_naive = False
-        self.include_water = True
+        self.include_water = False
         self.sort_onset_style = 'CS-'
 
 class OFC_STATE_BIG_Config(Base_Config):
@@ -556,9 +567,9 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
     return list_of_psth, ixs
 
 
-black = False
+black = True
 config = PSTHConfig()
-condition_config = PIR_LIM_Config()
+condition_config = OFC_REVERSAL_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -594,7 +605,7 @@ if condition_config.plot_big:
             temp, _, _, _ = helper(res, mouse, day, condition_config)
             sort_list.append(temp)
     sort_list = np.concatenate(sort_list, axis=1)
-    _, ixs = sort_helper(list_of_psth,odor_on,water_on, condition_config)
+    _, ixs = sort_helper(sort_list,odor_on,water_on, condition_config)
     image = image[ixs,:]
     image = image
     naive = condition_config.plot_big_naive

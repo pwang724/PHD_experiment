@@ -20,7 +20,7 @@ import statistics.count_methods.cory as cory
 import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.OFC_LONGTERM_Config()
+condition_config = statistics.analyze.OFC_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -69,7 +69,8 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # cory.main(res, temp_res, figure_path, excitatory=True,valence='CS-')
     # cory.main(res, temp_res, figure_path, excitatory=False,valence='CS-')
 
-
+    # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path,
+    #                                   behavior_arg='onset')
     # waveform.behavior_vs_neural_onset(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='com')
     # waveform.behavior_vs_neural_onset(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='onset')
     # waveform.behavior_vs_neural_onset(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='magnitude')
