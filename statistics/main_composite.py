@@ -175,6 +175,8 @@ if condition.name == 'MPFC_COMPOSITE':
     dt_end = [8, 8, 5, 8]
     dt_res = filter.filter(res, filter_dict={'odor_valence':['CS+','CS-']})
 
+    # overlap.plot_overlap_water(res, dt_learned, dt_end, figure_path=figure_path)
+
     # waveform.behavior_vs_neural_onset(res, temp_res, dt_learned, dt_end, figure_path,
     #                                   behavior_arg='onset')
 
@@ -204,7 +206,7 @@ if condition.name == 'MPFC_COMPOSITE':
     # responsive.plot_summary_odor(res, dt_learned, dt_end, figure_path=figure_path)
     # overlap.plot_overlap_odor(dt_res, dt_naive, dt_start, figure_path = figure_path)
     # overlap.plot_overlap_odor(dt_res, dt_start, dt_last, figure_path = figure_path)
-    # responsive.plot_summary_water(res, dt_start, dt_learned, figure_path=figure_path)
+    responsive.plot_summary_water(res, dt_start, dt_learned, figure_path=figure_path)
     # responsive.plot_responsive_difference_odor_and_water(res, dt_naive, None, dt_end,
     #                                                      pt_start= pt_start, pt_learned= pt_learned,
     #                                                      ylim=.3,

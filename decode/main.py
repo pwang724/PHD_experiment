@@ -24,10 +24,10 @@ import scikit_posthocs
 experiments = [
     # 'vary_neuron_odor',
     # 'vary_decoding_style_odor',
-    'test_odor_across_days',
+    # 'test_odor_across_days',
     # 'test_split',
     # 'split__ofc',
-    # 'test_fp_fn',
+    'test_fp_fn',
     # 'test_us_fp_fn',
     # 'fp_fn__ofc',
     # 'vary_decoding_style_days',
@@ -40,7 +40,7 @@ ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.OFC
+condition = experimental_conditions.MPFC_COMPOSITE
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -260,6 +260,10 @@ if 'test_fp_fn' in experiments:
         if condition.name == 'OFC_LONGTERM':
             learned_days = np.array([4, 3, 3, 0])
             last_days = np.array([6, 6, 5, -1])
+
+        if condition.name == 'MPFC_COMPOSITE':
+            learned_days = [5, 5, 4, 8]
+            last_days = [8, 8, 5, 8]
 
         experiment_tools.perform(experiment=decode.organizer.organizer_test_fp_fn,
                                  condition=condition,

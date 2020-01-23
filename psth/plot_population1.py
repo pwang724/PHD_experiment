@@ -345,7 +345,7 @@ class MPFC_COMPOSITE_BIG_Config(Base_Config):
         self.plot_big_days = [8, 8, 5, 8]
 
         self.plot_big_naive = False
-        self.include_water = False
+        self.include_water = True
 
 class BLA_BIG_Config(Base_Config):
     def __init__(self):
@@ -556,6 +556,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
     elif condition_config.sort_method == 'plus_minus':
         if len(list_of_psth) == 5:
             ixs = sort.sort_by_plus_minus(list_of_psth[1:], odor_on, water_on, condition_config)
+            # ixs = sort.sort_by_plus_minus(list_of_psth[:5], odor_on, water_on, condition_config)
         elif len(list_of_psth) < 4:
             ixs = sort.sort_by_onset(list_of_psth, odor_on, water_on, condition_config)
         else:
@@ -567,9 +568,9 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
     return list_of_psth, ixs
 
 
-black = True
+black = False
 config = PSTHConfig()
-condition_config = OFC_REVERSAL_BIG_Config()
+condition_config = MPFC_COMPOSITE_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -604,6 +605,7 @@ if condition_config.plot_big:
         if day != -1:
             temp, _, _, _ = helper(res, mouse, day, condition_config)
             sort_list.append(temp)
+    # sort_list = np.concatenate(sort_list, axis=1)
     sort_list = np.concatenate(sort_list, axis=1)
     _, ixs = sort_helper(sort_list,odor_on,water_on, condition_config)
     image = image[ixs,:]

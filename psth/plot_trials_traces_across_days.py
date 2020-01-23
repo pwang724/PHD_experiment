@@ -48,17 +48,16 @@ class PIR_Config(object):
 
 class MPFC_Config(object):
     def __init__(self):
-        #TODO
         self.condition = experimental_conditions.MPFC_COMPOSITE
-        # self.mouse = 0
-        # self.days = [[0, 1, 2]]
-        # self.cells = [18]
-        # self.ylim = .4
-        # self.title = ['Naive', 'Learning', 'Learned']
+        self.mouse = 2
+        self.days = [[3,4,5]]
+        self.cells = [65]
+        self.ylim = .3
+        self.title = ['Naive', 'Learning', 'Learned']
 
 csp_only = False
 plot_licks = True
-condition_config = OFC_Config()
+condition_config = MPFC_Config()
 
 condition = condition_config.condition
 mouse = condition_config.mouse
@@ -85,7 +84,10 @@ else:
     us_ix = 4
 
 for i,_ in enumerate(cell_days):
-    odors = copy.copy(condition.odors[mouse])
+    try:
+        odors = copy.copy(condition.odors[mouse])
+    except:
+        odors = copy.copy(condition.dt_odors[mouse])
 
     if csp_only:
         odors = odors[:2]
