@@ -156,7 +156,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
             ax = ax.twinx()
     else:
         fig = plt.figure(figsize=fig_size)
-        ax = fig.add_axes(rect, **ax_args)
+        ax = fig.add_axes(rect)
 
     if sort:
         ind_sort = np.argsort(res[x_key])
@@ -209,9 +209,17 @@ def plot_results(res, x_key, y_key, loop_keys =None,
                 t[k] = res[k][plot_ix]
             sns.swarmplot(x = x_key, y = y_key, hue=loop_keys[0], data=t, **plot_args)
             ax.get_legend().remove()
+        elif plot_function == sns.barplot:
+            import pandas as pd
+            t = defaultdict(list)
+            for k, v in res.items():
+                t[k] = res[k][plot_ix]
+            sns.barplot(x = x_key, y = y_key, data=t, **plot_args)
+            ax.get_legend().remove()
         else:
             _plot(plot_function, x_plot, y_plot, color=color, label=label, plot_args=plot_args, xjitter=xjitter)
 
+    ax.set(**ax_args)
     #format
     # plt.xticks(rotation=45)
     ax.set_ylabel(nice_names(y_key), fontsize = 7)
@@ -241,6 +249,9 @@ def plot_results(res, x_key, y_key, loop_keys =None,
                 handle.set_sizes([5])
         except:
             pass
+
+    if not loop_keys and legend:
+        plt.legend(frameon=False)
         # l.set_title(nice_loop_str)
         # plt.setp(l.get_title(), fontsize=4)
 
