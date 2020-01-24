@@ -7,8 +7,8 @@ class behaviorConfig(object):
         self.polynomial_degree = 0
 
         self.smoothing_window_first_lick = 7
-        self.rules_output_lick = {'PT CS+': 29}
-        self.rules_output_boolean = {'PT CS+': 29}
+        self.rules_output_lick = {'PT CS+': 19}
+        self.rules_output_boolean = {'PT CS+': 19}
         self.rules_single_phase_lick = {'CS+': 19, 'CS-': 19}
         self.rules_single_phase_boolean = {'CS+': 19, 'CS-': 19}
         self.rules_two_phase_lick = {'PT CS+': 19, 'PT Naive':19, 'CS+': 11, 'CS-': 11}

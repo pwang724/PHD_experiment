@@ -24,6 +24,7 @@ mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     'trials_to_criterion',
+    # 'summary'
 ]
 
 conditions = [
@@ -76,7 +77,7 @@ if 'trials_to_criterion' in experiments:
     error_args_copy = error_args.copy()
     error_args_copy.update({'elinewidth': .5, 'markeredgewidth': .5, 'markersize': 0})
     xlim_1 = np.unique(all_res[collapse_arg]).size
-    ax_args_pt_ = {'yticks': [0, 50, 100, 150, 200], 'ylim': [-10, 210], 'xlim':[-1, xlim_1]}
+    ax_args_pt_ = {'yticks': [0, 50, 100, 150, 200, 250], 'ylim': [-10, 260], 'xlim':[-1, xlim_1]}
     ax_args_dt_ = {'yticks': [0, 25, 50], 'ylim': [-5, 55], 'xlim':[-1, xlim_1]}
     ax_args_mush_ = {'yticks': [0, 50, 100], 'ylim': [-5, 125], 'xlim':[-1, xlim_1]}
 
@@ -108,3 +109,44 @@ if 'trials_to_criterion' in experiments:
     print(mean_std_res[x_key])
     print(mean_std_res[reduce_key])
     print(mean_std_res[reduce_key + '_sem'])
+
+if 'summary' in experiments:
+    all_res = filter.filter(all_res, {'odor_valence':['CS+','CS-', 'PT CS+']})
+    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'],
+                                            reduce_key=lick_smoothed)
+    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence','mouse'],
+                                            reduce_key=boolean_smoothed)
+
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'marker': None, 'linewidth':.75})
+
+    valences = np.unique(all_res['odor_valence'])
+    valences = [[x] for x in valences]
+    valences.append(['CS+','CS-'])
+    for valence in valences:
+        color = ['red','black']
+
+        ax_args = {'yticks': [0, 5, 10], 'ylim': [-1, 12], 'xticks': [0, 100, 200, 300], 'xlim': [0, 300]}
+        bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 100, 200, 300], 'xlim': [0, 300]}
+
+        path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, loop_keys= 'condition',
+                          colors=color, select_dict={'odor_valence':valence},
+                          ax_args=bool_ax_args, plot_args=line_args_copy,
+                          reuse = False, save=False,
+                          path=save_path_all)
+        c = behavior.behavior_config.behaviorConfig()
+
+        if 'CS+' in valence or 'PT CS+' in valence:
+            y = c.fully_learned_threshold_up
+            plt.plot(plt.xlim(), [y, y], '--', color = 'gray', linewidth =.5)
+
+        if 'CS-' in valence:
+            y = c.fully_learned_threshold_down
+            plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+        plot._easy_save(path=path, name=name)
+
+        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, loop_keys= 'condition',
+                          colors=color, select_dict={'odor_valence':valence},
+                          ax_args=ax_args, plot_args=line_args_copy,
+                          reuse = False, save=True,
+                          path=save_path_all)
