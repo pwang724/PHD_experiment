@@ -56,14 +56,14 @@ config = Config()
 add_raw = False
 
 # experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
-experiments = [OFC_PT_Config]
+experiments = [OFC_DT_Config]
 # experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
 collapse_arg = None
 plotting = [
     # 'individual_separate',
     # 'individual_together',
-    # 'trials_to_criterion',
-    'trials_per_day',
+    'trials_to_criterion',
+    # 'trials_per_day',
     # 'summary',
     # 'control',
     # 'fraction_licks_per_day',
@@ -241,7 +241,7 @@ if 'trials_to_criterion' in plotting:
 
         plot.plot_results(summary_res, x_key='odor_valence_condition', y_key=keyword, error_key=keyword + '_sem',
                       select_dict={'phase_odor_valence': phase},
-                      ax_args=ax_args,
+                      ax_args=ax_args_cur,
                       plot_function=plt.errorbar,
                       plot_args=error_args,
                       fig_size=[2, 1.5],

@@ -9,11 +9,12 @@ from collections import defaultdict
 import itertools
 import plot
 import seaborn as sns
-from format import *
+from _CONSTANTS.config import Config
+import filter
+import reduce
 
-
-# d = r'I:\MANUSCRIPT_DATA\RNA_SCOPE\values.xlsx'
-d = '/Users/pwang/Desktop/values.xlsx'
+d = r'I:\MANUSCRIPT_DATA\RNA_SCOPE\values.xlsx'
+save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'MISC', 'RNA_SCOPE')
 
 name_str ='RNA_SCOPE'
 names = ['GCAMP','VGLUT1','VGLUT2']
@@ -23,7 +24,7 @@ xlim = [-.5, 1.5]
 # name_str = 'NEUROTRACE'
 # names = ['GCAMP', 'NEUROTRACE']
 # brain_regions = ['OFC_NEUROTRACE','MPFC_NEUROTRACE']
-# xlim = [-1, 1]
+# xlim = [-1.5, 2.5]
 
 permutations = list(itertools.permutations(names, 2))
 
@@ -51,45 +52,67 @@ for i in range(len(dict['condition'])):
         stats_dict['name'].append(name)
         stats_dict['numerator'].append(pair[0])
         stats_dict['denominator'].append(pair[1])
+        stats_dict['denominator_size'].append(relevant.size)
         stats_dict['value'].append(fraction)
         stats_dict['condition'].append(dict['condition'][i])
 
 for k,v in stats_dict.items():
     stats_dict[k] = np.array(v)
 
+def _print(stats_dict, f):
+    temp = filter.filter(stats_dict, f)
+    print(temp['condition'])
+    print(temp['name'])
+    print(temp['value'])
+    print(temp['denominator_size'])
+
 ax_args = {'ylim':[0, 1.1], 'yticks':[0, .5, 1], 'xlim':xlim}
 cat_args = {'alpha': .5, 'hue':'condition'}
-denominator = 'GCAMP'
-plot.plot_results(stats_dict, x_key= 'name', y_key='value',
-                  select_dict= {'denominator':denominator},
-                  plot_function=sns.barplot,
-                  plot_args = cat_args,
-                    fig_size=[2.5, 2],
-                  ax_args=ax_args,
-                  path = 'test', name_str=name_str)
 
-numerator = 'GCAMP'
-cat_args = {'alpha': .5, 'hue':'condition'}
-plot.plot_results(stats_dict, x_key= 'name', y_key='value',
-                  select_dict= {'numerator':numerator},
-                  plot_function=sns.barplot,
-                  plot_args = cat_args,
-                    fig_size=[2.5, 2],
-                  ax_args=ax_args,
-                  path = 'test', name_str=name_str)
+if name_str == 'NEUROTRACE':
+    numerator = 'GCAMP'
+    _print(stats_dict, {'numerator':numerator})
+    stats_dict = reduce.new_filter_reduce(stats_dict, 'name', 'value')
+    plot.plot_results(stats_dict, x_key='name', y_key='value',
+                      # select_dict={'numerator': numerator},
+                      plot_function=sns.barplot,
+                      plot_args=cat_args,
+                      ax_args=ax_args,
+                      legend=False,
+                      path=save_path, name_str=name_str)
 
-numerator = 'VGLUT1'
-denominator = 'VGLUT2'
-cat_args = {'alpha': .5, 'hue':'condition'}
-ax_args.update({'xlim':[-1, 1]})
-plot.plot_results(stats_dict, x_key= 'name', y_key='value',
-                  select_dict= {'numerator':numerator,'denominator':denominator},
-                  plot_function=sns.barplot,
-                  plot_args = cat_args,
-                    fig_size=[2.5, 2],
-                  ax_args=ax_args,
-                  path = 'test', name_str=name_str)
 
+else:
+    denominator = 'GCAMP'
+    plot.plot_results(stats_dict, x_key= 'name', y_key='value',
+                      select_dict= {'denominator':denominator},
+                      plot_function=sns.barplot,
+                      plot_args = cat_args,
+                      ax_args=ax_args,
+                      path = save_path, name_str=name_str)
+    _print(stats_dict, {'denominator': denominator})
+
+    numerator = 'GCAMP'
+    cat_args = {'alpha': .5, 'hue':'condition'}
+    plot.plot_results(stats_dict, x_key= 'name', y_key='value',
+                      select_dict= {'numerator':numerator},
+                      plot_function=sns.barplot,
+                      plot_args = cat_args,
+                      ax_args=ax_args,
+                      path = save_path, name_str=name_str)
+    _print(stats_dict, {'numerator': numerator})
+
+    numerator = 'VGLUT1'
+    denominator = 'VGLUT2'
+    cat_args = {'alpha': .5, 'hue':'condition'}
+    ax_args.update({'xlim':[-1, 1]})
+    plot.plot_results(stats_dict, x_key= 'name', y_key='value',
+                      select_dict= {'numerator':numerator,'denominator':denominator},
+                      plot_function=sns.barplot,
+                      plot_args = cat_args,
+                      ax_args=ax_args,
+                      path = save_path, name_str=name_str)
+    _print(stats_dict, {'numerator':numerator,'denominator':denominator})
 
 
 
