@@ -243,9 +243,9 @@ behavior.behavior_analysis.add_odor_value(res, condition)
 print(np.unique(res['mouse']))
 
 _angle(res)
-# _average_velocity(res, save_path)
+_average_velocity(res, save_path)
 # _hist(res, save_path)
-_example_velocity(res, save_path)
+# _example_velocity(res, save_path)
 
 
 

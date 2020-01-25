@@ -27,8 +27,8 @@ experiments = [
     # 'individual',
     'summary',
     # 'mean_sem',
-    # 'trials_to_criterion',
-    # 'roc',
+    'trials_to_criterion',
+    'roc',
     # 'cdf',
     # 'bar'
 ]
@@ -42,8 +42,12 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
-    experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
-    experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
+    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
+    # experimental_conditions.BEHAVIOR_MPFC_YFP_PRETRAINING,
+    # experimental_conditions.BEHAVIOR_MPFC_HALO_PRETRAINING,
+    experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -405,7 +409,7 @@ if 'trials_to_criterion' in experiments:
     error_args_copy = error_args.copy()
     error_args_copy.update({'elinewidth': 1, 'markeredgewidth': 1, 'markersize': 0, 'alpha':.5})
     xlim_1 = np.unique(all_res[collapse_arg]).size
-    ax_args_pt_ = {'yticks': [0, 50, 100, 150], 'ylim': [-10, 160], 'xlim':[-1, xlim_1]}
+    ax_args_pt_ = {'yticks': [0, 50, 100, 150], 'ylim': [-10, 310], 'xlim':[-1, xlim_1]}
     ax_args_dt_ = {'yticks': [0, 25, 50], 'ylim': [-5, 55], 'xlim':[-1, xlim_1]}
     ax_args_mush_ = {'yticks': [0, 50, 100], 'ylim': [-5, 125], 'xlim':[-1, xlim_1]}
 
