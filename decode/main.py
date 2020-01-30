@@ -24,10 +24,10 @@ import scikit_posthocs
 experiments = [
     # 'vary_neuron_odor',
     # 'vary_decoding_style_odor',
-    # 'test_odor_across_days',
+    'test_odor_across_days',
     # 'test_split',
     # 'split__ofc',
-    'test_fp_fn',
+    # 'test_fp_fn',
     # 'test_us_fp_fn',
     # 'fp_fn__ofc',
     # 'vary_decoding_style_days',
@@ -35,7 +35,7 @@ experiments = [
 ]
 # EXPERIMENT = True
 # ANALYZE = False
-EXPERIMENT = True
+EXPERIMENT = False
 ANALYZE = True
 argTest = False
 

@@ -10,7 +10,7 @@ import analysis
 from matplotlib.colors import LinearSegmentedColormap
 
 condition = experimental_conditions.PIR
-mouse = 0
+mouse = 1
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'OTHER', 'BEHAVIOR',  condition.name, 'RAW_LICKS')

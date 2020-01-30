@@ -308,7 +308,7 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
                 color = (0.0, 0.0, 0.0)
             else:
                 color = (1.0, 1.0, 1.0)
-            ax.text(x, y, fmt % value, ha="center", va="center", color=color, fontsize=5, **kw)
+            ax.text(x, y, fmt % value, ha="center", va="center", color=color, fontsize=6, **kw)
 
     _show_values(im)
 
@@ -317,7 +317,7 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
     # import seaborn as sns
     # im = sns.heatmap(w_plot, annot=True)
 
-    plt.title(title, fontsize=7)
+    # plt.title(title, fontsize=7)
     ax.set_xlabel(x_key, labelpad=2)
     ax.set_ylabel(y_key, labelpad=2)
     plt.axis('tight')

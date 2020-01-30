@@ -43,9 +43,10 @@ class OFC_Context_Config(object):
         self.mouse = 0
         self.days = [[0,1],[0,1],[0,1]]
         self.cells = [0, 2, 6] #0, 2, 6
-        self.ylim = [-.1, 1]
+        self.ylim = [-.2, 1]
         self.colors = ['red', 'magenta', 'lime', 'darkgreen']
         self.name = 'odor'
+        self.include_water = False
 
 class OFC_State_Config(object):
     def __init__(self):
@@ -53,9 +54,10 @@ class OFC_State_Config(object):
         self.mouse = 0
         self.days = [[0,1],[0,1],[0,1]]
         self.cells = [3, 17, 48]
-        self.ylim = [-.1, 1]
+        self.ylim = [-.2, 1]
         self.colors = ['lime', 'darkgreen', 'red', 'magenta']
         self.name = 'odor'
+        self.include_water = False
 
 class OFC_Reversal_Config(object):
     def __init__(self):
@@ -63,9 +65,10 @@ class OFC_Reversal_Config(object):
         self.mouse = 0
         self.days = [[0, 2, 4],[0,2, 4],[1, 2, 4],[0,2 ,4]]
         self.cells = [0, 3, 8, 22]
-        self.ylim = [-.1, 1]
+        self.ylim = [-.2, 1]
         self.colors = ['lime', 'darkgreen', 'red', 'magenta']
         self.name = 'odor'
+        self.include_water = False
 
 class BLA_Config(object):
     def __init__(self):
@@ -73,13 +76,13 @@ class BLA_Config(object):
         self.mouse = 3
         self.days = [[1, 4], [1, 4], [1, 4], [1, 4]]
         self.cells = [1, 12, 15, 18]
-        self.ylim = [-.1, 1]
+        self.ylim = [-.2, 1]
         self.colors = ['lime', 'darkgreen', 'red', 'magenta', 'turquoise']
         self.include_water = True
         self.name = 'odor'
 
 config = PSTHConfig()
-condition_config = PIR_Config()
+condition_config = OFC_Context_Config()
 condition = condition_config.condition
 mouse = condition_config.mouse
 days = condition_config.days
@@ -123,17 +126,18 @@ for j, cell in enumerate(cells):
             ax.fill_between(time, mean - err, mean + err, zorder=0, lw=0, alpha=config.fill_alpha,
                             color=condition_config.colors[j])
 
-        plt.xticks([time_odor_on, time_odor_off, time_water_on], labels=['ON', 'OFF', 'US'])
+        # plt.xticks([time_odor_on, time_odor_off, time_water_on], labels=['ON', 'OFF', 'US'])
+        plt.xticks([time_odor_on, time_odor_off, time_water_on], labels=['', '', ''])
         plt.yticks([])
         plt.ylim(condition_config.ylim)
-        if condition_config.name == 'standard':
-            legends = ['CS+1','CS+2','CS-1','CS-2']
-        else:
-            legends = [odor.upper() for odor in odors]
-        plt.legend(legends, frameon=False)
-        ax.set_xlabel('Time (s)')
-        ax.set_ylabel(r'$\Delta$ F/F')
-        draw_scale_line_xy(ax, length=[5, .5], offset=[0, 0], linewidth= config.scale_linewidth)
+        # if condition_config.name == 'standard':
+        #     legends = ['CS+1','CS+2','CS-1','CS-2']
+        # else:
+        #     legends = [odor.upper() for odor in odors]
+        # plt.legend(legends, frameon=False)
+        # ax.set_xlabel('Time (s)')
+        # ax.set_ylabel(r'$\Delta$ F/F')
+        # draw_scale_line_xy(ax, length=[5, .5], offset=[0, 0], linewidth= config.scale_linewidth)
         ax.spines['top'].set_visible(False)
         ax.spines['bottom'].set_visible(False)
         ax.spines['right'].set_visible(False)

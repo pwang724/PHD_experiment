@@ -24,11 +24,11 @@ mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     # 'licks_per_day'
-    # 'individual',
-    'summary',
+    'individual',
+    # 'summary',
     # 'mean_sem',
-    'trials_to_criterion',
-    'roc',
+    # 'trials_to_criterion',
+    # 'roc',
     # 'cdf',
     # 'bar'
 ]
@@ -43,11 +43,11 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
-    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
+    experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
     # experimental_conditions.BEHAVIOR_MPFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_MPFC_HALO_PRETRAINING,
-    experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,

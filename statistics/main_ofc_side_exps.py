@@ -17,7 +17,7 @@ import statistics.count_methods.correlation as correlation
 import statistics.count_methods.cory as cory
 from scipy.stats import ranksums, wilcoxon, kruskal
 
-condition_config = statistics.analyze.OFC_State_Config()
+condition_config = statistics.analyze.OFC_Context_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -66,7 +66,7 @@ if condition.name == 'OFC_STATE':
     #                  colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS+':'Gray','CS-':'Gray'})
     # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
     #                                             arg='first', valence='CS+', more_stats=True, figure_path= figure_path)
-    compare.distribution_dff(res, start_days_per_mouse, last_day_per_mouse, arg='all', valence='CS+',
+    compare.distribution_dff(res, start_days_per_mouse, last_day_per_mouse, arg='first', valence='CS+',
                              figure_path=figure_path)
     # start = [0,0,0,0,0]
     # end = [1,1,1,1,1]
@@ -86,7 +86,7 @@ if condition.name == 'OFC_CONTEXT':
     #                  colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS+':'Gray','CS-':'Gray'})
     # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
     #                          arg='all', valence='CS+', more_stats=True, figure_path= figure_path)
-    compare.distribution_dff(res, start_days_per_mouse, last_day_per_mouse, arg='all', valence='CS+',
+    compare.distribution_dff(res, start_days_per_mouse, last_day_per_mouse, arg='first', valence='CS+',
                              figure_path=figure_path)
     # start = [0,0,0,0]
     # end = [1,1,1,1]

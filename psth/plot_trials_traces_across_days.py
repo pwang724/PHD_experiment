@@ -19,12 +19,11 @@ mpl.rcParams['font.family'] = 'arial'
 class OFC_Config(object):
     def __init__(self):
         self.condition = experimental_conditions.OFC
-        self.mouse = 0
-        # self.days = [[1,2,3,4,5]]
-        # self.cells = [31]
+        # self.mouse = 0
+        # self.cells = [1]
         self.days = [[1, 2, 3, 4, 5]]
-        # self.cells = [40]
-        self.cells = [1]
+        self.mouse = 2
+        self.cells = [40]
         self.ylim = 1.25
         self.title = ['Naive','Learning','Learning','Learned','Learned']
 
@@ -57,7 +56,7 @@ class MPFC_Config(object):
 
 csp_only = False
 plot_licks = True
-condition_config = MPFC_Config()
+condition_config = OFC_Config()
 
 condition = condition_config.condition
 mouse = condition_config.mouse
@@ -96,7 +95,7 @@ for i,_ in enumerate(cell_days):
 
     odor_on = res_mouse['DAQ_O_ON_F'][i]
     odor_off = res_mouse['DAQ_O_OFF_F'][i]
-    water_on = res_mouse['DAQ_W_ON_F'][i]
+    water_on = res_mouse['DAQ_W_ON_F'][i] + 1
     print(odor_on,water_on)
     odor_trials = res_mouse['ODOR_TRIALS'][i]
     frames_per_trial = res_mouse['TRIAL_FRAMES'][i]

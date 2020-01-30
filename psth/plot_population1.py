@@ -50,8 +50,8 @@ class PIR_Config(Base_Config):
     def __init__(self):
         super(PIR_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 0
-        self.days = [0, 1, 2, 3]
+        self.mouse = 1
+        self.days = [0, 1, 2]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -61,12 +61,12 @@ class PIR_Config(Base_Config):
         self.vlim = .35
         self.include_water = True
 
-class PIR_PIN_Config(Base_Config):
+class PIR_CSP_Config(Base_Config):
     def __init__(self):
-        super(PIR_PIN_Config, self).__init__()
+        super(PIR_CSP_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 0
-        self.days = [0, 1, 2, 3]
+        self.mouse = 1
+        self.days = [0, 1, 2]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -77,12 +77,12 @@ class PIR_PIN_Config(Base_Config):
         self.vlim = .35
         self.filter_ix = 0
 
-class PIR_LIM_Config(Base_Config):
+class PIR_CSM_Config(Base_Config):
     def __init__(self):
-        super(PIR_LIM_Config, self).__init__()
+        super(PIR_CSM_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 0
-        self.days = [0, 1, 2, 3]
+        self.mouse = 1
+        self.days = [0, 1, 2]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -91,7 +91,7 @@ class PIR_LIM_Config(Base_Config):
         self.sort_days = self.days[-1]
         self.include_water = True
         self.vlim = .35
-        self.filter_ix = 3
+        self.filter_ix = 2
 
 class PIR_CONTEXT_Config(Base_Config):
     def __init__(self):
@@ -283,7 +283,7 @@ class OFC_REVERSAL_BIG_Config(Base_Config):
         self.plot_big = True
         self.threshold = 0.03
         self.vlim = .25
-        self.plot_big_days = [3] * 5
+        self.plot_big_days = [1] * 5
         self.sort_days = [3] * 5
         self.plot_big_naive = False
         self.include_water = False
@@ -570,7 +570,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = MPFC_COMPOSITE_BIG_Config()
+condition_config = OFC_REVERSAL_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

@@ -254,13 +254,13 @@ if condition.name == 'MPFC_COMPOSITE':
     #     power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'],
     #                      colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'}, excitatory=False, ylim=[-.06, .01])
     #
-    # days = [dt_naive, dt_start, dt_learned, dt_end]
-    # correlations = []
-    # for direction in [-1, 0, 1]:
-    #     for day in days:
-    #         a = correlation.plot_correlation_matrix(dt_res, day, loop_keys=['mouse'], shuffle=False,
-    #                                                 figure_path = figure_path, direction=direction)
-    #         correlations.append(a)
+    days = [dt_naive, dt_start, dt_learned, dt_end]
+    correlations = []
+    for direction in [-1, 0, 1]:
+        for day in days:
+            a = correlation.plot_correlation_matrix(dt_res, day, loop_keys=['mouse'], shuffle=False,
+                                                    figure_path = figure_path, direction=direction)
+            correlations.append(a)
     # #
     # def _get_ixs(r):
     #     A = r['Odor_A']
