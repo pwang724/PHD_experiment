@@ -42,8 +42,8 @@ class Analysis_Config():
         self.anticipatory_bins = [indices.bin_ant_2, indices.bin_ant_3]
         self.pt_filter_window = 41
         self.pt_criterion_filter_window = 41
-        self.dt_filter_window = 41
-        self.dt_criterion_filter_window = 41
+        self.dt_filter_window = 21
+        self.dt_criterion_filter_window = 21
         self.filter_order = 0
         self.criterion_threshold = .8
         self.half_max_threshold = .5

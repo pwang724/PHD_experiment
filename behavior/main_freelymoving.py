@@ -17,7 +17,7 @@ import behavior.behavior_config
 plt.style.use('default')
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'arial'
 
 ax_args_copy = ax_args.copy()
@@ -62,9 +62,9 @@ collapse_arg = None
 plotting = [
     # 'individual_separate',
     # 'individual_together',
-    # 'trials_to_criterion',
+    'trials_to_criterion',
     # 'trials_per_day',
-    'summary',
+    # 'summary',
     # 'control',
     # 'fraction_licks_per_day',
     # 'release_of_inhibition'
@@ -253,11 +253,15 @@ if 'trials_to_criterion' in plotting:
         ixs = test['condition'] == 'Y'
         x = test[keyword][ixs]
         y = test[keyword][np.invert(ixs)]
-        rs = ranksums(x, y)[-1]
-        print(ranksums(x, y))
         ylim = plt.gca().get_ylim()
-        sig_str = plot.significance_str(x=.4, y= .7 * (ylim[-1] - ylim[0]), val= rs)
+        rs = ranksums(x, y)
+        sig_str = plot.significance_str(x=.4, y= .7 * (ylim[-1] - ylim[0]), val= rs[-1])
         plot._easy_save(path, name, pdf=True)
+
+        print('Phase: {}'.format(phase))
+        print('YFP: {}'.format(np.mean(x)))
+        print('HALO: {}'.format(np.mean(y)))
+        print(rs)
 
     print(summary_res[keyword])
     print(summary_res['odor_valence_condition'])
@@ -267,7 +271,7 @@ if 'trials_per_day' in plotting:
     line_args_copy = line_args.copy()
     line_args_copy.update({'linestyle':'--', 'linewidth':.5,'markersize':1, 'alpha':0.5})
     ax_args_cur = ax_args.copy()
-    ax_args_cur.update({'ylim':[-25, 350], 'yticks':[0, 100, 200, 300], 'xticks':[1, 3, 5, 7, 9], 'xlim':[1, 8]})
+    ax_args_cur.update({'ylim':[-25, 350], 'yticks':[0, 100, 200, 300], 'xticks':[1, 3, 5, 7, 9]})
 
     phase_odor_valence = np.unique(res['phase_odor_valence'])
     y_key = 'trials_per_day'

@@ -162,16 +162,23 @@ def _correlation(res, loop_keys, shuffle, odor_end = True, direction = 0):
     return corrcoefs
 
 def plot_correlation(res, start_days, end_days, figure_path, odor_end = True, linestyle = '-', direction = 0,
-                     opposing_valence=False,
+                     arg=False,
                      save=False, reuse=False, color = 'black'):
-    def _get_ixs(r):
+    def _get_ixs(r, arg):
         A = r['Odor_A']
         B = r['Odor_B']
         l = []
         for i, a in enumerate(A):
             b = B[i]
-            if a < 2 and b > 1:
-                l.append(i)
+            if arg == 'opposing':
+                if a < 2 and b > 1:
+                    l.append(i)
+            elif arg == 'CS+':
+                if a == 0 and b == 1:
+                    l.append(i)
+            elif arg == 'CS-':
+                if a == 2 and b == 3:
+                    l.append(i)
         return np.array(l)
 
     res_before = filter.filter_days_per_mouse(res, start_days)
@@ -189,16 +196,16 @@ def plot_correlation(res, start_days, end_days, figure_path, odor_end = True, li
     for k, v in corr.items():
         corr[k] = v[ix_different]
 
-    if opposing_valence:
-        ixs = _get_ixs(corr)
+    if arg is not False:
+        ixs = _get_ixs(corr, arg)
         for k, v in corr.items():
             corr[k] = v[ixs]
 
 
     mouse_corr = reduce.new_filter_reduce(corr, filter_keys=['mouse','day'], reduce_key='corrcoef')
-    average_corr = reduce.new_filter_reduce(mouse_corr, filter_keys=['day'], reduce_key='corrcoef')
     mouse_corr.pop('corrcoef_sem')
     mouse_corr.pop('corrcoef_std')
+    average_corr = reduce.new_filter_reduce(mouse_corr, filter_keys=['day'], reduce_key='corrcoef')
 
     error_args = {'capsize': 2, 'elinewidth': 1, 'markersize': 2, 'alpha': .5}
     error_args.update({'linestyle':linestyle})
@@ -208,7 +215,18 @@ def plot_correlation(res, start_days, end_days, figure_path, odor_end = True, li
                       colors= color,
                       ax_args={'ylim':[0, 1], 'xlim':[-.5, 1.5]},
                       save=save, reuse=reuse,
-                      path = figure_path, name_str=str(direction))
+                      path = figure_path, name_str=str(direction) + '_' + str(arg))
+
+    #stats
+    before_odor = filter.filter(corr, filter_dict={'day':'A'})
+    after_odor = filter.filter(corr, filter_dict={'day':'B'})
+    from scipy.stats import ranksums, wilcoxon, kruskal
+    print('direction: {}'.format(direction))
+    print('Data Before: {}'.format(before_odor['corrcoef']))
+    print('Data After: {}'.format(after_odor['corrcoef']))
+    print('Before: {}'.format(np.mean(before_odor['corrcoef'])))
+    print('After: {}'.format(np.mean(after_odor['corrcoef'])))
+    print('Wilcoxin:{}'.format(wilcoxon(before_odor['corrcoef'], after_odor['corrcoef'])))
 
 
 def plot_correlation_matrix(res, days, loop_keys, shuffle, figure_path, odor_end = True, direction = 0):

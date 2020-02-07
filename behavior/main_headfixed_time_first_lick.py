@@ -20,14 +20,14 @@ import behavior.behavior_config
 plt.style.use('default')
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     # 'summary_raw',
-    # 'summary_line',
+    'summary_line',
     # 'summary_hist',
-    'summary_mouse_line'
+    # 'summary_mouse_line'
 ]
 
 conditions = [
@@ -36,14 +36,14 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
-    # experimental_conditions.OFC_LONGTERM,
+    experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
@@ -120,13 +120,13 @@ if arg == 'first':
         reduce_key_raw = 'time_first_lick'
         reduce_key = 'time_first_lick_smoothed'
         xkey = 'time_first_lick_trial'
-        ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['odor on', 'odor off', 'US'],
+        ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['ON', 'OFF', 'US'],
                          'xlabel': 'Time', 'xticks': [0, 50, 100], 'xlim': [0, 130]}
 elif arg == 'com':
     reduce_key_raw = 'lick_com'
     reduce_key = 'lick_com_smoothed'
     xkey = 'lick_com_trial'
-    ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['odor on', 'odor off', 'US'],
+    ax_args_local = {'yticks': [0, 2, 5], 'ylim': [-.1, 5], 'yticklabels': ['ON', 'OFF', 'US'],
                      'xlabel': 'Time','xticks': [0, 50, 100], 'xlim': [0, 130]}\
 
 elif arg == 'lick':
@@ -169,7 +169,7 @@ if 'summary_raw' in experiments:
             ax_args = ax_args_mush
 
         plot.plot_results(all_res_, x_key=xkey, y_key= reduce_key, loop_keys= composite_arg,
-                          rect = (.3, .2, .6, .6),
+                          rect = (.3, .3, .6, .6),
                           colors=color, select_dict={'odor_valence': valence},
                           ax_args=ax_args_local, plot_args=line_args_local,
                           path=save_path)
@@ -192,7 +192,7 @@ if 'summary_raw' in experiments:
 
             path, name = plot.plot_results(mean_sem, x_key=xkey, y_key= reduce_key,
                               loop_keys= composite_arg,
-                               rect = (.3, .2, .6, .6),
+                               rect = (.3, .3, .6, .6),
                               colors=color, select_dict={'odor_valence':valence},
                               ax_args=ax_args_local, plot_args=line_args_mean_sem,
                               save=False,
@@ -200,7 +200,7 @@ if 'summary_raw' in experiments:
 
             plot.plot_results(mean_sem, x_key=xkey, y_key=reduce_key, error_key=reduce_key+'_sem',
                               loop_keys= composite_arg,
-                              rect = (.3, .2, .6, .6),
+                              rect = (.3, .3, .6, .6),
                               colors=color, select_dict={'odor_valence': valence},
                               ax_args=ax_args_local,
                               plot_function=plt.fill_between,
@@ -234,7 +234,7 @@ if 'summary_line' in experiments:
         color = color_dict_valence[valence]
         path, name = plot.plot_results(res_use, x_key=before_key, y_key=after_key,
                           select_dict={'odor_valence':valence},
-                          rect=(.3, .2, .6, .6),
+                          rect=(.3, .3, .6, .6),
                           plot_function=plt.scatter,
                           plot_args=scatter_args_copy,
                                        ax_args = ax_args_local,
@@ -246,11 +246,11 @@ if 'summary_line' in experiments:
         try:
             stat_res = filter.filter(res_use, {'odor_valence':valence})
             a, b = stat_res[before_key], stat_res[after_key]
-            stat = wilcoxon(a, b)[-1]
+            stat = wilcoxon(a, b)
             ylim = plt.gca().get_ylim()
-            sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=stat)
+            sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val= stat[-1])
             plot._easy_save(path, name)
-            print(np.mean(a), np.mean(b))
+            print('Before: {}, After: {}'.format(np.mean(a), np.mean(b)))
             print(stat)
         except:
             print('no stats')
@@ -274,7 +274,7 @@ if 'summary_mouse_line' in experiments:
     if arg in ['lick','lick_5s']:
         ax_args = {'yticks': [0, 10, 20, 30], 'ylim': [0, 30], 'xlim': [-1, 2]}
     elif arg in ['com', 'first']:
-        ax_args = {'yticks': [0, 2, 5], 'ylim': [0, 5], 'yticklabels': ['Odor ON', 'Odor OFF', 'US'],
+        ax_args = {'yticks': [0, 2, 5], 'ylim': [0, 5], 'yticklabels': ['ON', 'OFF', 'US'],
                    'xlim': [-1, 2]}
 
     for valence in np.unique(res_modified['odor_valence']):
@@ -298,11 +298,12 @@ if 'summary_mouse_line' in experiments:
         ixs = test['condition'] == 'YFP'
         y_yfp = test[ykey][ixs]
         y_combined = test[ykey][np.invert(ixs)]
-        rs = ranksums(y_yfp, y_combined)[-1]
-        print(rs)
+        rs = ranksums(y_yfp, y_combined)
         ylim = plt.gca().get_ylim()
-        sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=rs)
+        sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=rs[-1])
         plot._easy_save(path, name)
+
+        print(rs)
 
 
 
@@ -366,7 +367,7 @@ if 'summary_hist' in experiments:
                 range = [0, 15]
                 bins=15
             else:
-                plt.xticks([0, 2, 5], ['Odor ON', 'Odor Off', 'US'])
+                plt.xticks([0, 2, 5], ['ON', 'OFF', 'US'])
                 range = [0, 5]
 
             _helper(ctrl_data, 'YFP', bins, range, ax)

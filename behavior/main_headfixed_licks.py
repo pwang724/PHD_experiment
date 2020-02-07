@@ -19,15 +19,15 @@ import behavior.behavior_config
 plt.style.use('default')
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     # 'licks_per_day'
-    'individual',
+    # 'individual',
     # 'summary',
     # 'mean_sem',
-    # 'trials_to_criterion',
+    'trials_to_criterion',
     # 'roc',
     # 'cdf',
     # 'bar'
@@ -43,11 +43,11 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
-    experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
+    # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
     # experimental_conditions.BEHAVIOR_MPFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_MPFC_HALO_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -409,7 +409,7 @@ if 'trials_to_criterion' in experiments:
     error_args_copy = error_args.copy()
     error_args_copy.update({'elinewidth': 1, 'markeredgewidth': 1, 'markersize': 0, 'alpha':.5})
     xlim_1 = np.unique(all_res[collapse_arg]).size
-    ax_args_pt_ = {'yticks': [0, 50, 100, 150], 'ylim': [-10, 310], 'xlim':[-1, xlim_1]}
+    ax_args_pt_ = {'yticks': [0, 50, 100, 150], 'ylim': [-10, 175], 'xlim':[-1, xlim_1]}
     ax_args_dt_ = {'yticks': [0, 25, 50], 'ylim': [-5, 55], 'xlim':[-1, xlim_1]}
     ax_args_mush_ = {'yticks': [0, 50, 100], 'ylim': [-5, 125], 'xlim':[-1, xlim_1]}
 
@@ -453,28 +453,21 @@ if 'trials_to_criterion' in experiments:
         # plt.xlim(-1, 2)
 
         test = filter.filter(all_res, {'odor_valence': valence})
-        ixs = test[collapse_arg] == 'YFP'
-        y_yfp = test[reduce_key][ixs]
-        y_combined = test[reduce_key][np.invert(ixs)]
-        y_halo = test[reduce_key][test[collapse_arg]=='HALO']
-        y_jaws = test[reduce_key][test[collapse_arg]=='JAWS']
-        ys = [y_combined, y_halo, y_jaws]
-        for y in ys:
-            rs = ranksums(y_yfp, y)[-1]
-            print(rs)
-        rs = ranksums(y_yfp, y_combined)[-1]
-        ylim = plt.gca().get_ylim()
-        sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=rs)
+        y_yfp = test[reduce_key][test[collapse_arg]=='YFP']
+        y_halo = test[reduce_key][test[collapse_arg]=='INH']
+        rs = ranksums(y_yfp, y_halo)
 
+        ylim = plt.gca().get_ylim()
+        sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=rs[-1])
         name_str = '_collapsed' if do_collapse else '_not_collapsed'
         name += name_str
         plot._easy_save(path, name, pdf=True)
 
-        # dunns test
-        import scikit_posthocs
-        dunn = scikit_posthocs.posthoc_dunn(a=[y_halo, y_jaws, y_yfp], p_adjust=None)
-        print('halo, jaws, yfp dunns test')
-        print(dunn)
+        print('Odor Valence: {}'.format(valence))
+        print('YFP: {}'.format(np.mean(y_yfp)))
+        print('HALO: {}'.format(np.mean(y_halo)))
+        print(rs)
+
 
     # #stats
     # print(mean_std_res[x_key])

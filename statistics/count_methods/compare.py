@@ -92,6 +92,10 @@ def distribution_dff(res, start_days, end_days, arg, valence, figure_path, hist_
     sig_str = plot.significance_str(x=(xlim[-1] - ylim[0]) * .7, y=.7 * (ylim[-1] - ylim[0]), val= sr)
     _easy_save(os.path.join(figure_path, 'dff_distribution'), valence, dpi=300, pdf=True)
 
+    print('Before mean: {}'.format(np.mean(x)))
+    print('After mean: {}'.format(np.mean(y)))
+    print('wilcoxon: {}'.format(sr))
+
 
 
 

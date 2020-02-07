@@ -40,7 +40,7 @@ ANALYZE = True
 argTest = False
 
 #inputs
-condition = experimental_conditions.MPFC_COMPOSITE
+condition = experimental_conditions.OFC
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 
 #load files from matlab
@@ -127,10 +127,10 @@ if 'test_us_fp_fn' in experiments:
                               ax_args=ax_args,
                               path=save_path,
                               rect=[0.25, 0.25, .6, .6],
-                              fig_size=[2.5, 2],
+                              fig_size=[2, 1.5],
                               save=False)
 
-            plt.text(0, 1, text[i], fontdict={'fontsize': 5})
+            plt.text(0, 1, text[i], fontdict={'fontsize': 7})
 
             plot.plot_results(summary_res__, x_key='odor_valence_shuffle', y_key=y_key, error_key=y_key + '_sem',
                               loop_keys='odor_valence_shuffle',
@@ -140,7 +140,17 @@ if 'test_us_fp_fn' in experiments:
                               plot_args=error_args,
                               ax_args=ax_args,
                               path=save_path,
+                              legend=False,
                               reuse=True)
+
+            exp = filter.filter(summary_res_, {'odor_valence':valence, 'shuffle': 0})
+            control = filter.filter(summary_res_, {'odor_valence':valence, 'shuffle': 1})
+            print('error trials: {}'.format(exp[y_key]))
+            print('cv trials: {}'.format(control[y_key]))
+            print('error trial mean: {}'.format(np.mean(exp[y_key])))
+            print('cv trial mean: {}'.format(np.mean(control[y_key])))
+            from scipy.stats import ranksums
+            print(ranksums(exp[y_key], control[y_key]))
 
 if 'test_split' in experiments:
     experiment_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_split', condition.name)
@@ -319,10 +329,10 @@ if 'test_fp_fn' in experiments:
                               ax_args=ax_args,
                               path=save_path,
                               rect=[0.25, 0.25, .6, .6],
-                              fig_size=[2.5, 2],
+                              fig_size=[2, 1.5],
                               save=False)
 
-            plt.text(0, 1, text[i], fontdict={'fontsize': 5})
+            plt.text(0, 1, text[i], fontdict={'fontsize': 7})
 
             plot.plot_results(summary_res__, x_key='odor_valence_shuffle', y_key=y_key, error_key=y_key + '_sem',
                               loop_keys='odor_valence_shuffle',
@@ -332,7 +342,18 @@ if 'test_fp_fn' in experiments:
                               plot_args=error_args,
                               ax_args=ax_args,
                               path=save_path,
+                              legend=False,
                               reuse=True)
+
+            exp = filter.filter(summary_res_, {'odor_valence': valence, 'shuffle': 0})
+            control = filter.filter(summary_res_, {'odor_valence': valence, 'shuffle': 1})
+            print('error trials: {}'.format(exp[y_key]))
+            print('cv trials: {}'.format(control[y_key]))
+            print('error trial mean: {}'.format(np.mean(exp[y_key])))
+            print('cv trial mean: {}'.format(np.mean(control[y_key])))
+            from scipy.stats import ranksums
+
+            print(ranksums(exp[y_key], control[y_key]))
 
 if 'fp_fn__ofc' in experiments:
     experiment_path_ofc = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'DECODING','decoding_test_fp_fn', 'OFC')
@@ -489,6 +510,19 @@ if 'test_odor_across_days' in experiments:
                                   path= save_path, name_str= '_same_day',
                                   legend=False,
                                   )
+
+                before = filter.filter(res_overall_mean, filter_dict={'day':0, 'decode_style':style})
+                after = filter.filter(res_overall_mean, filter_dict={'day':1, 'decode_style':style})
+                before = before['top_score']
+                after = after['top_score']
+                from scipy.stats import wilcoxon
+                stat = wilcoxon(before, after)
+                print(style)
+                print('Before: {}'.format(np.mean(before)))
+                print('After: {}'.format(np.mean(after)))
+                print(stat)
+
+
                 #
                 # plot.plot_results(res_overall_mean_, x_key='day', y_key='top_score', error_key='top_score_sem',
                 #                   plot_function=plt.errorbar,
@@ -548,6 +582,17 @@ if 'test_odor_across_days' in experiments:
                                   legend=False
                                   )
 
+                before = filter.filter(res_overall_mean, filter_dict={'day':0, 'decode_style':style})
+                after = filter.filter(res_overall_mean, filter_dict={'day':1, 'decode_style':style})
+                before = before['top_score']
+                after = after['top_score']
+                from scipy.stats import wilcoxon
+                stat = wilcoxon(before, after)
+                print(style)
+                print('Before: {}'.format(np.mean(before)))
+                print('After: {}'.format(np.mean(after)))
+                print(stat)
+
                 # plot.plot_results(res_overall_mean_, x_key='day', y_key='top_score', error_key='top_score_sem',
                 #                   plot_function=plt.errorbar,
                 #                   plot_args=error_args,
@@ -586,26 +631,55 @@ if 'test_odor_across_days' in experiments:
                 _ = filter.filter(temp, {'shuffle':shuffle})
                 text = '_shuffle' if shuffle else '_no_shuffle'
                 plot.plot_weight(_, x_key, y_key, val_key, title, vmin, vmax, label= True,
-                                 save_path=os.path.join(save_path, temp['decode_style'][0]), text=text)
+                                 save_path=os.path.join(save_path, temp['decode_style'][0]), text=text, fontsize = 4)
 
-            # analysis = filter.filter(res, {'decode_style': style})
-            # analysis = reduce.new_filter_reduce(analysis, filter_keys=['decode_style', 'Test Day', 'Training Day','mouse'],
-            #                                        reduce_key='top_score')
-            # ixTest = analysis['Test Day']
-            # ixTrain = analysis['Training Day']
-            #
-            # ixBefore = np.logical_and(ixTest == 0, ixTrain == 0)
-            # ixAfter = np.logical_and(ixTest > 0, ixTrain > 0)
-            #
-            # scores_before = analysis['top_score'][ixBefore]
-            # scores_after = analysis['top_score'][ixAfter]
-            #
-            # from scipy.stats import ranksums, wilcoxon, kruskal
-            # x = ranksums(scores_before, scores_after)
-            # print(style)
-            # print(x)
-            # print(np.mean(scores_before))
-            # print(np.mean(scores_after))
+            analysis = filter.filter(res, {'decode_style': style, 'shuffle':False})
+            analysis = reduce.new_filter_reduce(analysis, filter_keys=['decode_style', 'Test Day', 'Training Day','mouse'],
+                                                   reduce_key='top_score')
+
+            if condition.name == 'OFC_COMPOSITE':
+                before_day = [0, 0, 0, 0]
+                after_day = [4, 4, 4, 4]
+            elif condition.name == 'MPFC_COMPOSITE':
+                before_day = [0, 0, 0, 0]
+                after_day = [6, 6, 2, 5]
+            else:
+                after_day = get_days_per_mouse(data_path, condition, 'CS+')[-1]
+                before_day = [0] * len(after_day)
+
+            before = filter.filter_days_per_mouse(analysis, before_day, 'Training Day')
+            before = filter.filter_days_per_mouse(before, before_day, 'Test Day')
+
+            after = filter.filter_days_per_mouse(analysis, after_day, 'Training Day')
+            after = filter.filter_days_per_mouse(after, after_day, 'Test Day')
+
+            scores_before = before['top_score']
+            scores_after = after['top_score']
+
+            from scipy.stats import ranksums, wilcoxon, kruskal
+            x = wilcoxon(scores_before, scores_after)
+            print(before_day)
+            print(after_day)
+            print(style)
+            print(x)
+            print(np.mean(scores_before))
+            print(np.mean(scores_after))
+
+            if style == 'identity':
+                before = filter.filter_days_per_mouse(analysis, before_day, 'Training Day')
+                before = filter.filter_days_per_mouse(before, before_day, 'Test Day')
+                naive_scores = before['top_score']
+
+                analysis = filter.filter(res, {'decode_style': style, 'shuffle': True})
+                before = filter.filter_days_per_mouse(analysis, before_day, 'Training Day')
+                before = filter.filter_days_per_mouse(before, before_day, 'Test Day')
+                shuffled_scores = before['top_score']
+
+                print('naive scores: {}'.format(naive_scores))
+                print('shuffled scores: {}'.format(shuffled_scores))
+                print(ranksums(naive_scores, shuffled_scores))
+
+
 
 
 if 'vary_decoding_style_odor' in experiments:

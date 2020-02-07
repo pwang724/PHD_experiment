@@ -9,6 +9,8 @@ from behavior.behavior_analysis import get_days_per_mouse
 import behavior
 import analysis
 # import scikit_posthocs
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 import statistics.analyze
 import statistics.count_methods.overlap as overlap
@@ -19,6 +21,12 @@ import statistics.count_methods.correlation as correlation
 import statistics.count_methods.cory as cory
 import statistics.count_methods.responsive as responsive
 from scipy.stats import ranksums, wilcoxon, kruskal
+
+plt.style.use('default')
+mpl.rcParams['pdf.fonttype'] = 42
+mpl.rcParams['ps.fonttype'] = 42
+mpl.rcParams['font.size'] = 6
+mpl.rcParams['font.family'] = 'arial'
 
 condition_config = statistics.analyze.OFC_Config()
 condition = condition_config.condition
@@ -58,13 +66,13 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # temp_res_naive = filter.filter(temp_res_naive, {'odor_valence': ['CS+']})
     # temp_res_naive = filter.exclude(temp_res_naive, {'mouse': 3})
     # temp_res_naive['mouse'] += 5
-    res = filter.exclude(res, {'day': 0})
+    # res = filter.exclude(res, {'day': 0})
     # reduce.chain_defaultdicts(res, res_naive)
     # reduce.chain_defaultdicts(temp_res, temp_res_naive)
     # learned_days_combined = [3, 3, 2, 3, 3, 3, 2, 2]
     # last_days_combined = [5, 5, 3, 4, 4, 8, 7, 5]
 
-    cory.main(res, temp_res, figure_path, excitatory=True,valence='CS+')
+    # cory.main(res, temp_res, figure_path, excitatory=True,valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=False,valence='CS+')
     # cory.main(res, temp_res, figure_path, excitatory=True,valence='CS-')
     # cory.main(res, temp_res, figure_path, excitatory=False,valence='CS-')
@@ -90,20 +98,21 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # overlap.plot_overlap_water(res, training_start_day_per_mouse, last_day_per_mouse, figure_path = figure_path)
 
     # odor_end = True
-    # opposing_valence = True
+    # args = ['opposing', 'CS+', 'CS-']
+    # arg = 'CS-'
     # correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
-    #                              odor_end=odor_end, opposing_valence=opposing_valence,
+    #                              odor_end=odor_end, arg=arg,
     #                              direction=1, color='green', save=False, reuse=False)
     # correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
-    #                              odor_end=odor_end, opposing_valence=opposing_valence,
+    #                              odor_end=odor_end, arg=arg,
     #                              direction=-1, color='red', save=False, reuse=True)
     # correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
-    #                              odor_end=odor_end, linestyle='--', opposing_valence=opposing_valence,
+    #                              odor_end=odor_end, linestyle='--', arg=arg,
     #                              direction=0, color='black', save=True, reuse=True)
 
-    # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='onset', figure_path=figure_path)
-    # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
-    # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='duration', figure_path=figure_path)
+    waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='onset', figure_path=figure_path)
+    waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
+    waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='duration', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='onset', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='duration', figure_path=figure_path)
@@ -203,7 +212,6 @@ if condition.name == 'OFC_LONGTERM':
     # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
     # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
     # waveform.behavior_vs_neural_onset(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
-    # #
     # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='magnitude')
     # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='onset')
     # waveform.behavior_vs_neural_power(res, temp_res, learned_day_per_mouse, last_day_per_mouse, figure_path, behavior_arg='com')
@@ -243,20 +251,22 @@ if condition.name == 'OFC_LONGTERM':
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'}, ylim=.05)
 
-    signs = [True, False]
-    ylims = [[-.005, 0.06], [-.05, 0.01]]
-    for sign, ylim in zip(signs, ylims):
-        power.plot_power(res, learned_day_per_mouse, start_day_per_mouse, figure_path, odor_valence=['CS+'],
-                         colors_before = {'CS+':'greenyellow'}, colors_after = {'CS+':'Gray'}, ylim=ylim, excitatory=sign)
-        power.plot_power(res, learned_day_per_mouse, start_days_per_mouse, figure_path, odor_valence=['CS-'],
-                         colors_before = {'CS-':'Red'}, colors_after = {'CS-':'Gray'}, ylim=ylim, excitatory=sign)
+    # signs = [True, False]
+    # ylims = [[-.005, 0.06], [-.05, 0.01]]
+    # learned_color = 'darkgreen'
+    # overtrained_color = 'greenyellow'
+    # before_color = 'gray'
+    # for sign, ylim in zip(signs, ylims):
+    #     power.plot_power(res, learned_day_per_mouse, start_day_per_mouse, figure_path, odor_valence=['CS+'],
+    #                      colors_before = {'CS+':learned_color}, colors_after = {'CS+':before_color}, ylim=ylim, excitatory=sign)
+    #     power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+    #                      colors_before = {'CS+':learned_color}, colors_after = {'CS+':overtrained_color}, ylim=ylim, excitatory=sign)
+    #     power.plot_power(res, start_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
+    #                      colors_before = {'CS+':before_color}, colors_after = {'CS+':overtrained_color}, ylim=ylim, excitatory=sign)
 
-        power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
-                         colors_before = {'CS+':'greenyellow'}, colors_after = {'CS+':'darkgreen'}, ylim=ylim, excitatory=sign)
-        power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
-                         colors_before = {'CS-':'mistyrose'}, colors_after = {'CS-':'darkred'}, ylim=ylim, excitatory=sign)
-
-        power.plot_power(res, start_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+'],
-                         colors_before = {'CS+':'Gray'}, colors_after = {'CS+':'darkgreen'}, ylim=ylim, excitatory=sign)
-        power.plot_power(res, start_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
-                         colors_before = {'CS-':'Gray'}, colors_after = {'CS-':'darkred'}, ylim=ylim, excitatory=sign)
+        # power.plot_power(res, learned_day_per_mouse, start_days_per_mouse, figure_path, odor_valence=['CS-'],
+        #                  colors_before = {'CS-':'Red'}, colors_after = {'CS-':'Gray'}, ylim=ylim, excitatory=sign)
+        # power.plot_power(res, learned_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
+        #                  colors_before = {'CS-':'mistyrose'}, colors_after = {'CS-':'darkred'}, ylim=ylim, excitatory=sign)
+        # power.plot_power(res, start_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS-'],
+        #                  colors_before = {'CS-':'Gray'}, colors_after = {'CS-':'darkred'}, ylim=ylim, excitatory=sign)

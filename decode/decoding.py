@@ -277,6 +277,8 @@ def test_odors_across_days(list_of_cons, list_of_data, chosen_odors, csp_odors, 
                 if test_day != train_day:
                     scores = test_odors_time_bin(test_data[:, cell_ixs, :], test_labels, models)
                 else:
+                    if decode_shuffle:
+                        test_labels = np.random.permutation(test_labels)
                     scores = decode_odors_time_bin(test_data, test_labels, number_of_cells=decode_neurons, cv=5)
                     scores = np.mean(scores)
                 res['Training Day'].append(train_day)

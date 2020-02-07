@@ -253,6 +253,7 @@ def analyze_data(save_path, condition_config, m_threshold=None, excitatory = Tru
                 mag_significance = False
 
             if statistical_significance and mag_significance:
+                reached_ssig = [np.all(x) for x in _rolling_window(ssig, condition_config.p_window)]
                 onset = np.where(reached_ssig[s:e])[0][0]
                 onset_list.append(onset)
 
@@ -292,7 +293,7 @@ def _rolling_window(a, window):
 
 if __name__ == '__main__':
     config = psth.psth_helper.PSTHConfig()
-    condition_config = OFC_LONGTERM_Config()
+    condition_config = PIR_NAIVE_Config()
     condition = condition_config.condition
 
     data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
@@ -304,7 +305,7 @@ if __name__ == '__main__':
     analysis.add_time(res)
     odor_res = convert(res, condition_config)
     analysis.add_odor_value(odor_res, condition_config.condition)
-    parse_data(odor_res, excitatory=True)
+    parse_data(odor_res, excitatory=False)
 
     # odor_res = fio.load_pickle(pickle_path=os.path.join(save_path,'dict_backup.pkl'))
     # analyze_data(odor_res, condition_config)

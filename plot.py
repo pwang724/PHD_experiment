@@ -243,7 +243,7 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
         handles, labels = ax.get_legend_handles_labels()
         by_label = OrderedDict(zip(labels, handles))
-        l = ax.legend(by_label.values(), by_label.keys(), ncol = 2, fontsize = 4, frameon=False)
+        l = ax.legend(by_label.values(), by_label.keys(), ncol = 2, fontsize = 7, frameon=False)
         try:
             for handle in l.legendHandles:
                 handle.set_sizes([5])
@@ -276,7 +276,8 @@ def plot_results(res, x_key, y_key, loop_keys =None,
 
 def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
                 xticklabel =None, yticklabel=None,
-                label ='Accuracy', save_path = None, text='', mask=False):
+                label ='Accuracy', save_path = None, text='', mask=False,
+                figsize = (1.626, 1.626), fontsize = 6):
     x_len = len(np.unique(summary_res[x_key]))
     y_len = len(np.unique(summary_res[y_key]))
 
@@ -288,7 +289,7 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
 
     rect = [0.2, 0.2, 0.6, 0.6]
     rect_cb = [0.82, 0.2, 0.02, 0.6]
-    fig = plt.figure(figsize=(2.2, 2.2))
+    fig = plt.figure(figsize= figsize)
     ax = fig.add_axes(rect)
 
     if mask:
@@ -308,7 +309,7 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
                 color = (0.0, 0.0, 0.0)
             else:
                 color = (1.0, 1.0, 1.0)
-            ax.text(x, y, fmt % value, ha="center", va="center", color=color, fontsize=6, **kw)
+            ax.text(x, y, fmt % value, ha="center", va="center", color=color, fontsize= fontsize, **kw)
 
     _show_values(im)
 
@@ -317,9 +318,9 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
     # import seaborn as sns
     # im = sns.heatmap(w_plot, annot=True)
 
-    # plt.title(title, fontsize=7)
-    ax.set_xlabel(x_key, labelpad=2)
-    ax.set_ylabel(y_key, labelpad=2)
+    plt.title(title, fontsize=6)
+    # ax.set_xlabel(x_key, labelpad=2)
+    # ax.set_ylabel(y_key, labelpad=2)
     plt.axis('tight')
     for loc in ['bottom', 'top', 'left', 'right']:
         ax.spines[loc].set_visible(False)
@@ -330,18 +331,18 @@ def plot_weight(summary_res, x_key, y_key, val_key, title, vmin, vmax,
     ax.set_yticks(yticks[::-1])
 
     if xticklabel == None:
-        ax.set_xticklabels((xticks + .5).astype(int), fontsize = 7)
-        ax.set_yticklabels((yticks + .5).astype(int), fontsize = 7)
+        ax.set_xticklabels((xticks + .5).astype(int), fontsize = 6)
+        ax.set_yticklabels((yticks + .5).astype(int), fontsize = 6)
     else:
-        ax.set_xticklabels(xticklabel, fontsize = 7)
-        ax.set_yticklabels(yticklabel, fontsize = 7)
+        ax.set_xticklabels(xticklabel, fontsize = 6)
+        ax.set_yticklabels(yticklabel, fontsize = 6)
     plt.axis('tight')
 
     ax = fig.add_axes(rect_cb)
     cb = plt.colorbar(cax=ax, ticks=[vmin, vmax])
     cb.outline.set_linewidth(0.5)
-    cb.set_label(label, fontsize=7, labelpad=-5)
-    plt.tick_params(axis='both', which='major', labelsize=7)
+    cb.set_label(label, fontsize=6, labelpad=-5)
+    plt.tick_params(axis='both', which='major', labelsize=6)
     plt.axis('tight')
 
     folder_name = x_key + '_and_' + y_key + '_vs_' + val_key + '_' + text

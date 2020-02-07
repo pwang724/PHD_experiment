@@ -60,7 +60,7 @@ def plot_power(res, start_days, end_days, figure_path,
         start_end_day_res = filter.exclude(start_end_day_res, {'odor_standard': 'PT CS+','training_day':'Naive'})
         ix = start_end_day_res['odor_valence'] == 'PT Naive'
         start_end_day_res['odor_valence'][ix] = 'PT CS+'
-    start_end_day_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['training_day', 'odor_valence'],
+    start_end_day_sum_res = reduce.new_filter_reduce(start_end_day_res, filter_keys=['training_day', 'odor_valence'],
                                                  reduce_key='Power')
 
 
@@ -80,35 +80,54 @@ def plot_power(res, start_days, end_days, figure_path,
         strr += '_E'
     else:
         strr += '_I'
-    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
+    plot.plot_results(start_end_day_sum_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
                       x_key='Time', y_key='Power', loop_keys= 'odor_valence', error_key='Power_sem',
                       path=figure_path,
                       plot_function=plt.fill_between, plot_args=fill_args, ax_args=ax_args_copy,
                       colors = colors_b,
                       fig_size=(2, 1.5), rect=(.3, .2, .6, .6), save=False)
 
-    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
+    plot.plot_results(start_end_day_sum_res, select_dict={'odor_valence':odor_valence, 'training_day':'Naive'},
                       x_key='Time', y_key='Power', loop_keys= 'odor_valence',
                       path=figure_path, plot_args=trace_args, ax_args=ax_args_copy,
                       colors = colors_b,
                       fig_size=(2, 1.5), reuse=True, save=False)
 
-    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Learned'},
+    plot.plot_results(start_end_day_sum_res, select_dict={'odor_valence':odor_valence, 'training_day':'Learned'},
                       x_key='Time', y_key='Power', loop_keys= 'odor_valence', error_key='Power_sem',
                       path=figure_path,
                       plot_function=plt.fill_between, plot_args=fill_args, ax_args=ax_args_copy,
                       colors = colors,
                       fig_size=(2, 1.5), reuse=True, save=False)
 
-    plot.plot_results(start_end_day_res, select_dict={'odor_valence':odor_valence, 'training_day':'Learned'},
+    plot.plot_results(start_end_day_sum_res, select_dict={'odor_valence':odor_valence, 'training_day':'Learned'},
                       x_key='Time', y_key='Power', loop_keys= 'odor_valence',
                       path=figure_path, plot_args=trace_args, ax_args=ax_args_copy,
                       colors = colors,
                       fig_size=(2, 1.5), reuse=True, name_str=strr)
 
-    print(start_end_day_res['odor_valence'])
-    print(start_end_day_res['training_day'])
-    print([np.max(x[res['DAQ_O_ON_F'][-1]:res['DAQ_W_ON_F'][-1]])-np.min(x) for x in start_end_day_res['Power']])
+    for i, x in enumerate(start_end_day_res['Power']):
+        on, off = [start_end_day_res['DAQ_O_ON_F'][i], start_end_day_res['DAQ_W_ON_F'][i]]
+        y = np.max(x[on:off]) - np.min(x)
+        start_end_day_res['stat'].append(y)
+    start_end_day_res['stat'] = np.array(start_end_day_res['stat'])
+
+    for valence in odor_valence:
+        before_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'Naive', 'odor_valence': valence})
+        after_odor = filter.filter(start_end_day_res, filter_dict={'training_day':'Learned', 'odor_valence': valence})
+
+        try:
+            from scipy.stats import ranksums, wilcoxon, kruskal
+            print(before_odor['odor_valence'])
+            print('Before: {}'.format(np.mean(before_odor['stat'])))
+            print('After: {}'.format(np.mean(after_odor['stat'])))
+            print('Wilcoxin:{}'.format(wilcoxon(before_odor['stat'], after_odor['stat'])))
+        except:
+            print('stats didnt work')
+
+    # print(start_end_day_res['odor_valence'])
+    # print(start_end_day_res['training_day'])
+    # print([np.max(x[res['DAQ_O_ON_F'][-1]:res['DAQ_W_ON_F'][-1]])-np.min(x) for x in start_end_day_res['Power']])
 
 def _power(res, excitatory):
     list_of_dff = res['dff']

@@ -19,11 +19,11 @@ mpl.rcParams['font.family'] = 'arial'
 class OFC_Config(object):
     def __init__(self):
         self.condition = experimental_conditions.OFC
-        # self.mouse = 0
-        # self.cells = [1]
+        self.mouse = 0
+        self.cells = [1]
         self.days = [[1, 2, 3, 4, 5]]
-        self.mouse = 2
-        self.cells = [40]
+        # self.mouse = 2
+        # self.cells = [40]
         self.ylim = 1.25
         self.title = ['Naive','Learning','Learning','Learned','Learned']
 
@@ -56,7 +56,7 @@ class MPFC_Config(object):
 
 csp_only = False
 plot_licks = True
-condition_config = OFC_Config()
+condition_config = MPFC_Config()
 
 condition = condition_config.condition
 mouse = condition_config.mouse
@@ -121,7 +121,7 @@ for i,_ in enumerate(cell_days):
     list_of_psths = [x[:min_trial,:] for x in list_of_psths]
     list_of_licks = [x[:min_trial, :] for x in list_of_licks]
 
-    fig, axs = plt.subplots(1, us_ix + 1, figsize=(4, 3))
+    fig, axs = plt.subplots(1, us_ix + 1, figsize=(3.75, 3))
 
     space_x = frames_per_trial
     space_y = gap + condition_config.ylim
@@ -180,12 +180,12 @@ for i,_ in enumerate(cell_days):
     time_bar = 5
     time_frames = time_bar / trial_period
     time_coordinates = [frames_per_trial-time_frames, frames_per_trial]
-    axs[us_ix].plot(time_coordinates, [-space_y/2, -space_y/2], linewidth=1.5, color='black')
+    axs[us_ix].plot(time_coordinates, [-space_y/2, -space_y/2], linewidth=1, color='black')
     axs[us_ix].text(time_coordinates[0], -space_y, '{} s'.format(time_bar), fontsize=7)
 
     df_bar = 0.5
     df_coordinates = [0, df_bar]
-    axs[us_ix].plot([frames_per_trial-5, frames_per_trial-5], df_coordinates, linewidth=1.5, color='black')
+    axs[us_ix].plot([frames_per_trial-5, frames_per_trial-5], df_coordinates, linewidth=1, color='black')
     axs[us_ix].text(frames_per_trial+5, df_bar, '{} DF/F'.format(df_bar), fontsize=7)
 
     axs[us_ix].plot([])

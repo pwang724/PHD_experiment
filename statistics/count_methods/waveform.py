@@ -11,6 +11,7 @@ import plot
 from format import *
 from statistics.count_methods.power import _power, _max_dff
 import copy
+import matplotlib as mpl
 
 def behavior_vs_neural_power(neural_res, behavior_res, start, end, figure_path, neural_arg ='power', behavior_arg ='onset'):
     neural_res = copy.copy(neural_res)
@@ -88,20 +89,25 @@ def behavior_vs_neural_power(neural_res, behavior_res, start, end, figure_path, 
                                    path=figure_path,
                                    save=False)
 
-    res = out
     from sklearn import linear_model
     from sklearn.metrics import mean_squared_error, r2_score
-    regr = linear_model.LinearRegression()
-    x = res[behavior_key + behavior_arg].reshape(-1, 1)
-    y = res[neural_key + neural_arg].reshape(-1, 1)
-    regr.fit(x, y)
+    scores = []
+    for mouse in np.unique(out['mouse']):
+        res = filter.filter(out, {'mouse':mouse})
+        regr = linear_model.LinearRegression()
+        x = res[behavior_key + behavior_arg].reshape(-1,1)
+        y = res[neural_key + neural_arg].reshape(-1,1)
+        regr.fit(x, y)
 
-    y_pred = regr.predict(x)
-    score = regr.score(x, y)
+        y_pred = regr.predict(x)
+        score = regr.score(x, y)
+        scores.append(score)
+
+    print('regression: {}'.format(scores))
 
     xlim = plt.xlim()
     ylim = plt.ylim()
-    plt.text(xlim[1], ylim[1], 'R = {:.2f}'.format(score))
+    plt.text((xlim[1] - xlim[0])/2, ylim[1]-.01, 'Average R = {:.2f}'.format(np.mean(scores)))
     name += '_' + behavior_arg
     plot._easy_save(path, name)
 
@@ -142,7 +148,17 @@ def behavior_vs_neural_onset(neural_res, behavior_res, start, end, figure_path, 
 
         assert len(ix) == 1
         neural = neural_res_filtered[neural_data_key][ix[0]]
+
+        #test
+        ixs = np.where(neural > -1)[0]
+        for a in ixs:
+            plt.plot(np.transpose(neural_res_filtered['data'][ix[0]][a]))
+            plt.title(neural[a])
+            plt.show()
+
         neural = neural[neural > -1] * .229
+
+
 
         temp = filter.filter(behavior_res_filtered, {'mouse': mouse, 'odor_standard': odor_standard})
         assert len(temp[behavior_data_key]) == 1
@@ -180,6 +196,7 @@ def behavior_vs_neural_onset(neural_res, behavior_res, start, end, figure_path, 
     _helper(all_licks, behavior_key + behavior_arg, bins, range, ax)
     plt.xticks(xticks, xticklabels)
     plt.xlim([range[0]-0.5, range[1] + .5])
+    plt.ylabel('Density')
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
     ax.xaxis.set_ticks_position('bottom')
@@ -188,6 +205,9 @@ def behavior_vs_neural_onset(neural_res, behavior_res, start, end, figure_path, 
     name = behavior_arg + '_' + ','.join([str(x) for x in start]) + '_' + ','.join([str(x) for x in end])
     plt.legend(frameon=False)
     _easy_save(os.path.join(figure_path, folder), name, dpi=300, pdf=True)
+
+    print('lick mean: {}'.format(np.mean(all_licks)))
+    print('neural mean: {}'.format(np.mean(all_neural)))
 
     ## versus
     if behavior_arg in ['onset', 'com']:
@@ -209,20 +229,25 @@ def behavior_vs_neural_onset(neural_res, behavior_res, start, end, figure_path, 
                       path = figure_path,
                       save=False)
 
-    res = out
     from sklearn import linear_model
     from sklearn.metrics import mean_squared_error, r2_score
-    regr = linear_model.LinearRegression()
-    x = res[behavior_key + behavior_arg].reshape(-1,1)
-    y = res[neural_key + neural_arg].reshape(-1,1)
-    regr.fit(x, y)
+    scores = []
+    for mouse in np.unique(out['mouse']):
+        res = filter.filter(out, {'mouse':mouse})
+        regr = linear_model.LinearRegression()
+        x = res[behavior_key + behavior_arg].reshape(-1,1)
+        y = res[neural_key + neural_arg].reshape(-1,1)
+        regr.fit(x, y)
 
-    y_pred = regr.predict(x)
-    score = regr.score(x, y)
+        y_pred = regr.predict(x)
+        score = regr.score(x, y)
+        scores.append(score)
+
+    print('average regression: {}'.format(np.mean(scores)))
 
     xlim = plt.xlim()
     ylim = plt.ylim()
-    plt.text(xlim[1] - .5, ylim[1]-.5, 'R = {:.2f}'.format(score))
+    plt.text((xlim[1] - xlim[0])/2, ylim[1]-.5, 'Average R = {:.2f}'.format(np.mean(scores)))
     name += '_' + behavior_arg
     plot._easy_save(path, name)
 
@@ -251,6 +276,7 @@ def distribution(res, start, end, data_arg, figure_path, save):
 
     flatten = lambda l: [item for sublist in l for item in sublist]
     real = np.array(flatten(real), dtype=float)
+    print('Number of points: {}'.format(real.shape))
 
     bin = 20
     if data_arg == 'amplitude':
@@ -300,7 +326,7 @@ def distribution(res, start, end, data_arg, figure_path, save):
     if save:
         y -= .05
     t = 'Median = {:.3f}, mean = {:.3f}'.format(median, mean)
-    plt.text(x, y, t)
+    # plt.text(x, y, t)
 
     ax.spines["right"].set_visible(False)
     ax.spines["top"].set_visible(False)
@@ -317,6 +343,7 @@ def distribution(res, start, end, data_arg, figure_path, save):
     if data_arg == 'onset':
         odor = np.sum(real < 2) / real.size
         delay = np.sum(real > 2) / real.size
+        print('mean, median: {}, {}'.format(mean, median))
         print('Fraction of cells with onset during odor presentation: {}'.format(odor))
     return real
 
@@ -379,8 +406,8 @@ def compare_to_shuffle(res, start, end, data_arg, figure_path):
 
     p = scipy.stats.ranksums(real, shuffled)[1]
 
-    fig = plt.figure(figsize=(2.5, 2))
-    ax = fig.add_axes([0.2, 0.2, 0.7, 0.7])
+    fig = plt.figure(figsize=(2, 1.5))
+    ax = fig.add_axes([0.25, 0.25, 0.7, 0.7])
 
     def _helper(real, label):
         density, bins = np.histogram(real, bins=bin, density=True, range=[0, hist_range])
@@ -388,7 +415,7 @@ def compare_to_shuffle(res, start, end, data_arg, figure_path):
         widths = bins[:-1] - bins[1:]
         ax.bar(bins[1:], unity_density, width=widths, alpha = .5, label=label)
 
-    _helper(real, 'Data')
+    _helper(real, 'Within Neurons')
     _helper(shuffled, 'Shuffled')
 
     ax.legend(frameon=False)
@@ -415,3 +442,7 @@ def compare_to_shuffle(res, start, end, data_arg, figure_path):
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
     _easy_save(os.path.join(figure_path, data_arg), 'difference_' + data_arg, dpi=300, pdf=True)
+
+    print('real mean: {}'.format(np.mean(real)))
+    print('shuffled mean: {}'.format(np.mean(shuffled)))
+    print('ranksum: {}'.format(t))

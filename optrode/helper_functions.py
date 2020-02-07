@@ -18,6 +18,7 @@ def _plot_graph(data, lim, ticks, figure_path, name):
     plt.xticks(ticks, ticks)
     plt.xlabel('Firing Rate (Laser OFF)')
     plt.ylabel('Firing Rate (Laser ON)')
+    plt.plot([lim[0], lim[1]], [lim[0],lim[1]], '--r', alpha=0.6, linewidth=1)
     plt.text(-.2, lim[1], 'Baseline: {0:.2f}, Inhibition: {1:.2f}'.format(np.mean(data[0]), np.mean(data[1])))
 
     ax.spines['top'].set_visible(False)

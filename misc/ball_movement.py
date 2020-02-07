@@ -187,8 +187,8 @@ def _example_velocity(res, save_path):
     ykey = 'velocity'
 
     line_args = {'alpha': .5, 'linewidth': .25, 'marker': 'o', 'markersize': 0}
-    mouse = 1
-    odor = 'CS-'
+    mouse = 0
+    odor = 'PT CS+'
     temp = filter.filter(res, {'odor_valence': odor, 'mouse': mouse})
     start = temp['on'][0]
     off = temp['off'][0]
@@ -243,9 +243,9 @@ behavior.behavior_analysis.add_odor_value(res, condition)
 print(np.unique(res['mouse']))
 
 _angle(res)
-_average_velocity(res, save_path)
+# _average_velocity(res, save_path)
 # _hist(res, save_path)
-# _example_velocity(res, save_path)
+_example_velocity(res, save_path)
 
 
 

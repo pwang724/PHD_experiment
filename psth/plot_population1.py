@@ -145,8 +145,7 @@ class OFC_LONGTERM_Config(Base_Config):
         self.condition = experimental_conditions.OFC_LONGTERM
         self.mouse = 0
         self.days = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        self.independent_sort = True
-        # self.independent_sort = False
+        self.independent_sort = False
         self.sort_days = 3
         self.vlim = .25
         self.threshold = .03
@@ -163,7 +162,7 @@ class OFC_COMPOSITE_PT_Config(Base_Config):
         self.sort_day_ix = 0
         self.vlim = .25
         self.threshold = .03
-        self.independent_sort = True
+        self.independent_sort = False
         self.include_water = False
         self.period = 'ptdt'
         self.sort_days = 4
@@ -265,9 +264,9 @@ class OFC_LT_BIG_Config(Base_Config):
         self.condition = experimental_conditions.OFC_LONGTERM
         self.plot_big = True
         self.threshold = 0.03
-        self.vlim = .3
-        # self.plot_big_days = [8, 7, 7, -1]
-        self.plot_big_days = [3, 2, 2, -1]
+        self.vlim = .25
+        self.plot_big_days = [8, 7, 7, -1]
+        # self.plot_big_days = [3, 2, 2, -1]
         self.sort_day_ix = 0
         self.plot_big_naive = False
         self.include_water = False
@@ -283,7 +282,7 @@ class OFC_REVERSAL_BIG_Config(Base_Config):
         self.plot_big = True
         self.threshold = 0.03
         self.vlim = .25
-        self.plot_big_days = [1] * 5
+        self.plot_big_days = [3] * 5
         self.sort_days = [3] * 5
         self.plot_big_naive = False
         self.include_water = False
@@ -292,11 +291,26 @@ class OFC_REVERSAL_BIG_Config(Base_Config):
 class OFC_STATE_BIG_Config(Base_Config):
     def __init__(self):
         super(OFC_STATE_BIG_Config, self).__init__()
+        self.condition = experimental_conditions.OFC_STATE
+        self.plot_big = True
+        self.threshold = 0.03
+        self.vlim = .25
+        self.plot_big_days = [0] * 5
+        self.sort_days = [0] * 5
+        self.sort_day_ix = 0
+        self.plot_big_naive = False
+        self.include_water = False
+        self.sort_onset_style = 'CS+'
+
+class OFC_CONTEXT_BIG_Config(Base_Config):
+    def __init__(self):
+        super(OFC_CONTEXT_BIG_Config, self).__init__()
         self.condition = experimental_conditions.OFC_CONTEXT
         self.plot_big = True
         self.threshold = 0.03
         self.vlim = .25
-        self.plot_big_days = [1,1,1,1]
+        self.plot_big_days = [0] * 4
+        self.sort_days = [0] * 4
         self.sort_day_ix = 0
         self.plot_big_naive = False
         self.include_water = False
@@ -419,6 +433,8 @@ def helper(res, mouse, day, condition_config):
             if np.abs(odor_on - right_on) > 2:
                 diff = (right_on - odor_on).astype(int)
                 mean = _pad(mean, diff)
+                odor_on = odor_on + diff
+                water_on = water_on + diff
 
             if frames_per_trial < right_frame:
                 diff = right_frame - frames_per_trial
@@ -485,6 +501,7 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
     water_on_lines = np.arange(water_on, frames_per_trial * n_plots, frames_per_trial)
     if 'water' in titles:
         water_on_lines = water_on_lines[[0, 1, 4]]
+        # water_on_lines = water_on_lines[[2, 3, 4]]
         odor_on_lines = odor_on_lines_raw[:-1]
     else:
         if condition_config.period == 'pt':
@@ -492,16 +509,19 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         else:
             if condition_config.filter_ix is None:
                 water_on_lines = water_on_lines[:2]
+                # water_on_lines = water_on_lines[2:]
             else:
                 water_on_lines = water_on_lines[[0]]
             odor_on_lines = odor_on_lines_raw
 
     if not naive:
         xticks = np.concatenate((odor_on_lines, odor_on_lines + 8, water_on_lines))
+        xticklabels = ['ON'] * len(odor_on_lines) + ['OFF'] * len(odor_on_lines) + ['US'] * len(water_on_lines)
     else:
         xticks = np.concatenate((odor_on_lines, odor_on_lines + 8))
+        xticklabels = ['ON'] * len(odor_on_lines) + ['OFF'] * len(odor_on_lines)
 
-    plt.xticks(xticks, '')
+    plt.xticks(xticks, xticklabels, fontsize = 5)
     range = image.shape[0]
     if range > 100:
         interval = 50
@@ -510,10 +530,10 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
     plt.yticks(np.arange(0, range, interval))
 
     for line in xticks:
-        plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.25, alpha=0.5)
+        plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.5, alpha=0.5)
 
     for line in condition_lines:
-        plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.5)
+        plt.plot([line, line], plt.ylim(), '--', color='darkgrey', linewidth=.75)
 
     for j, x in enumerate(odor_on_lines_raw):
         plt.text(x, -1, titles[j].upper())
@@ -544,7 +564,7 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         name += '_odor_' + str(condition_config.filter_ix)
 
     plt.sca(ax)
-    plt.title(name)
+    # plt.title(name)
     plot._easy_save(save_path, name)
 
 def sort_helper(list_of_psth, odor_on, water_on, condition_config):
@@ -570,7 +590,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = OFC_REVERSAL_BIG_Config()
+condition_config = OFC_CONTEXT_BIG_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
