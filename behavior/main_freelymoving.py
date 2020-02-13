@@ -30,6 +30,10 @@ class OFC_PT_Config():
     path = os.path.join(d,'OFC Pretraining')
     name = 'OFC_PT'
 
+class OFC_PT_WITH_TRIALS_Config():
+    path = os.path.join(d, 'OFC Pretraining', 'Pretraining_with_trials')
+    name = 'OFC_PT_WITH_TRIALS'
+
 class OFC_PT_ZERO_TRIALS_Config():
     path = os.path.join(d, 'OFC Pretraining', 'Pretraining_zero_trials')
     name = 'OFC_PT_ZERO_TRIALS'
@@ -56,7 +60,7 @@ config = Config()
 add_raw = False
 
 # experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
-experiments = [MPFC_PT_Config]
+experiments = [OFC_PT_WITH_TRIALS_Config]
 # experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
 collapse_arg = None
 plotting = [
@@ -345,30 +349,6 @@ if 'summary' in plotting:
         for condition in conditions:
             if condition == 'H':
                 color = color_dict[phase]
-            # else:
-            #     color = 'black'
-            # plot.plot_results(res, x_key='trials', y_key=y_key,
-            #                   select_dict={'phase_odor_valence':phase, 'condition': condition},
-            #                    ax_args=ax_args_cur, plot_args=trace_args_copy,
-            #                    colors= color,
-            #                    path=save_path, name_str= 'indv')
-            # plot.plot_results(res, x_key='trials', y_key=y_key_bool,
-            #                   select_dict={'phase_odor_valence': phase, 'condition': condition},
-            #                    ax_args=ax_args_bool_cur, plot_args=trace_args_copy,
-            #                    colors= color,
-            #                    path=save_path, name_str= 'indv')
-            # #
-            # plot.plot_results(res, x_key='trials', y_key=y_key_bool, loop_keys='condition',
-            #                   select_dict={'phase_odor_valence': phase},
-            #                   ax_args=ax_args_bool_cur, plot_args=trace_args_copy,
-            #                   colors=[color, 'black'],
-            #                   path=save_path)
-            #
-            # plot.plot_results(res, x_key='trials', y_key=y_key, loop_keys='condition',
-            #                   select_dict={'phase_odor_valence': phase},
-            #                   ax_args=ax_args_cur, plot_args=trace_args_copy,
-            #                   colors=[color, 'black'],
-            #                   path=save_path)
 
             #fill bool plot
             path, name = plot.plot_results(res, x_key='trials', y_key=y_key_bool, loop_keys='condition',
@@ -400,7 +380,8 @@ if 'control' in plotting:
     trace_args_copy = trace_args.copy()
     trace_args_copy.update({'alpha': .5, 'linewidth': .75})
     line_args_copy = line_args.copy()
-    line_args.update({'marker':',','markersize':0, 'linewidth':.5})
+    line_args_copy.update({'marker':',','markersize':0, 'linewidth':.5})
+
 
     y_key = 'bin_ant_23_smooth'
     y_key_bool = 'bin_ant_23_boolean'
@@ -419,8 +400,7 @@ if 'control' in plotting:
             ax_args_bool_cur.update({'xlim': [-10, 410], 'xticks': [0, 200, 400]})
 
         for condition in conditions:
-            if condition == 'H':
-                color = color_dict[phase]
+            color = color_dict[phase]
 
             #fill bool plot
             plot.plot_results(res, x_key='trials', y_key=y_key_bool, loop_keys='condition',
@@ -434,6 +414,36 @@ if 'control' in plotting:
                               ax_args=ax_args_cur, plot_args=trace_args_copy,
                               colors=['black']*50,
                               path=save_path)
+
+            all_res_bool = reduce.new_filter_reduce(res, filter_keys=['phase_odor_valence', 'condition'],
+                                                    reduce_key= y_key_bool,
+                                                    regularize='max')
+
+            path, name = plot.plot_results(all_res_bool, x_key='trials', y_key= y_key_bool,
+                                           loop_keys= 'condition',
+                                           select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
+                                           colors=[color],
+                                           ax_args= ax_args_bool_cur, plot_args=line_args_copy,
+                                           save=False,
+                                           path=save_path)
+
+            c = behavior.behavior_config.behaviorConfig()
+            if 'CS+' in phase or 'PT CS+' in phase:
+                y = c.fully_learned_threshold_up
+                plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+
+            if 'CS-' in phase:
+                y = c.fully_learned_threshold_down
+                plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+
+
+            plot.plot_results(all_res_bool, x_key='trials', y_key= y_key_bool, error_key= y_key_bool + '_sem',
+                              select_dict={'phase_odor_valence': phase, 'condition': 'Y'},
+                              colors=[color],
+                              ax_args=ax_args_bool_cur, plot_args=fill_args,
+                              reuse=True,
+                              plot_function=plt.fill_between,
+                              path=save_path, name_str='_mean_sem')
 
 #individual
 def _add_session_lines(res_mouse):

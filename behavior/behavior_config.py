@@ -7,10 +7,11 @@ class behaviorConfig(object):
         self.polynomial_degree = 0
 
         self.smoothing_window_first_lick = 7
-        self.rules_output_lick = {'PT CS+': 19}
-        self.rules_output_boolean = {'PT CS+': 19}
-        self.rules_single_phase_lick = {'CS+': 19, 'CS-': 19}
-        self.rules_single_phase_boolean = {'CS+': 19, 'CS-': 19}
+        self.rules_output_lick = {'PT CS+': 39}
+        self.rules_output_boolean = {'PT CS+': 39}
+        single_phase = 5
+        self.rules_single_phase_lick = {'CS+': single_phase, 'CS-': single_phase}
+        self.rules_single_phase_boolean = {'CS+': single_phase, 'CS-': single_phase}
         self.rules_two_phase_lick = {'PT CS+': 19, 'PT Naive':19, 'CS+': 11, 'CS-': 11}
         self.rules_two_phase_boolean = {'PT CS+': 19, 'PT Naive':19, 'CS+': 5, 'CS-': 11}
 

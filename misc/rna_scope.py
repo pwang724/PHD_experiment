@@ -13,7 +13,7 @@ from _CONSTANTS.config import Config
 import filter
 import reduce
 
-d = r'I:\MANUSCRIPT_DATA\RNA_SCOPE\values.xlsx'
+d = r'I:\MANUSCRIPT_DATA\HISTOLOGY_ANALYSIS\processed.xlsx'
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'MISC', 'RNA_SCOPE')
 
 name_str ='RNA_SCOPE'

@@ -22,7 +22,7 @@ conditions = [
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'MISC', 'SNR')
 out = defaultdict(list)
 
-psth = True
+psth = False
 
 for condition in conditions:
     data_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -66,7 +66,7 @@ ykey = 'max'
 if psth:
     ax_args = {'yticks': np.arange(1,1.5,.1), 'ylim': [1, 1.5], 'xlim': [-1, len(conditions)]}
 else:
-    ax_args = {'yticks': [1, 1.5, 2], 'ylim': [1, 2], 'xlim': [-1, len(conditions)]}
+    ax_args = {'yticks': [1, 1.5, 2], 'ylim': [1, 2], 'xlim': [-0.5, len(conditions)-.5]}
 
 swarm_args = {'marker': '.', 'size': 5, 'facecolors': 'none', 'alpha': .5, 'palette': ['black'], 'jitter': .1}
 error_args = {'fmt': '.', 'capsize': 2, 'elinewidth': 1, 'markersize': 0, 'alpha': .6}
@@ -77,6 +77,7 @@ path, name = plot.plot_results(out, x_key='condition', y_key=ykey,
                                plot_function=sns.stripplot,
                                plot_args=swarm_args,
                                save=False,
+                               fig_size=(3,2),
                                path=save_path)
 
 names_list = [x.name for x in conditions]

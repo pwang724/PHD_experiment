@@ -24,10 +24,10 @@ mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     # 'licks_per_day'
-    # 'individual',
+    'individual',
     # 'summary',
     # 'mean_sem',
-    'trials_to_criterion',
+    # 'trials_to_criterion',
     # 'roc',
     # 'cdf',
     # 'bar'
@@ -46,11 +46,11 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
     # experimental_conditions.BEHAVIOR_MPFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_MPFC_HALO_PRETRAINING,
-    experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
-    # experimental_conditions.OFC,
-    # experimental_conditions.PIR,
-    # experimental_conditions.OFC_LONGTERM,
+    # experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
+    experimental_conditions.OFC,
+    experimental_conditions.PIR,
+    experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
@@ -105,8 +105,8 @@ color_dict_valence = {'PT CS+': 'C1', 'CS+': 'green', 'CS-': 'red'}
 color_dict_condition = {'HALO': 'C1', 'JAWS':'red','YFP':'black', 'INH':'red'}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
                 'xlim': [0, 200]}
-ax_args_mush = {'yticks': [0, 5], 'ylim': [-1, 8],'xticks': [0, 50, 100, 150],'xlim': [0, 125]}
-bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150], 'xlim': [0, 125]}
+ax_args_mush = {'xticks': [0, 50, 100, 150],'xlim': [0, 75]}
+bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150], 'xlim': [0, 75]}
 ax_args_dt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],'xticks': [0, 50],'xlim': [0, 50]}
 bool_ax_args_dt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50], 'xlim': [0, 50]}
 ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12], 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]}
@@ -208,10 +208,10 @@ if 'summary' in experiments:
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
     for valence in valences:
-        # color = [color_dict_valence[x] for x in valence]
+        color = [color_dict_valence[x] for x in valence]
         # for i in range(len(color)):
         #     color.append('black')
-        color = [color_dict_condition[x] for x in np.unique(all_res_lick['condition'])]
+        # color = [color_dict_condition[x] for x in np.unique(all_res_lick['condition'])]
 
         if 'PT CS+' in valence or 'PT Naive' in valence:
             ax_args = ax_args_pt
@@ -267,8 +267,8 @@ if 'mean_sem' in experiments:
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
     for valence in valences:
-        # color = [color_dict_valence[x] for x in valence]
-        color = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
+        color = [color_dict_valence[x] for x in valence]
+        # color = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
         for i in range(len(color)):
             color.append('black')
 

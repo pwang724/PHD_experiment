@@ -86,14 +86,14 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     # waveform.behavior_vs_neural_power(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='magnitude')
     # waveform.behavior_vs_neural_power(res, temp_res, learned_days_combined, last_days_combined, figure_path, behavior_arg='onset')
 
-    # excitatory = [True, False]
-    # thresholds = [0.04, -0.04]
-    # for i, sign in enumerate(excitatory):
-    #     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
-    #     res.pop('data')
+    excitatory = [True, False]
+    thresholds = [0.04, -0.04]
+    for i, sign in enumerate(excitatory):
+        res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold= thresholds[i], excitatory=sign)
+        res.pop('data')
         # responsive.plot_individual(res, lick_res, figure_path=figure_path)
-        # responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse,
-        #                                    figure_path=figure_path, excitatory= sign)
+        responsive.plot_summary_odor_and_water(res, start_days_per_mouse, training_start_day_per_mouse, last_day_per_mouse, arg='odor_valence',
+                                           figure_path=figure_path, excitatory= sign)
         # overlap.plot_overlap_odor(res, start_days_per_mouse, last_day_per_mouse, figure_path = figure_path, excitatory=sign)
     # overlap.plot_overlap_water(res, training_start_day_per_mouse, last_day_per_mouse, figure_path = figure_path)
 
@@ -110,9 +110,9 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     #                              odor_end=odor_end, linestyle='--', arg=arg,
     #                              direction=0, color='black', save=True, reuse=True)
 
-    waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='onset', figure_path=figure_path)
-    waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
-    waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='duration', figure_path=figure_path)
+    # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='onset', figure_path=figure_path)
+    # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
+    # waveform.compare_to_shuffle(res, start= learned_day_per_mouse, end = last_day_per_mouse, data_arg='duration', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='onset', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='amplitude', figure_path=figure_path)
     # waveform.distribution(res, start=learned_day_per_mouse, end=last_day_per_mouse, data_arg='duration', figure_path=figure_path)

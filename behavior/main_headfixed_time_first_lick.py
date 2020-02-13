@@ -25,9 +25,9 @@ mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     # 'summary_raw',
-    'summary_line',
+    # 'summary_line',
     # 'summary_hist',
-    # 'summary_mouse_line'
+    'summary_mouse_line'
 ]
 
 conditions = [
@@ -38,12 +38,12 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
-    experimental_conditions.OFC_LONGTERM,
+    # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,

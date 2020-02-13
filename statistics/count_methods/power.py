@@ -119,12 +119,15 @@ def plot_power(res, start_days, end_days, figure_path,
         try:
             from scipy.stats import ranksums, wilcoxon, kruskal
             print(before_odor['odor_valence'])
+            print('Before: {}'.format(before_odor['stat']))
             print('Before: {}'.format(np.mean(before_odor['stat'])))
+            print('After: {}'.format(after_odor['stat']))
             print('After: {}'.format(np.mean(after_odor['stat'])))
             print('Wilcoxin:{}'.format(wilcoxon(before_odor['stat'], after_odor['stat'])))
         except:
             print('stats didnt work')
 
+    return before_odor['stat'], after_odor['stat']
     # print(start_end_day_res['odor_valence'])
     # print(start_end_day_res['training_day'])
     # print([np.max(x[res['DAQ_O_ON_F'][-1]:res['DAQ_W_ON_F'][-1]])-np.min(x) for x in start_end_day_res['Power']])
@@ -137,7 +140,7 @@ def _power(res, excitatory):
         s, e = list_odor_on[i], list_water_on[i]
         y_ = np.mean(dff[:, s:e], axis=1)
         if excitatory:
-            ix = y_> 0
+            ix = y_> -0.01
         else:
             ix = y_< 0
         y = np.mean(dff[ix,:], axis=0)

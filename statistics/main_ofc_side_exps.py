@@ -26,7 +26,7 @@ mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.size'] = 6
 mpl.rcParams['font.family'] = 'arial'
 
-condition_config = statistics.analyze.OFC_Context_Config()
+condition_config = statistics.analyze.OFC_Reversal_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
@@ -62,13 +62,22 @@ if condition.name == 'OFC_REVERSAL':
     #                                             arg='first', valence='CS+', more_stats=False, figure_path= figure_path)
     # compare.plot_compare_dff(res, start_days_per_mouse, last_day_per_mouse,
     #                                             arg='last', valence='CS-', more_stats=False, figure_path= figure_path)
-    reversal.plot_reversal(res, start_days_per_mouse, last_day_per_mouse, figure_path= figure_path)
+    # reversal.plot_reversal(res, start_days_per_mouse, last_day_per_mouse, figure_path= figure_path)
     # power.plot_power(res, [1, 0, 1, 1, 1], [1, 0, 1, 1, 1], figure_path, odor_valence=['CS+', 'CS-'],
     #                  colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS-':'Red','CS+':'Green'},
     #                  ylim = [-0.005, .1])
-    # power.plot_power(res, last_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+', 'CS-'],
-    #                  colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS-':'Red','CS+':'Green'},
-    #                  ylim = [-0.005, .1])
+    power.plot_power(res, last_day_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+', 'CS-'],
+                     colors_before = {'CS+':'Green','CS-':'Red'}, colors_after = {'CS-':'Red','CS+':'Green'},
+                     ylim = [-0.005, .1])
+
+    before_csp = [ 0.12609179,  0.11384058,  0.07161805,  0.06145226,  0.07293244,  0.05645741, 0.04455081,  0.03228587,  0.04068222,  0.04597894]
+    before_csm = [ 0.05445334,  0.03700504,  0.03669895,  0.04474983,  0.03151948,  0.03421161, 0.04146117,  0.03686822,  0.0434961,   0.02564307]
+
+    after_csp = [0.05620492, 0.04649211,  0.05401214,  0.04357546,  0.03712788,  0.03253676 , 0.01846068 , 0.0207211 ,  0.02797289 , 0.02952]
+    after_csm = [0.11979772 , 0.12339208,  0.06531946 , 0.0946324  , 0.0653834 ,  0.09284357, 0.03751425 , 0.03192471 , 0.04160611,  0.04502207]
+
+    print(wilcoxon(before_csp, after_csp))
+    print(wilcoxon(before_csm, after_csm))
 
 if condition.name == 'OFC_STATE':
     res = statistics.analyze.analyze_data(save_path, condition_config, m_threshold=0.04)

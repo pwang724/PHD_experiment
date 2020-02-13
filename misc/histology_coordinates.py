@@ -59,9 +59,10 @@ for k,v in dict.items():
     dict[k] = np.array(v)
 
 arg_type = 'both' #moving, headfixed, both
-arg = 'OFC' #OFC, MPFC, OUTPUT
+arg = 'OUTPUT' #OFC, MPFC, OUTPUT
 
 res = filter_subset(dict, 'commentary', 'EXCLUDED', exclude=True)
+res = filter_subset(res, 'experiment', 'OPTRODE', exclude=True)
 res = filter_subset(res, 'experiment', 'IMAGING', exclude=True)
 res = filter_subset(res, 'experiment', 'JAWS', exclude=True)
 res = filter_subset(res, 'coordinates fiber (AP, ML, DV)', 'CRISTIAN', exclude=True) #TODO
@@ -122,9 +123,9 @@ for k, v in res.items():
 
 print(res.keys())
 print(res['experiment'])
-fig = plt.figure(figsize=[3,2])
-ax = fig.add_axes([.2, .2, .6, .6])
-ax1 = fig.add_axes([0.82, 0.2, 0.02, 0.6])
+fig = plt.figure(figsize=[2,1.5])
+ax = fig.add_axes([.2, .25, .5, .5])
+ax1 = fig.add_axes([0.75, 0.25, 0.02, 0.5])
 
 hemispheres = [['ml_l', 'dv_l', 'ap_l'], ['ml_r', 'dv_r', 'ap_r']]
 hemispheres = hemispheres if length == 6 else [hemispheres[0]]
@@ -157,7 +158,7 @@ norm = mpl.colors.Normalize(vmin=min, vmax= max)
 cb = mpl.colorbar.ColorbarBase(ax1, cmap=cmap, norm=norm)
 cb.set_ticks(np.arange(min,max+.01,.1))
 cb.outline.set_linewidth(0.5)
-cb.set_label('AP', fontsize=7, labelpad=0)
+cb.set_label('AP', fontsize=7, labelpad=5)
 plt.tick_params(axis='both', which='major', labelsize=7)
 plt.axis('tight')
 
@@ -185,9 +186,9 @@ if arg == 'OUTPUT':
 
     print(res.keys())
     print(res['experiment'])
-    fig = plt.figure(figsize=[3, 2])
-    ax = fig.add_axes([.2, .2, .6, .6])
-    ax1 = fig.add_axes([0.82, 0.2, 0.02, 0.6])
+    fig = plt.figure(figsize=[2, 1.5])
+    ax = fig.add_axes([.2, .25, .5, .5])
+    ax1 = fig.add_axes([0.75, 0.25, 0.02, 0.5])
 
     hemispheres = [['ml_r_v', 'dv_r_v', 'ap_r_v']]
     for side in hemispheres:
@@ -219,7 +220,7 @@ if arg == 'OUTPUT':
     cb = mpl.colorbar.ColorbarBase(ax1, cmap=cmap, norm=norm)
     cb.set_ticks(np.arange(min, max + .01, .2))
     cb.outline.set_linewidth(0.5)
-    cb.set_label('AP', fontsize=7, labelpad=0)
+    cb.set_label('AP', fontsize=7, labelpad=5)
     plt.tick_params(axis='both', which='major', labelsize=7)
     plt.axis('tight')
 

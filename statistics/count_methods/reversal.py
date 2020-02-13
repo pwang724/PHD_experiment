@@ -35,6 +35,16 @@ def plot_reversal(res, start_days, end_days, figure_path):
     print(mean_res['day_odor_valence'])
     print(mean_res['Fraction'])
 
+    from scipy.stats import wilcoxon
+    ix_before_p = reversal_res['day_odor_valence'] == 'Lrn_CS+'
+    ix_after_p = reversal_res['day_odor_valence'] == 'Rev_CS+'
+    ix_before_m = reversal_res['day_odor_valence'] == 'Lrn_CS-'
+    ix_after_m = reversal_res['day_odor_valence'] == 'Rev_CS-'
+    stat_csp = wilcoxon(reversal_res['Fraction'][ix_before_p], reversal_res['Fraction'][ix_after_p])
+    stat_csm = wilcoxon(reversal_res['Fraction'][ix_before_m], reversal_res['Fraction'][ix_after_m])
+    print('CS+ to CS-: {}'.format(stat_csp))
+    print('CS- to CS+: {}'.format(stat_csm))
+
 
     titles = ['','CS+', 'CS-', 'None']
     conditions = [['none-p','p-m','p-none', 'p-p'], ['p-m','p-none', 'p-p'],['m-m','m-none', 'm-p'],['none-m','none-none', 'none-p']]

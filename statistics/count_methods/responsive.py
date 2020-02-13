@@ -248,6 +248,13 @@ def plot_summary_odor(res, start_days, end_days, use_colors= True, figure_path =
                           fig_size=(2.5, 1.5),legend=False,
                           name_str = ','.join([str(x) for x in start_days]) + name_str)
 
+    start_end_day_res = filter.filter_days_per_mouse(res, days_per_mouse=list_of_days)
+    add_naive_learned(start_end_day_res, start_days, end_days, 'a', 'b')
+    filter.assign_composite(start_end_day_res, loop_keys=['odor_valence', 'training_day'])
+    start_end_day_res = reduce.new_filter_reduce(start_end_day_res,
+                                                 filter_keys=['training_day', 'mouse', 'odor_standard'],
+                                                 reduce_key='Fraction Responsive')
+
     before_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'CS+'})
     after_csp = filter.filter(start_end_day_res, filter_dict={'training_day':'b', 'odor_valence':'CS+'})
     before_csm = filter.filter(start_end_day_res, filter_dict={'training_day':'a', 'odor_valence':'CS-'})

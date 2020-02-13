@@ -19,12 +19,13 @@ import behavior.behavior_config
 plt.style.use('default')
 mpl.rcParams['pdf.fonttype'] = 42
 mpl.rcParams['ps.fonttype'] = 42
-mpl.rcParams['font.size'] = 5
+mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
-    'trials_to_criterion',
-    # 'summary'
+    # 'trials_to_criterion',
+    # 'summary',
+    'mean_sem'
 ]
 
 conditions = [
@@ -150,3 +151,59 @@ if 'summary' in experiments:
                           ax_args=ax_args, plot_args=line_args_copy,
                           reuse = False, save=True,
                           path=save_path_all)
+
+if 'mean_sem' in experiments:
+    all_res = filter.filter(all_res, {'odor_valence':['CS+','CS-', 'PT CS+']})
+    all_res_lick = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence'], reduce_key=lick_smoothed,
+                                            regularize='max')
+    all_res_bool = reduce.new_filter_reduce(all_res, filter_keys=['condition', 'odor_valence'], reduce_key=boolean_smoothed,
+                                            regularize='max')
+
+    line_args_copy = line_args.copy()
+    line_args_copy.update({'marker': None, 'linewidth':.75})
+
+    valences = np.unique(all_res['odor_valence'])
+    valences = [[x] for x in valences]
+    valences.append(['CS+','CS-'])
+    for valence in valences:
+        ax_args = ax_args_pt
+        bool_ax_args = bool_ax_args_pt
+
+        path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed,
+                          loop_keys= ['condition','odor_valence'],
+                          colors= ['red','black'], select_dict={'odor_valence':valence},
+                          ax_args=bool_ax_args, plot_args=line_args_copy,
+                          save=False,
+                          path=save_path_all)
+
+        c = behavior.behavior_config.behaviorConfig()
+        if 'CS+' in valence or 'PT CS+' in valence:
+            y = c.fully_learned_threshold_up
+            plt.plot(plt.xlim(), [y, y], '--', color = 'gray', linewidth =.5)
+
+        if 'CS-' in valence:
+            y = c.fully_learned_threshold_down
+            plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+
+        plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, error_key=boolean_sem,
+                          loop_keys= ['condition','odor_valence'],
+                          colors= ['red','black'], select_dict={'odor_valence':valence},
+                          ax_args=bool_ax_args, plot_args= fill_args,
+                          reuse=True,
+                          plot_function= plt.fill_between,
+                          path=save_path_all, name_str='_mean_sem')
+
+        path, name = plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed,
+                          loop_keys= ['condition','odor_valence'],
+                          colors=['red','black'], select_dict={'odor_valence':valence},
+                          ax_args=ax_args, plot_args=line_args_copy,
+                          save=False,
+                          path=save_path_all)
+
+        plot.plot_results(all_res_lick, x_key='trial', y_key=lick_smoothed, error_key=lick_sem,
+                          loop_keys= ['condition','odor_valence'],
+                          colors= ['red','black'], select_dict={'odor_valence':valence},
+                          ax_args=ax_args, plot_args= fill_args,
+                          save = True, reuse=True,
+                          plot_function= plt.fill_between,
+                          path=save_path_all, name_str='_mean_sem')

@@ -180,7 +180,7 @@ def plot_correlation(res, start_days, end_days, figure_path, odor_end = True, li
                 if a == 2 and b == 3:
                     l.append(i)
         return np.array(l)
-
+    res = filter.filter(res, {'odor_valence':['CS+','CS-']})
     res_before = filter.filter_days_per_mouse(res, start_days)
     corr_before = _correlation(res_before, ['mouse'], shuffle=False, odor_end=odor_end, direction=direction)
     corr_before['day'] = np.array(['A'] * len(corr_before['Odor_A']))
@@ -222,8 +222,8 @@ def plot_correlation(res, start_days, end_days, figure_path, odor_end = True, li
     after_odor = filter.filter(corr, filter_dict={'day':'B'})
     from scipy.stats import ranksums, wilcoxon, kruskal
     print('direction: {}'.format(direction))
-    print('Data Before: {}'.format(before_odor['corrcoef']))
-    print('Data After: {}'.format(after_odor['corrcoef']))
+    # print('Data Before: {}'.format(before_odor['corrcoef']))
+    # print('Data After: {}'.format(after_odor['corrcoef']))
     print('Before: {}'.format(np.mean(before_odor['corrcoef'])))
     print('After: {}'.format(np.mean(after_odor['corrcoef'])))
     print('Wilcoxin:{}'.format(wilcoxon(before_odor['corrcoef'], after_odor['corrcoef'])))
