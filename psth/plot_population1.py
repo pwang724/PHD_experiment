@@ -50,8 +50,8 @@ class PIR_Config(Base_Config):
     def __init__(self):
         super(PIR_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 1
-        self.days = [0, 1, 2]
+        self.mouse = 0
+        self.days = [0, 1, 2, 3]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -65,8 +65,8 @@ class PIR_CSP_Config(Base_Config):
     def __init__(self):
         super(PIR_CSP_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 1
-        self.days = [0, 1, 2]
+        self.mouse = 0
+        self.days = [0, 1, 2, 3]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -81,8 +81,8 @@ class PIR_CSM_Config(Base_Config):
     def __init__(self):
         super(PIR_CSM_Config, self).__init__()
         self.condition = experimental_conditions.PIR
-        self.mouse = 1
-        self.days = [0, 1, 2]
+        self.mouse = 0
+        self.days = [0, 1, 2, 3]
         self.sort_day_ix = 0
         self.threshold = .1
         self.sort_method = 'selectivity'
@@ -252,7 +252,7 @@ class OFC_BIG_Config(Base_Config):
         self.sort_day_ix = 0
         self.plot_big_naive = False
         self.include_water = True
-        self.sort_method = 'plus_minus'
+        self.sort_method = 'onset'
 
         # self.plot_big_days = [0,0,0,0,0]
         # self.plot_big_naive = True
@@ -533,7 +533,7 @@ def plotter(image, odor_on, water_on, odor_names, condition_config, save_path, n
         plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.5, alpha=0.5)
 
     for line in condition_lines:
-        plt.plot([line, line], plt.ylim(), '--', color='darkgrey', linewidth=.75)
+        plt.plot([line, line], plt.ylim(), '--', color='grey', linewidth=.75, alpha = 1)
 
     for j, x in enumerate(odor_on_lines_raw):
         plt.text(x, -1, titles[j].upper())
@@ -590,7 +590,7 @@ def sort_helper(list_of_psth, odor_on, water_on, condition_config):
 
 black = False
 config = PSTHConfig()
-condition_config = OFC_CONTEXT_BIG_Config()
+condition_config = PIR_CSP_Config()
 condition = condition_config.condition
 
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)

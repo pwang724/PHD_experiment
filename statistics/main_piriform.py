@@ -134,16 +134,18 @@ if condition.name == 'PIR':
     #     b = correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=False,
     #                                             figure_path = figure_path, odor_end=odor_end, direction=d)
 
-    # odor_end = False
-    # correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
-    #                              odor_end=odor_end,
-    #                              direction=1, color='green', save=False, reuse=False)
-    # correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
-    #                              odor_end=odor_end,
-    #                              direction=-1, color='red', save=False, reuse=True)
-    # correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
-    #                              odor_end=odor_end, linestyle='--',
-    #                              direction=0, color='black', save=True, reuse=True)
+    odor_end = False
+    args = [False, 'CS+', 'CS-']
+    for arg in args:
+        correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
+                                     odor_end=odor_end, arg=arg,
+                                     direction=1, color='green', save=False, reuse=False)
+        correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
+                                     odor_end=odor_end, arg=arg,
+                                     direction=-1, color='red', save=False, reuse=True)
+        correlation.plot_correlation(res, start_days_per_mouse, last_day_per_mouse, figure_path=figure_path,
+                                     odor_end=odor_end, linestyle='--', arg=arg,
+                                     direction=0, color='black', save=True, reuse=True)
 
     # correlation.plot_correlation_matrix(res, start_days_per_mouse, loop_keys=['mouse'], shuffle=True, figure_path = figure_path)
     # correlation.plot_correlation_matrix(res, last_day_per_mouse, loop_keys=['mouse'], shuffle=True, figure_path = figure_path)

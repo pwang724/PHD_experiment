@@ -60,7 +60,7 @@ config = Config()
 add_raw = False
 
 # experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
-experiments = [OFC_PT_WITH_TRIALS_Config]
+experiments = [MPFC_PT_Config]
 # experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
 collapse_arg = None
 plotting = [

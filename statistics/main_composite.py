@@ -130,22 +130,22 @@ if condition.name == 'OFC_COMPOSITE':
     #                ['PT CS+', 'PT CS+', 'CS-', 'CS-', 'CS-'],
     #                day_pad=1, save=True, reuse=True, figure_path=figure_path)
 
-    _, pt_stat = power.plot_power(pt_res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=True, ylim=[-0.01, .1],
-                     colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'})
+    # _, pt_stat = power.plot_power(pt_res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=True, ylim=[-0.01, .1],
+    #                  colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'})
     # power.plot_power(pt_res, pt_start, pt_learned, figure_path, odor_valence=['PT CS+'], naive=True,
     #                  colors_before = {'PT CS+':'Gray'}, colors_after = {'PT CS+':'Orange'}, excitatory=False,
     #                  ylim=[-.06, 0.01])
 
-    # combos = [[dt_naive, dt_start], [dt_naive, dt_learned], [dt_naive, dt_end]]
-    # x = []
-    # y = []
-    # for combo in combos:
+    combos = [[dt_naive, dt_start], [dt_naive, dt_learned], [dt_naive, dt_end]]
+    x = []
+    y = []
+    for combo in combos:
     #     a, b = power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'], ylim=[-0.01, .1],
     #                      colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'})
         # power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS+'],
         #                  colors_before={'CS+': 'Gray'}, colors_after={'CS+': 'Green'}, excitatory=False, ylim=[-.06, .01])
-        # power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'], ylim=[-0.01, .1],
-        #                  colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'})
+        power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'], ylim=[-0.01, .1],
+                         colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'})
         # power.plot_power(res, combo[0], combo[1], figure_path, odor_valence=['CS-'],
         #                  colors_before={'CS-': 'Gray'}, colors_after={'CS-': 'Red'}, excitatory=False, ylim=[-.06, .01])
     #     x.append(a)
