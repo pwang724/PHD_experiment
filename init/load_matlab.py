@@ -113,7 +113,7 @@ if __name__ == '__main__':
     # condition = conditions.PIR_CONTEXT
     # load_condition(condition)
 
-    condition = conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION
+    condition = conditions.BEHAVIOR_OFC_MUSH_HALO
     load_condition(condition, arg = 'behavior')
 
     # condition = conditions.BEHAVIOR_OFC_MUSH_JAWS_HALO

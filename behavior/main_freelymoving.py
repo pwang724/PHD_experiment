@@ -60,7 +60,7 @@ config = Config()
 add_raw = False
 
 # experiments = [OFC_PT_Config, OFC_DT_Config, MPFC_PT_Config, MPFC_DT_Config]
-experiments = [MPFC_PT_Config]
+experiments = [OFC_DT_Config]
 # experiments = [OFC_PT_ZERO_TRIALS_RELEASED_Config]
 collapse_arg = None
 plotting = [
@@ -113,6 +113,9 @@ for experiment in experiments:
         if experiment.name == 'MPFC_PT':
             res1 = filter.exclude(res1, {'mouse': ['Y01']})
             res2 = filter.exclude(res2, {'mouse': ['Y01']})
+        # if experiment.name == 'OFC_DT': # the unusual mouse
+        #     res1 = filter.exclude(res1, {'mouse': ['H03']})
+        #     res2 = filter.exclude(res2, {'mouse': ['H03']})
 
         keys = analysis.Indices().__dict__.keys()
         if experiment.name == 'OFC_PT' and directory == constants.pretraining_directory:
@@ -264,7 +267,10 @@ if 'trials_to_criterion' in plotting:
 
         print('Phase: {}'.format(phase))
         print('YFP: {}'.format(np.mean(x)))
+        print('YFP: {}'.format(x))
         print('HALO: {}'.format(np.mean(y)))
+        print('HALO: {}'.format(y))
+
         print(rs)
 
     print(summary_res[keyword])

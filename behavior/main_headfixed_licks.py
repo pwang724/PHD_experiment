@@ -27,7 +27,7 @@ experiments = [
     'individual',
     # 'summary',
     # 'mean_sem',
-    # 'trials_to_criterion',
+    'trials_to_criterion',
     # 'roc',
     # 'cdf',
     # 'bar'
@@ -38,19 +38,20 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    # experimental_conditions.BEHAVIOR_OFC_HALO_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.BEHAVIOR_OFC_OUTPUT_YFP,
     # experimental_conditions.BEHAVIOR_OFC_OUTPUT_CHANNEL,
     # experimental_conditions.BEHAVIOR_MPFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_MPFC_HALO_PRETRAINING,
     # experimental_conditions.BEHAVIOR_MPFC_YFP_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_MPFC_HALO_DISCRIMINATION,
-    experimental_conditions.OFC,
-    experimental_conditions.PIR,
-    experimental_conditions.OFC_LONGTERM,
+    # experimental_conditions.OFC,
+    # experimental_conditions.PIR,
+    # experimental_conditions.OFC_LONGTERM,
     # experimental_conditions.BLA_LONGTERM,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_MUSH,
     # experimental_conditions.BEHAVIOR_OFC_HALO_MUSH,
@@ -105,8 +106,8 @@ color_dict_valence = {'PT CS+': 'C1', 'CS+': 'green', 'CS-': 'red'}
 color_dict_condition = {'HALO': 'C1', 'JAWS':'red','YFP':'black', 'INH':'red'}
 bool_ax_args = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150, 200],
                 'xlim': [0, 200]}
-ax_args_mush = {'xticks': [0, 50, 100, 150],'xlim': [0, 75]}
-bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150], 'xlim': [0, 75]}
+ax_args_mush = {'xticks': [0, 50, 100, 150],'xlim': [0, 150]}
+bool_ax_args_mush = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 100, 150], 'xlim': [0, 150]}
 ax_args_dt = {'yticks': [0, 5, 10], 'ylim': [-1, 12],'xticks': [0, 50],'xlim': [0, 50]}
 bool_ax_args_dt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50], 'xlim': [0, 50]}
 ax_args_pt = {'yticks': [0, 5, 10], 'ylim': [-1, 12], 'xticks': [0, 50, 100, 150, 200], 'xlim': [0, 200]}
@@ -167,22 +168,37 @@ if 'individual' in experiments:
                 plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
                                   select_dict=select_dict, colors=colors, ax_args=ax_args_pt, plot_args=line_args_copy,
                                   path=save_path)
-                plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
+                path, name = plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
                                   select_dict=select_dict, colors=colors, ax_args=bool_ax_args_pt, plot_args=line_args_copy,
-                                  path=save_path)
+                                  path=save_path,save=False)
+                c = behavior.behavior_config.behaviorConfig()
+                y = c.fully_learned_threshold_up
+                plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+
+                y = c.fully_learned_threshold_down
+                plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+                plot._easy_save(path=path, name=name)
 
                 select_dict = {'mouse': mouse, 'odor': condition.dt_odors[i]}
                 plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
                                   select_dict=select_dict, colors=colors, ax_args=ax_args_dt, plot_args=line_args_copy,
                                   path=save_path)
-                plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
+                path, name = plot.plot_results(res, x_key='trial', y_key=boolean_smoothed, loop_keys='odor_standard',
                                   select_dict=select_dict, colors=colors, ax_args=bool_ax_args_dt, plot_args=line_args_copy,
-                                  path=save_path)
+                                  path=save_path, save=False)
+                c = behavior.behavior_config.behaviorConfig()
+                y = c.fully_learned_threshold_up
+                plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+
+                y = c.fully_learned_threshold_down
+                plt.plot(plt.xlim(), [y, y], '--', color='gray', linewidth=.5)
+                plot._easy_save(path=path, name=name)
             except:
                 print('not two-phase')
 
             try:
                 select_dict = {'mouse': mouse, 'odor': condition.odors[i]}
+
                 plot.plot_results(res, x_key='trial', y_key=lick_smoothed, loop_keys='odor_standard',
                                   select_dict=select_dict, colors=colors, ax_args=ax_args_mush, plot_args=line_args_copy,
                                   path=save_path)
@@ -465,7 +481,9 @@ if 'trials_to_criterion' in experiments:
 
         print('Odor Valence: {}'.format(valence))
         print('YFP: {}'.format(np.mean(y_yfp)))
+        print('YFP: {}'.format(y_yfp))
         print('HALO: {}'.format(np.mean(y_halo)))
+        print('HALO: {}'.format(y_halo))
         print(rs)
 
 

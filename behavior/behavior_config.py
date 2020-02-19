@@ -9,11 +9,11 @@ class behaviorConfig(object):
         self.smoothing_window_first_lick = 7
         self.rules_output_lick = {'PT CS+': 39}
         self.rules_output_boolean = {'PT CS+': 39}
-        single_phase = 5
+        single_phase = 19
         self.rules_single_phase_lick = {'CS+': single_phase, 'CS-': single_phase}
         self.rules_single_phase_boolean = {'CS+': single_phase, 'CS-': single_phase}
         self.rules_two_phase_lick = {'PT CS+': 19, 'PT Naive':19, 'CS+': 11, 'CS-': 11}
-        self.rules_two_phase_boolean = {'PT CS+': 19, 'PT Naive':19, 'CS+': 5, 'CS-': 11}
+        self.rules_two_phase_boolean = {'PT CS+': 19, 'PT Naive':19, 'CS+': 11, 'CS-': 5}
 
         self.halfmax_up_threshold = 50
         self.halfmax_down_threshold = 50
