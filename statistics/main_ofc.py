@@ -165,13 +165,13 @@ if condition.name == 'OFC' or condition.name == 'BLA':
     #                                          figure_path = figure_path,
     #                                          reuse=False, save=True, analyze=False, plot_bool=True)
     #
-    power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
-                     colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
-                     excitatory=True, ylim = [-0.01, .1])
-    #
     # power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
     #                  colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
-    #                  excitatory=False, ylim= [-.06, 0.01])
+    #                  excitatory=True, ylim = [-0.01, .1])
+
+    power.plot_power(res, start_days_per_mouse, last_day_per_mouse, figure_path, odor_valence=['CS+','CS-'],
+                     colors_before = {'CS+':'Gray','CS-':'Gray'}, colors_after = {'CS+':'Green','CS-':'Red'},
+                     excitatory=False, ylim= [-.06, 0.01])
 
 
     # power.plot_max_dff_days(res, [start_days_per_mouse, last_day_per_mouse], ['CS+', 'CS+'], normalize= True,

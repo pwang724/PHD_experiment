@@ -24,7 +24,7 @@ mpl.rcParams['font.family'] = 'arial'
 
 experiments = [
     # 'licks_per_day'
-    'individual',
+    # 'individual',
     # 'summary',
     # 'mean_sem',
     'trials_to_criterion',
