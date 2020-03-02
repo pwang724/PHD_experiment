@@ -18,6 +18,9 @@ def plot_reversal(res, start_days, end_days, figure_path):
     reversal_res, stats_res = get_reversal_sig(start_end_day_res)
     filter.assign_composite(reversal_res, loop_keys=['day','odor_valence'])
 
+    import seaborn as sns
+    swarm_args = {'marker': '.', 'size': 8, 'facecolors': 'none', 'alpha': .5, 'palette': ['green', 'red'], 'jitter': .1}
+
     mean_res = reduce.new_filter_reduce(reversal_res, filter_keys=['day','odor_valence'], reduce_key='Fraction')
     plot.plot_results(mean_res,
                       x_key='day_odor_valence', y_key='Fraction', error_key='Fraction_sem',
@@ -26,10 +29,13 @@ def plot_reversal(res, start_days, end_days, figure_path):
                       fig_size=(2, 1.5), save=False)
     plt.plot([1.5, 1.5], plt.ylim(), '--', color='gray', linewidth=2)
     plot.plot_results(reversal_res,
-                      x_key='day_odor_valence', y_key='Fraction', loop_keys= 'day_odor_valence',
+                      x_key='day_odor_valence', y_key='Fraction',
                       path=figure_path,
                       colors = ['Green','Red','Green','Red'],
-                      plot_function=plt.scatter, plot_args=scatter_args, ax_args=ax_args_copy,
+                      # plot_function=plt.scatter, plot_args=scatter_args,
+                      plot_function=sns.stripplot,
+                      plot_args=swarm_args,
+                      ax_args=ax_args_copy,
                       fig_size=(2, 1.5), reuse=True, save=True,
                       legend=False)
     print(mean_res['day_odor_valence'])

@@ -179,33 +179,34 @@ def _plot_power_every_mouse(res, figure_path, excitatory, valence):
 def _plot_power_mean_sem(res, figure_path, excitatory, valence):
     color = 'red' if valence == 'CS-' else 'green'
     res.pop('power_sem')
-    ax_lim = {'yticks': [0, .5, 1], 'ylim': [0, 1.05]}
+    ax_lim = {'yticks': [0, .5, 1], 'ylim': [0, 1.05], 'xticks':np.arange(0, 100, 25), 'xlim':[0, 85]}
     name_str = '_E' if excitatory else '_I'
     name_str += '_' + valence
 
-    mean_std_power = reduce.new_filter_reduce(res, filter_keys='odor_valence', reduce_key='power')
-    mean_std_bhv = reduce.new_filter_reduce(res, filter_keys='odor_valence', reduce_key=ykey_b)
+
+    mean_std_power = reduce.new_filter_reduce(res, filter_keys='odor_valence', reduce_key='power', regularize='max')
+    mean_std_bhv = reduce.new_filter_reduce(res, filter_keys='odor_valence', reduce_key=ykey_b, regularize='max')
     plot.plot_results(mean_std_bhv, x_key=xkey_b, y_key=ykey_b,
-                      plot_args=trace_args, path=figure_path,
+                      plot_args=trace_args, path=figure_path, rect=(.2, .25, .6, .6),
                       save=False, ax_args=ax_lim)
     plot.plot_results(mean_std_power, x_key='trials', y_key='power',
                       colors=color,
                       plot_args=trace_args, path=figure_path,
                       reuse=True, save=False,
                       ax_args=ax_lim)
-    plt.legend(['behavior','neural'], frameon=False)
     plot.plot_results(mean_std_bhv, x_key=xkey_b, y_key=ykey_b, error_key=ykey_b + '_sem',
                       plot_function=plt.fill_between,
                       plot_args=fill_args,
                       path=figure_path,
                       reuse=True, save=False,
                       ax_args=ax_lim)
+    plt.legend(['behavior','neural'], frameon=False)
     plot.plot_results(mean_std_power, x_key='trials', y_key='power', error_key='power_sem',
                       plot_function=plt.fill_between,
                       plot_args=fill_args,
                       colors=color,
                       path=figure_path,
-                      reuse=True, save=True,
+                      reuse=True, save=True, twinax=True,
                       ax_args=ax_lim,
                       name_str=name_str)
 

@@ -45,7 +45,7 @@ def _add_jitter(x, jitter_range):
     x = x + np.random.uniform(0, jitter_range, size= x.shape)
     return x
 
-d = r'C:\Users\P\Dropbox\LAB\MANUSCRIPTS\master_mouse_list.xlsx'
+d = r'/Users/peterwang/Dropbox/LAB/MANUSCRIPTS/master_mouse_list.xlsx'
 brain_regions = ['OFC','MPFC']
 
 save_path = os.path.join(Config.LOCAL_FIGURE_PATH, 'MISC', 'RNA_SCOPE')
@@ -123,7 +123,7 @@ for k, v in res.items():
 
 print(res.keys())
 print(res['experiment'])
-fig = plt.figure(figsize=[2,1.5])
+fig = plt.figure(figsize=[2.25, 1.5])
 ax = fig.add_axes([.2, .25, .5, .5])
 ax1 = fig.add_axes([0.75, 0.25, 0.02, 0.5])
 
@@ -186,7 +186,7 @@ if arg == 'OUTPUT':
 
     print(res.keys())
     print(res['experiment'])
-    fig = plt.figure(figsize=[2, 1.5])
+    fig = plt.figure(figsize=[2.25, 1.5])
     ax = fig.add_axes([.2, .25, .5, .5])
     ax1 = fig.add_axes([0.75, 0.25, 0.02, 0.5])
 

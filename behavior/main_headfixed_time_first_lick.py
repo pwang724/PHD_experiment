@@ -36,11 +36,12 @@ conditions = [
     # experimental_conditions.BEHAVIOR_OFC_YFP_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_PRETRAINING,
     # experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING,
-    # experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_YFP_DISCRIMINATION,
+    experimental_conditions.BEHAVIOR_OFC_HALO_DISCRIMINATION,
     # experimental_conditions.BEHAVIOR_OFC_JAWS_DISCRIMINATION,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_HALO,
     # experimental_conditions.BEHAVIOR_OFC_MUSH_JAWS,
-    experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
+    # experimental_conditions.BEHAVIOR_OFC_MUSH_YFP,
     # experimental_conditions.OFC,
     # experimental_conditions.PIR,
     # experimental_conditions.OFC_LONGTERM,
@@ -106,7 +107,7 @@ bool_ax_args_pt = {'yticks': [0, 50, 100], 'ylim': [-5, 105], 'xticks': [0, 50, 
 bar_args = {'alpha': .6, 'fill': False}
 scatter_args = {'marker': 'o', 's': 10, 'alpha': .6}
 
-arg = 'com' #first, com
+arg = 'com' #first, com, lick
 collection = False
 
 if arg == 'first':
@@ -303,6 +304,10 @@ if 'summary_mouse_line' in experiments:
         sig_str = plot.significance_str(x=.4, y=.7 * (ylim[-1] - ylim[0]), val=rs[-1])
         plot._easy_save(path, name)
 
+        print('YFP: {}'.format(np.mean(y_yfp)))
+        print('YFP: {}'.format(y_yfp))
+        print('HALO: {}'.format(np.mean(y_combined)))
+        print('HALO: {}'.format(y_combined))
         print(rs)
 
 

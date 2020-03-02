@@ -237,6 +237,8 @@ def plot_results(res, x_key, y_key, loop_keys =None,
         ax.yaxis.set_ticks_position('left')
     else:
         ax.spines['top'].set_visible(False)
+        ax.yaxis.label.set_color('green')
+        ax.tick_params(axis='y', colors='green')
 
     if loop_keys and legend:
         nice_loop_str = '+'.join([nice_names(x) for x in loop_keys])

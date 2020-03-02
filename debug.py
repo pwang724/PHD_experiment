@@ -18,7 +18,7 @@ def _look_at_timing(cons):
 
 # condition = experimental_conditions.BEHAVIOR_OFC_MUSH_HALO
 # data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
-condition = experimental_conditions.BEHAVIOR_OFC_MUSH_HALO
+condition = experimental_conditions.BEHAVIOR_OFC_HALO_PRETRAINING
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_BEHAVIOR_FOLDER, condition.name)
 
 # load cons

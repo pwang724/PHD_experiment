@@ -320,6 +320,8 @@ def plot_summary_odor_pretraining(res, start_days, end_days, arg_naive, figure_p
 
     print('Before PT CS+: {}'.format(np.mean(before_csm['Fraction Responsive'])))
     print('After PT CS+: {}'.format(np.mean(after_csm['Fraction Responsive'])))
+    from scipy.stats import sem
+    print('After PT CS+ STD: {}'.format(sem(after_csm['Fraction Responsive'])))
     print('Wilcoxin:{}'.format(wilcoxon(before_csm['Fraction Responsive'], after_csm['Fraction Responsive'])))
 
 def plot_summary_water(res, start_days, end_days, figure_path):

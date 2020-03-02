@@ -628,12 +628,20 @@ class BEHAVIOR_OFC_JAWS_PRETRAINING:
 class BEHAVIOR_OFC_HALO_PRETRAINING:
     name = 'BEHAVIOR_OFC_HALO_PRETRAINING'
     paths = [
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M412_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M414_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M416_OFC_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_OFC_HALO\M417_OFC_PT_HALO',
+        '/Users/peterwang/Desktop/temp/AH76_OFC_PT_HALO',
+        '/Volumes/yw2500/IMPORTANT_DATA/DATA_2P/TWO_PHASE_PRETRAINING_OFC_HALO/M412_PT_HALO',
+        '/Volumes/yw2500/IMPORTANT_DATA/DATA_2P/TWO_PHASE_PRETRAINING_OFC_HALO/M414_PT_HALO',
+        '/Volumes/yw2500/IMPORTANT_DATA/DATA_2P/TWO_PHASE_PRETRAINING_OFC_HALO/M416_OFC_PT_HALO',
+        '/Volumes/yw2500/IMPORTANT_DATA/DATA_2P/TWO_PHASE_PRETRAINING_OFC_HALO/M417_OFC_PT_HALO',
+        '/Users/peterwang/Desktop/temp/MATT5_OFC_PT_HALO',
+        # '/Users/peterwang/Desktop/temp/MATT6_OFC_PT_HALO',
+        # '/Users/peterwang/Desktop/temp/MATT7_OFC_PT_HALO',
     ]
     dt_odors = [
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
+        ['msy', 'pin', 'euy', 'lim'],
         ['msy', 'pin', 'euy', 'lim'],
         ['msy', 'pin', 'euy', 'lim'],
         ['msy', 'pin', 'euy', 'lim'],
@@ -644,8 +652,16 @@ class BEHAVIOR_OFC_HALO_PRETRAINING:
         ['pin', 'msy'],
         ['pin', 'msy'],
         ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
+        ['pin', 'msy'],
     ]
     pt_odors = [
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
         ['oct'],
         ['oct'],
         ['oct'],
@@ -656,9 +672,13 @@ class BEHAVIOR_OFC_HALO_PRETRAINING:
         ['oct'],
         ['oct'],
         ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
+        ['oct'],
     ]
-    timing_override = [True, True, True, True]
-    training_start_day = [0, 0, 0, 0]
+    timing_override = [False] * 8
+    training_start_day = [0] * 8
     # last_pt_day = [4, 3, 3, 1, 2, 2]
 
 class BEHAVIOR_OFC_YFP_DISCRIMINATION:
@@ -963,11 +983,11 @@ class BEHAVIOR_MPFC_YFP_DISCRIMINATION:
 class BEHAVIOR_MPFC_HALO_PRETRAINING:
     name = 'BEHAVIOR_MPFC_HALO_PRETRAINING'
     paths = [
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH42_MPFC_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH43_MPFC_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH44_MPFC_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH50_MPFC_PT_HALO',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_HALO\AH55_MPFC_PT_HALO',
+        '/Users/peterwang/Desktop/temp/TWO_PHASE_PRETRAINING_MPFC_HALO/AH42_MPFC_PT_HALO',
+        '/Users/peterwang/Desktop/temp/TWO_PHASE_PRETRAINING_MPFC_HALO/AH43_MPFC_PT_HALO',
+        '/Users/peterwang/Desktop/temp/TWO_PHASE_PRETRAINING_MPFC_HALO/AH44_MPFC_PT_HALO',
+        '/Users/peterwang/Desktop/temp/TWO_PHASE_PRETRAINING_MPFC_HALO/AH50_MPFC_PT_HALO',
+        '/Users/peterwang/Desktop/temp/TWO_PHASE_PRETRAINING_MPFC_HALO/AH55_MPFC_PT_HALO',
     ]
     pt_odors = [
         ['oct'],
@@ -1005,13 +1025,12 @@ class BEHAVIOR_MPFC_HALO_PRETRAINING:
 class BEHAVIOR_MPFC_YFP_PRETRAINING:
     name = 'BEHAVIOR_MPFC_YFP_PRETRAINING'
     paths = [
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH57_MPFC_PT_YFP',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH65_MPFC_PT_YFP',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH66_MPFC_PT_YFP',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH67_MPFC_PT_YFP',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH68_MPFC_PT_YFP',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH69_MPFC_PT_YFP',
-        'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH70_MPFC_PT_YFP',
+        # 'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH57_MPFC_PT_YFP',
+        # 'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH67_MPFC_PT_YFP',
+        # 'I:\IMPORTANT DATA\DATA_2P\TWO_PHASE_PRETRAINING_MPFC_YFP\AH70_MPFC_PT_YFP',
+        '/Users/peterwang/Desktop/temp/AH77_MPFC_PT_YFP',
+        '/Users/peterwang/Desktop/temp/AH78_MPFC_PT_YFP',
+        '/Users/peterwang/Desktop/temp/AH79_MPFC_PT_YFP',
     ]
     pt_odors = [
         ['oct'],
@@ -1049,8 +1068,8 @@ class BEHAVIOR_MPFC_YFP_PRETRAINING:
         [],
         [],
     ]
-    timing_override = [True] * 7
-    training_start_day = [0] * 7
+    timing_override = [True] * 6
+    training_start_day = [0] * 6
 
 
 

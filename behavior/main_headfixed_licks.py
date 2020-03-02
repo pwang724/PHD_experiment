@@ -224,10 +224,10 @@ if 'summary' in experiments:
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
     for valence in valences:
-        color = [color_dict_valence[x] for x in valence]
-        # for i in range(len(color)):
-        #     color.append('black')
-        # color = [color_dict_condition[x] for x in np.unique(all_res_lick['condition'])]
+        # color = [color_dict_valence[x] for x in valence]
+        color = [color_dict_condition[x] for x in np.unique(all_res_lick['condition'])]
+        for i in range(len(color)):
+            color.append('black')
 
         if 'PT CS+' in valence or 'PT Naive' in valence:
             ax_args = ax_args_pt
@@ -245,10 +245,10 @@ if 'summary' in experiments:
             print('output')
 
         path, name = plot.plot_results(all_res_bool, x_key='trial', y_key=boolean_smoothed, loop_keys= 'condition',
-                          colors=color, select_dict={'odor_valence':valence},
-                          ax_args=bool_ax_args, plot_args=line_args_copy,
-                          reuse = False, save=False,
-                          path=save_path)
+                                       colors=color, select_dict={'odor_valence':valence},
+                                       ax_args=bool_ax_args, plot_args=line_args_copy,
+                                       reuse = False, save=False,
+                                       path=save_path)
         c = behavior.behavior_config.behaviorConfig()
 
         if 'CS+' in valence or 'PT CS+' in valence:
@@ -283,8 +283,8 @@ if 'mean_sem' in experiments:
     valences = [[x] for x in valences]
     valences.append(['CS+','CS-'])
     for valence in valences:
-        color = [color_dict_valence[x] for x in valence]
-        # color = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
+        # color = [color_dict_valence[x] for x in valence]
+        color = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
         for i in range(len(color)):
             color.append('black')
 
@@ -444,7 +444,7 @@ if 'trials_to_criterion' in experiments:
         #     colors = [color_dict_valence[valence], 'black']
         # else:
         colors = [color_dict_condition[x] for x in np.unique(all_res['condition'])]
-        swarm_args_copy.update({'palette': colors, 'size':5})
+        swarm_args_copy.update({'palette': colors, 'size':8})
 
         path, name = plot.plot_results(all_res, x_key=collapse_arg, y_key= reduce_key,
                                        select_dict={'odor_valence': valence},
