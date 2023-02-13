@@ -29,7 +29,7 @@ mpl.rcParams['ps.fonttype'] = 42
 mpl.rcParams['font.size'] = 7
 mpl.rcParams['font.family'] = 'arial'
 
-condition_config = statistics.analyze.OFC_COMPOSITE_Config()
+condition_config = statistics.analyze.MPFC_COMPOSITE_Config()
 condition = condition_config.condition
 data_path = os.path.join(Config.LOCAL_DATA_PATH, Config.LOCAL_DATA_TIMEPOINT_FOLDER, condition.name)
 save_path = os.path.join(Config.LOCAL_EXPERIMENT_PATH, 'COUNTING', condition.name)
